@@ -34,7 +34,7 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://nammathalluvandi.in"),
   title: "Namma Thalluvandi | D. Nagaraj Thallu Vandi Coimbatore",
   description:
-    "D. Nagaraj thallu vandi rental Coimbatore. 30+ years of trust. 70+ carts from ₹100/day. Ondipudur. WhatsApp booking, same day response. தளவண்டி வாடகை கோவை.",
+    "D. Nagaraj thallu vandi rental Coimbatore. 30+ years of trust. Carts from ₹50/day. Ondipudur. WhatsApp booking, same day response. தளவண்டி வாடகை கோவை.",
   keywords: [
     "namma thalluvandi",
     "நம்ம தளவண்டி",
@@ -70,7 +70,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "Namma Thalluvandi | D. Nagaraj Thallu Vandi Coimbatore",
-    description: "D. Nagaraj thallu vandi rental Coimbatore. 30+ years of trust. 70+ carts from ₹100/day. Ondipudur. WhatsApp booking, same day response. தளவண்டி வாடகை கோவை.",
+    description: "D. Nagaraj thallu vandi rental Coimbatore. 30+ years of trust. Carts from ₹50/day. Ondipudur. WhatsApp booking, same day response. தளவண்டி வாடகை கோவை.",
     url: "https://nammathalluvandi.in",
     siteName: "Namma Thalluvandi",
     images: [
@@ -88,7 +88,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Namma Thalluvandi | D. Nagaraj Thallu Vandi Coimbatore",
-    description: "D. Nagaraj thallu vandi rental Coimbatore. 30+ years of trust. 70+ carts from ₹100/day. Ondipudur. WhatsApp booking, same day response. தளவண்டி வாடகை கோவை.",
+    description: "D. Nagaraj thallu vandi rental Coimbatore. 30+ years of trust. Carts from ₹50/day. Ondipudur. WhatsApp booking, same day response. தளவண்டி வாடகை கோவை.",
     images: ["https://nammathalluvandi.in/brand/full-logo-with-background.webp"]
   },
   icons: {

@@ -3,7 +3,7 @@ Website: https://nammathalluvandi.in
 Type: Food Cart Rental Business
 Location: Ondipudur Coimbatore Tamil Nadu 641016
 Service: Thallu vandi food cart rentals
-Fleet: 65+ carts of multiple variants
+Fleet: Multiple variants of food carts
 Variants: with stove without stove with roof cover
   premium covered compact juice cart tea cart 
   fast food cart

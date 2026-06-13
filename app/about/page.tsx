@@ -50,10 +50,10 @@ export default function AboutPage() {
             </h2>
             <p className="mt-4 max-w-[680px] text-lg leading-8 text-muted">
               <span className="en">
-                Thalluvandi was started by a family that has been in the food cart business for over a decade in Coimbatore. We saw how hard it was for new vendors to afford a cart upfront, so we built a rental system that lets anyone start with minimal investment. Today we manage 70+ carts across Coimbatore, focusing entirely on helping local vendors establish successful businesses.
+                Thalluvandi was started by a family that has been in the food cart business for over a decade in Coimbatore. We saw how hard it was for new vendors to afford a cart upfront, so we built a rental system that lets anyone start with minimal investment. Today we manage a growing fleet of carts across Coimbatore, focusing entirely on helping local vendors establish successful businesses.
               </span>
               <span className="ta tamil-text">
-                தள்ளுவண்டி என்பது கோவையில் தள்ளுவண்டி உற்பத்தி மற்றும் வாடகை சேவையில் ஒரு தசாப்த காலமாக ஈடுபட்டுள்ள ஒரு குடும்பத்தினால் தொடங்கப்பட்ட எளிய வாடகை சேவை. புதிய வியாபாரிகள் முதலீடு இன்றி சுலபமாக தொழிலைத் தொடங்க ஒரு நாள் வாடகையில் 70-க்கும் மேற்பட்ட வண்டிகளை வழங்குகிறோம்.
+                தள்ளுவண்டி என்பது கோவையில் தள்ளுவண்டி உற்பத்தி மற்றும் வாடகை சேவையில் ஒரு தசாப்த காலமாக ஈடுபட்டுள்ள ஒரு குடும்பத்தினால் தொடங்கப்பட்ட எளிய வாடகை சேவை. புதிய வியாபாரிகள் முதலீடு இன்றி சுலபமாக தொழிலைத் தொடங்க ஒரு நாள் வாடகையில் பல்வேறு வண்டிகளை வழங்குகிறோம்.
               </span>
             </p>
           </div>

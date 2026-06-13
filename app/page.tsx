@@ -20,7 +20,6 @@ import { Reveal } from "@/components/sections/reveal";
 import { CartExplorer } from "@/components/sections/cart-explorer";
 import { rentalTamilMessage } from "@/lib/utils";
 import { WA_NUMBER, buildWAUrl } from "@/config/whatsapp";
-import { CartCounter } from "@/components/sections/cart-counter";
 
 function Text({ en, ta }: { en: string; ta: string }) {
   return (
@@ -34,7 +33,7 @@ function Text({ en, ta }: { en: string; ta: string }) {
 const stats: any[] = [];
 
 const marquee = [
-  ["70+ Carts", "70+ வண்டிகள்"],
+  ["Rent Food Carts", "உணவு வண்டி வாடகை"],
   ["Coimbatore", "கோவை"],
   ["30+ YEARS OF TRUST", "30+ ஆண்டுகள் நம்பிக்கை"],
   ["PREMIUM CARTS", "பிரீமியம் வண்டி"],
@@ -49,8 +48,8 @@ const featureCards = [
     ShoppingCart,
     "Large cart fleet",
     "வண்டிகளின் பெரிய தொகுப்பு",
-    "D. Nagaraj's fleet of 70+ carts ready at Ondipudur, Coimbatore. Tea, snacks, juice, fast food — every type available. Always maintained and ready with no waiting period. Our 70+ cart fleet includes both traditional old-style thallu vandis and new modern model carts — so you can pick the style that suits your business and location.",
-    "D. நாகராஜ் அவர்களின் 70+ வண்டிகள் ஒண்டிப்புதூர், கோவையில் தயாராக உள்ளன. டீ, ஸ்நாக்ஸ், ஜூஸ், ஃபாஸ்ட் ஃபுட் — அனைத்து வகையும் உடனே கிடைக்கும். எங்கள் 70+ வண்டிகளில் பாரம்பரிய பழைய வகை தளவண்டிகளும் புதிய நவீன மாடல் வண்டிகளும் உள்ளன. உங்கள் தொழிலுக்கு ஏற்ற வகையை தேர்வு செய்யலாம்.",
+    "D. Nagaraj's fleet of carts ready at Ondipudur, Coimbatore. Tea, snacks, juice, fast food — every type available. Always maintained and ready with no waiting period. Our fleet includes both traditional old-style thallu vandis and new modern model carts — so you can pick the style that suits your business and location.",
+    "D. நாகராஜ் அவர்களின் வண்டிகள் ஒண்டிப்புதூர், கோவையில் தயாராக உள்ளன. டீ, ஸ்நாக்ஸ், ஜூஸ், ஃபாஸ்ட் ஃபுட் — அனைத்து வகையும் உடனே கிடைக்கும். எங்கள் வண்டிகளில் பாரம்பரிய பழைய வகை தளவண்டிகளும் புதிய நவீன மாடல் வண்டிகளும் உள்ளன. உங்கள் தொழிலுக்கு ஏற்ற வகையை தேர்வு செய்யலாம்.",
   ],
   [
     PanelsTopLeft,
@@ -79,8 +78,8 @@ const faqs = [
   [
     "What is Thalluvandi?",
     "தள்ளுவண்டி என்றால் என்ன?",
-    "Namma Thalluvandi is D. Nagaraj's thallu vandi rental service — Coimbatore's most trusted food cart rental with 30+ years of experience at Ondipudur. We offer 70+ carts for daily and monthly rental to help vendors start their business with minimal investment. Our fleet includes both traditional old-style push carts and new modern model carts to suit every type of street food business.",
-    "நம்ம தளவண்டி என்பது D. நாகராஜ் அவர்களின் தளவண்டி வாடகை சேவை. 30+ ஆண்டுகளாக ஒண்டிப்புதூர், கோயம்பத்தூரில் நம்பகமான உணவு வண்டி வாடகை. 70+ வண்டிகள் தினசரி மற்றும் மாதாந்திர வாடகைக்கு தயாராக உள்ளன. எங்கள் வண்டிகளில் பாரம்பரிய தளவண்டிகளும் புதிய நவீன மாடல் வண்டிகளும் இரண்டும் உள்ளன.",
+    "Namma Thalluvandi is D. Nagaraj's thallu vandi rental service — Coimbatore's most trusted food cart rental with 30+ years of experience at Ondipudur. We offer food carts for daily and monthly rental to help vendors start their business with minimal investment. Our fleet includes both traditional old-style push carts and new modern model carts to suit every type of street food business.",
+    "நம்ம தளவண்டி என்பது D. நாகராஜ் அவர்களின் தளவண்டி வாடகை சேவை. 30+ ஆண்டுகளாக ஒண்டிப்புதூர், கோயம்பத்தூரில் நம்பகமான உணவு வண்டி வாடகை. வண்டிகள் தினசரி மற்றும் மாதாந்திர வாடகைக்கு தயாராக உள்ளன. எங்கள் வண்டிகளில் பாரம்பரிய தளவண்டிகளும் புதிய நவீன மாடல் வண்டிகளும் இரண்டும் உள்ளன.",
   ],
   [
     "Where is your branch located?",
@@ -157,7 +156,7 @@ export default function Home() {
       longitude: 76.9558,
     },
     openingHours: "Mo-Sa 08:00-20:00",
-    priceRange: "₹100 to ₹200 per day",
+    priceRange: "₹50 to ₹200 per day",
     areaServed: ["Coimbatore", "Tamil Nadu"],
     serviceType: [
       "Food Cart Rental",
@@ -197,8 +196,8 @@ export default function Home() {
             </h1>
             <p className="mx-auto mt-6 max-w-xl text-base leading-7 text-muted md:mx-0 md:text-lg md:leading-8">
               <Text
-                en="D. Nagaraj's thallu vandi fleet — now online. 30+ years of trust in Coimbatore. 70+ carts ready — old style and new model both available. Choose what fits your business."
-                ta="D. நாகராஜ் தளவண்டி வண்டிகள் — இப்போது online-ல். கோவையில் 30+ ஆண்டுகள் நம்பகமான சேவை. 70+ வண்டிகள் தயார் — பழைய வகை மற்றும் புதிய மாடல் இரண்டும் உள்ளன. உங்கள் தொழிலுக்கு ஏற்றதை தேர்வு செய்யுங்கள்."
+                en="D. Nagaraj's thallu vandi fleet — now online. 30+ years of trust in Coimbatore. Carts ready — old style and new model both available. Choose what fits your business."
+                ta="D. நாகராஜ் தளவண்டி வண்டிகள் — இப்போது online-ல். கோவையில் 30+ ஆண்டுகள் நம்பகமான சேவை. வண்டிகள் தயார் — பழைய வகை மற்றும் புதிய மாடல் இரண்டும் உள்ளன. உங்கள் தொழிலுக்கு ஏற்றதை தேர்வு செய்யுங்கள்."
               />
             </p>
             <div className="mt-8 grid gap-3 sm:flex md:justify-start">
@@ -247,7 +246,7 @@ export default function Home() {
               className="border-black/10 px-4 py-5 text-center md:border-l first:md:border-l-0 odd:max-md:border-r max-md:border-b"
             >
               <p className="font-display text-4xl uppercase leading-none text-ink">
-                {index === 0 ? <CartCounter /> : <Text en={en} ta={ta} />}
+                <Text en={en} ta={ta} />
               </p>
             </div>
           ))}
@@ -291,22 +290,14 @@ export default function Home() {
                 </p>
               </div>
 
-              {/* Right side — three trust stat cards in a row */}
-              <div className="grid grid-cols-3 gap-4">
+              {/* Right side — two trust stat cards in a row */}
+              <div className="grid grid-cols-2 gap-4">
                 <div className="text-center border-r border-white/10 pr-2 last:border-r-0 last:pr-0">
                   <p className="font-display text-4xl md:text-5xl text-primary font-black">
                     30+
                   </p>
                   <p className="text-[10px] md:text-xs font-bold uppercase tracking-wider text-[#F8F6F2]/70 mt-2">
                     <Text en="Years of Trust" ta="ஆண்டுகள் நம்பிக்கை" />
-                  </p>
-                </div>
-                <div className="text-center border-r border-white/10 pr-2 last:border-r-0 last:pr-0">
-                  <p className="font-display text-4xl md:text-5xl text-primary font-black">
-                    70+
-                  </p>
-                  <p className="text-[10px] md:text-xs font-bold uppercase tracking-wider text-[#F8F6F2]/70 mt-2">
-                    <Text en="Carts in Fleet" ta="வண்டிகள் தயார்" />
                   </p>
                 </div>
                 <div className="text-center">
@@ -594,7 +585,7 @@ export default function Home() {
             Namma Thalluvandi provides thallu vandi vadagai in Coimbatore Tamil
             Nadu. Our push carts are available for rent for tea stalls juice
             counters fast food businesses and street food vendors. Thallu vandi
-            rental Coimbatore from 100 rupees per day. Monthly and weekly rental
+            rental Coimbatore from 50 rupees per day. Monthly and weekly rental
             available. Refundable deposit. WhatsApp booking. நம்ம தளவண்டி வாடகை
             கோவை. உணவு வண்டி வாடகை கோயம்புத்தூர். Namma Thalluvandi is operated
             by D. Nagaraj — Coimbatore's most trusted thallu vandi rental with

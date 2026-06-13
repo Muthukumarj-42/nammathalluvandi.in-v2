@@ -68,7 +68,7 @@ export default function HowItWorksPage() {
         "name": "How much does it cost to rent a food cart in Tamil Nadu?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Thalluvandi food cart rentals start from ₹100/day for basic carts and go up to ₹200/day for premium covered carts with stove. Deposit is refundable."
+          "text": "Thalluvandi food cart rentals start from ₹50/day for basic carts and go up to ₹200/day for premium covered carts with stove. Deposit is refundable."
         }
       },
       {
