@@ -184,8 +184,8 @@ export default function Home() {
           <Reveal className="text-center md:text-left">
             <p className="text-xs font-bold uppercase tracking-[0.24em] text-primary">
               <Text
-                en="Food carts | Rent | Grow"
-                ta="வண்டி வாடகை | தொழில் தொடக்கம் | வளர்ச்சி"
+                en="Rent | Sell | Grow"
+                ta="வண்டி வாடகை | விற்பனை | வளர்ச்சி"
               />
             </p>
             <h1 className="mt-5 max-w-4xl font-display text-5xl uppercase leading-none md:text-7xl lg:text-8xl">
