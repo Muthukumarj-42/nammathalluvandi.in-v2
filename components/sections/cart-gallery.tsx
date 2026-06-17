@@ -57,7 +57,7 @@ function GalleryImage({
       alt={alt}
       width={800}
       height={600}
-      sizes="(max-width: 768px) 100vw, (max-width: 1024px) 80vw, 60vw"
+      sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
       priority={priority}
       loading={priority ? undefined : "lazy"}
       className="object-contain max-h-[550px] w-auto h-auto max-w-full mx-auto rounded-2xl"

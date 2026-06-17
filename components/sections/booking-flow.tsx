@@ -458,7 +458,7 @@ export function BookingFlow() {
                     src={cart.images[0]}
                     alt={cart.nameEn}
                     fill
-                    sizes="100vw"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                     loading="lazy"
                     className="object-cover"
                     onError={() => setImgError(true)}
