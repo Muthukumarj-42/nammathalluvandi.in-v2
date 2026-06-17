@@ -3,7 +3,6 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import Script from "next/script";
 import "./globals.css";
-import { Analytics } from "@vercel/analytics/next";
 import { Footer } from "@/components/sections/footer";
 import { MobileBottomNav } from "@/components/sections/mobile-bottom-nav";
 import { Navbar } from "@/components/sections/navbar";
@@ -123,7 +122,6 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
         </Script>
         <Navbar />
         {children}
-        <Analytics />
         <Footer />
         <WhatsAppFloat />
         <MobileBottomNav />
