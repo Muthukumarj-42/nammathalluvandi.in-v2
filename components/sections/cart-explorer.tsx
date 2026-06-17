@@ -67,12 +67,18 @@ function CartImage({
   );
 }
 
-export function CartExplorer({ compact = false }: { compact?: boolean }) {
+export function CartExplorer({
+  compact = false,
+  initialCarts,
+}: {
+  compact?: boolean;
+  initialCarts?: Cart[];
+}) {
   const [activeFilter, setActiveFilter] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [lang, setLang] = useState<"en" | "ta">("en");
   
-
+  const activeCarts = initialCarts || carts;
 
   // Sync React language state dynamically with DOM mutations (data-lang toggle) - FIX 4
   useEffect(() => {
@@ -100,7 +106,7 @@ export function CartExplorer({ compact = false }: { compact?: boolean }) {
   // 3rd: available && availableCount === 0 (BOOKED)
   // 4th: !available (completely hidden, pushed to end)
   const sortedCarts = useMemo(() => {
-    return [...carts].sort((a, b) => {
+    return [...activeCarts].sort((a, b) => {
       if (!a.available && b.available) return 1;
       if (a.available && !b.available) return -1;
       if (!a.available && !b.available) return 0;

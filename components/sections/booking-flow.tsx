@@ -6,6 +6,7 @@ import { ArrowLeft, MessageCircle, MapPin } from "lucide-react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { getCart, type Cart } from "@/lib/carts";
+import { saveBooking } from "@/app/actions";
 
 const TAMIL_DICTIONARY: Record<string, string> = {
   // Pronouns / Particles
@@ -247,7 +248,8 @@ export function BookingFlow() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const cartId = searchParams.get("cart");
-  const cart = cartId ? getCart(cartId) : null;
+  const [cart, setCart] = useState<Cart | null>(null);
+  const [loading, setLoading] = useState(true);
 
   const [lang, setLang] = useState<"en" | "ta">("en");
   const [todayDate, setTodayDate] = useState("");
@@ -265,6 +267,19 @@ export function BookingFlow() {
   // Validation States
   const [phoneError, setPhoneError] = useState("");
   const [agreed, setAgreed] = useState(false);
+
+  // Fetch Cart Details on mount/cartId change
+  useEffect(() => {
+    if (cartId) {
+      setLoading(true);
+      getCart(cartId).then((data) => {
+        setCart(data);
+        setLoading(false);
+      });
+    } else {
+      setLoading(false);
+    }
+  }, [cartId]);
 
   // Sync language toggle
   useEffect(() => {
@@ -288,12 +303,23 @@ export function BookingFlow() {
     return () => observer.disconnect();
   }, []);
 
-  // Redirect if cart not found
+  // Redirect if cart not found (only after loading has finished)
   useEffect(() => {
-    if (!cart) {
+    if (!loading && !cart) {
       router.replace("/explore");
     }
-  }, [cart, router]);
+  }, [cart, loading, router]);
+
+  if (loading) {
+    return (
+      <main className="bg-[#fffdf7] min-h-screen py-16 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted text-sm font-semibold">Loading booking details...</p>
+        </div>
+      </main>
+    );
+  }
 
   if (!cart) {
     return null;
@@ -329,7 +355,7 @@ export function BookingFlow() {
     agreed &&
     phoneError === "";
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isFormValid) return;
 
@@ -338,6 +364,21 @@ export function BookingFlow() {
     const translatedDetails = formData.details.trim() !== "" 
       ? translateSentenceToTamil(formData.details.trim()) 
       : "இல்லை";
+
+    // Persist booking lead in Supabase
+    try {
+      await saveBooking({
+        cartId: cart.id,
+        name: formData.name.trim(),
+        phone: formData.phone.trim(),
+        date: formData.date,
+        location: formData.location.trim(),
+        duration: "1 month",
+        details: formData.details.trim(),
+      });
+    } catch (err) {
+      console.error("Failed to save booking to database:", err);
+    }
 
     // Build message dynamically strictly in Tamil as required
     const message = `வணக்கம், நான் ${cart.nameTa} வாடகைக்கு எடுக்க விரும்புகிறேன்.

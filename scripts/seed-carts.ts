@@ -1,39 +1,54 @@
-import { supabase } from "./supabase";
+import { createClient } from "@supabase/supabase-js";
+import * as fs from "fs";
+import * as path from "path";
 
-export interface Cart {
-  id: string;
-  nameEn: string;
-  nameTa: string;
-  type: string[];
-  pricePerDay: number;
-  depositAmount: number;
-  available: boolean;
-  availableCount: number;
-  city: string[];
-  featuresEn: string[];
-  featuresTa: string[];
-  images: string[];
-  whatsappMessageTa: string;
+// 1. Read environment variables from .env.local
+let supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+let supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
+
+try {
+  const envPath = path.join(process.cwd(), ".env.local");
+  if (fs.existsSync(envPath)) {
+    const envContent = fs.readFileSync(envPath, "utf8");
+    const urlMatch = envContent.match(/NEXT_PUBLIC_SUPABASE_URL=["']?([^"'\n]+)["']?/);
+    const keyMatch = envContent.match(/NEXT_PUBLIC_SUPABASE_ANON_KEY=["']?([^"'\n]+)["']?/);
+    
+    if (urlMatch && urlMatch[1] && !supabaseUrl) {
+      supabaseUrl = urlMatch[1];
+    }
+    if (keyMatch && keyMatch[1] && !supabaseAnonKey) {
+      supabaseAnonKey = keyMatch[1];
+    }
+  }
+} catch (err) {
+  console.error("Error reading .env.local:", err);
 }
 
-export const carts: Cart[] = [
+if (!supabaseUrl || !supabaseAnonKey || supabaseUrl.includes("your-project")) {
+  console.error("Please configure your actual Supabase URL and Anon Key in .env.local first.");
+  process.exit(1);
+}
+
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+const carts = [
   {
     id: "premium-fast-food-cart",
-    nameEn: "Wooden Fast Food Cart",
-    nameTa: "மரத்தாலான வண்டி",
+    name_en: "Wooden Fast Food Cart",
+    name_ta: "மரத்தாலான வண்டி",
     type: ["Has Roof", "Fast Food", "No Stove", "Large"],
-    pricePerDay: 50,
-    depositAmount: 2500,
+    price_per_day: 50,
+    deposit_amount: 2500,
     available: true,
-    availableCount: 3,
+    available_count: 3,
     city: ["Coimbatore"],
-    featuresEn: [
+    features_en: [
       "Has Roof Cover",
       "Glass Display Shelf",
       "Large Serving Counter",
       "Suitable for Fast Food & Meals",
     ],
-    featuresTa: [
+    features_ta: [
       "மேல் கவர் இருக்கு",
       "கண்ணாடி டிஸ்பிளே ஷெல்ஃப்",
       "பெரிய சர்விங் கவுண்டர்",
@@ -44,25 +59,25 @@ export const carts: Cart[] = [
       "/carts/premium-fast-food-cart-with-stove/photo-2.webp",
       "/carts/premium-fast-food-cart-with-stove/photo-3.webp",
     ],
-    whatsappMessageTa:
+    whatsapp_message_ta:
       "வணக்கம், நான் மரத்தாலான வண்டி வாடகைக்கு எடுக்க விரும்புகிறேன்.",
   },
   {
     id: "covered-premium-cart",
-    nameEn: "Aluminium Cart",
-    nameTa: "அலுமினியம் வண்டி",
+    name_en: "Aluminium Cart",
+    name_ta: "அலுமினியம் வண்டி",
     type: ["Has Roof", "No Stove", "Open Counter"],
-    pricePerDay: 70,
-    depositAmount: 3000,
+    price_per_day: 70,
+    deposit_amount: 3000,
     available: true,
-    availableCount: 1,
+    available_count: 1,
     city: ["Coimbatore"],
-    featuresEn: [
+    features_en: [
       "Metal Roof Cover",
       "Wide Open Serving Counter",
       "Traditional Spoke Wheels",
     ],
-    featuresTa: [
+    features_ta: [
       "உலோக மேல் கவர்",
       "அகலமான சர்விங் கவுண்டர்",
       "பாரம்பரிய சக்கரம்",
@@ -71,27 +86,27 @@ export const carts: Cart[] = [
       "/carts/covered-premium-cart/photo-1.webp",
       "/carts/covered-premium-cart/photo-2.webp",
     ],
-    whatsappMessageTa:
+    whatsapp_message_ta:
       "வணக்கம், நான் அலுமினியம் வண்டி வாடகைக்கு எடுக்க விரும்புகிறேன்.",
   },
   {
     id: "mobile-snack-cart",
-    nameEn: "Steel Cart with Stove",
-    nameTa: "அடுப்புடன் கூடிய வண்டி",
+    name_en: "Steel Cart with Stove",
+    name_ta: "அடுப்புடன் கூடிய வண்டி",
     type: ["Has Roof", "Has Stove", "Fast Food", "Premium"],
-    pricePerDay: 90,
-    depositAmount: 6000,
+    price_per_day: 90,
+    deposit_amount: 6000,
     available: true,
-    availableCount: 2,
+    available_count: 2,
     city: ["Coimbatore"],
-    featuresEn: [
+    features_en: [
       "Stainless Steel Body",
       "Glass Display Case",
       "Built-in Stove Burners",
       "Has Roof Cover",
       "Suitable for Frying & Snacks",
     ],
-    featuresTa: [
+    features_ta: [
       "ஸ்டெயின்லஸ் ஸ்டீல் உடல்",
       "கண்ணாடி டிஸ்பிளே கேஸ்",
       "உள்ளே அடுப்பு வசதி",
@@ -103,27 +118,27 @@ export const carts: Cart[] = [
       "/carts/mobile-snack-cart/photo-2.webp",
       "/carts/mobile-snack-cart/photo-3.webp",
     ],
-    whatsappMessageTa:
+    whatsapp_message_ta:
       "வணக்கம், நான் அடுப்புடன் கூடிய வண்டி வாடகைக்கு எடுக்க விரும்புகிறேன்.",
   },
   {
     id: "juice-cart",
-    nameEn: "Large Steel Cart with Stove",
-    nameTa: "பெரிய அடுப்புடன் கூடிய வண்டி",
+    name_en: "Large Steel Cart with Stove",
+    name_ta: "பெரிய அடுப்புடன் கூடிய வண்டி",
     type: ["has Stove", "has roof", "Fast food", "premium"],
-    pricePerDay: 130,
-    depositAmount: 10000,
+    price_per_day: 130,
+    deposit_amount: 10000,
     available: true,
-    availableCount: 2,
+    available_count: 2,
     city: ["Coimbatore"],
-    featuresEn: [
+    features_en: [
       "Stainless Steel Body",
       "Glass Display Case",
       "Built-in Stove Burners",
       "Has Roof Cover",
       "Suitable for Frying & Snacks",
     ],
-    featuresTa: [
+    features_ta: [
       "ஸ்டெயின்லஸ் ஸ்டீல் உடல்",
       "கண்ணாடி டிஸ்பிளே கேஸ்",
       "உள்ளே அடுப்பு வசதி",
@@ -135,26 +150,26 @@ export const carts: Cart[] = [
       "/carts/juice-cart/photo-2.webp",
       "/carts/juice-cart/photo-3.webp",
     ],
-    whatsappMessageTa:
+    whatsapp_message_ta:
       "வணக்கம், நான் பெரிய அடுப்புடன் கூடிய வண்டி வாடகைக்கு எடுக்க விரும்புகிறேன்.",
   },
   {
     id: "tea-coffee-cart",
-    nameEn: "Full Covered Lockable Cart",
-    nameTa: "முழு மூடிய பூட்டு வண்டி",
+    name_en: "Full Covered Lockable Cart",
+    name_ta: "முழு மூடிய பூட்டு வண்டி",
     type: ["No Stove", "Full Covered", "has roof"],
-    pricePerDay: 90,
-    depositAmount: 5000,
+    price_per_day: 90,
+    deposit_amount: 5000,
     available: true,
-    availableCount: 2,
+    available_count: 2,
     city: ["Coimbatore"],
-    featuresEn: [
+    features_en: [
       "Fully Closeable Sides",
       "Lockable for Security",
       "Metal Body with Roof",
       "Compact and Sturdy",
     ],
-    featuresTa: [
+    features_ta: [
       "பக்கங்கள் முழுமையாக மூடலாம்",
       "பூட்டி வைக்கும் வசதி",
       "உலோக உடல் கூரையுடன்",
@@ -165,26 +180,26 @@ export const carts: Cart[] = [
       "/carts/tea-coffee-cart/photo-2.webp",
       "/carts/tea-coffee-cart/photo-3.webp",
     ],
-    whatsappMessageTa:
+    whatsapp_message_ta:
       "வணக்கம், நான் முழு மூடிய பூட்டு வண்டி வாடகைக்கு எடுக்க விரும்புகிறேன்.",
   },
   {
     id: "starter-cart-without-stove",
-    nameEn: "Compact Closed Cart",
-    nameTa: "சிறிய மூடிய வண்டி",
+    name_en: "Compact Closed Cart",
+    name_ta: "சிறிய மூடிய வண்டி",
     type: ["No Stove", "Full Covered", "has roof"],
-    pricePerDay: 90,
-    depositAmount: 5000,
+    price_per_day: 90,
+    deposit_amount: 5000,
     available: true,
-    availableCount: 1,
+    available_count: 1,
     city: ["Coimbatore"],
-    featuresEn: [
+    features_en: [
       "Foldable Flaps Open as Counter",
       "Lockable Storage",
       "Compact Size, Easy to Park",
       "Budget-Friendly Starter Cart",
     ],
-    featuresTa: [
+    features_ta: [
       "மடக்கும் கதவுகள் கவுண்டராக திறக்கும்",
       "பூட்டு சேமிப்பு வசதி",
       "சிறிய அளவு, நிறுத்த சுலபம்",
@@ -194,20 +209,20 @@ export const carts: Cart[] = [
       "/carts/starter-cart-without-stove/photo-1.webp",
       "/carts/starter-cart-without-stove/photo-2.webp",
     ],
-    whatsappMessageTa:
+    whatsapp_message_ta:
       "வணக்கம், நான் சிறிய பச்சை மூடிய வண்டி வாடகைக்கு எடுக்க விரும்புகிறேன்.",
   },
   {
     id: "arched-roof-open-cart",
-    nameEn: "Compact Cart",
-    nameTa: "சிறிய வண்டி",
+    name_en: "Compact Cart",
+    name_ta: "சிறிய வண்டி",
     type: ["Has Roof", "No Stove", "Open Counter"],
-    pricePerDay: 120,
-    depositAmount: 2000,
+    price_per_day: 120,
+    deposit_amount: 2000,
     available: true,
-    availableCount: 1,
+    available_count: 1,
     city: ["Coimbatore"],
-    featuresEn: [
+    features_en: [
       "Arched GI Metal Roof",
       "Glass Display Panel (Front)",
       "Wide Flat Serving Counter",
@@ -215,7 +230,7 @@ export const carts: Cart[] = [
       "Pneumatic Rubber Tyres",
       "Ideal for Snacks, Juice & Beverages",
     ],
-    featuresTa: [
+    features_ta: [
       "வளைவு உலோக கூரை",
       "கண்ணாடி முன் டிஸ்பிளே பேனல்",
       "அகலமான சர்விங் கவுண்டர்",
@@ -228,90 +243,54 @@ export const carts: Cart[] = [
       "/carts/arched-roof-open-cart/photo-2.webp",
       "/carts/arched-roof-open-cart/photo-3.webp",
     ],
-    whatsappMessageTa:
+    whatsapp_message_ta:
       "வணக்கம், நான் வளைவு கூரை திறந்த வண்டி வாடகைக்கு எடுக்க விரும்புகிறேன்.",
   },
 ];
 
-export const filters = [
-  { en: "All", ta: "அனைத்தும்" },
-  { en: "Has Stove", ta: "அடுப்பு இருக்கு" },
-  { en: "No Stove", ta: "அடுப்பு இல்லை" },
-  { en: "Has Roof", ta: "மேல் கவர்" },
-  { en: "Full Covered", ta: "முழு மூடியது" },
-  { en: "Premium", ta: "பிரீமியம்" },
-  { en: "Fast Food", ta: "ஃபாஸ்ட் ஃபுட்" },
-];
-
-export async function getCarts(): Promise<Cart[]> {
-  try {
-    const { data, error } = await supabase
-      .from("carts")
-      .select("*")
-      .order("id");
-
-    if (error) {
-      console.warn("Supabase fetch error, using static fallback:", error.message);
-      return carts;
-    }
-    if (!data || data.length === 0) {
-      return carts;
-    }
-
-    return data.map((item: any) => ({
-      id: item.id,
-      nameEn: item.name_en,
-      nameTa: item.name_ta,
-      type: item.type || [],
-      pricePerDay: Number(item.price_per_day),
-      depositAmount: Number(item.deposit_amount),
-      available: item.available,
-      availableCount: item.available_count,
-      city: item.city || [],
-      featuresEn: item.features_en || [],
-      featuresTa: item.features_ta || [],
-      images: item.images || [],
-      whatsappMessageTa: item.whatsapp_message_ta || "",
-    }));
-  } catch (err) {
-    console.error("Failed to query carts table, using static fallback:", err);
-    return carts;
+async function seed() {
+  console.log("Seeding carts into Supabase...");
+  
+  // Clean first or upsert
+  const { data, error } = await supabase
+    .from("carts")
+    .upsert(carts, { onConflict: "id" });
+    
+  if (error) {
+    console.error("Error seeding carts:", error.message);
+    console.log("\n--- SQL INSERT BACKUP ---");
+    console.log("If your API key does not have write access due to RLS, please run the following SQL in your Supabase SQL Editor:\n");
+    generateSql();
+  } else {
+    console.log("Successfully seeded", carts.length, "carts into the database.");
   }
 }
 
-export async function getCart(id: string): Promise<Cart | null> {
-  try {
-    const { data, error } = await supabase
-      .from("carts")
-      .select("*")
-      .eq("id", id)
-      .single();
-
-    if (error) {
-      console.warn(`Supabase fetch error for cart ${id}, using static fallback:`, error.message);
-      return carts.find((cart) => cart.id === id) || null;
-    }
-    if (!data) {
-      return carts.find((cart) => cart.id === id) || null;
-    }
-
-    return {
-      id: data.id,
-      nameEn: data.name_en,
-      nameTa: data.name_ta,
-      type: data.type || [],
-      pricePerDay: Number(data.price_per_day),
-      depositAmount: Number(data.deposit_amount),
-      available: data.available,
-      availableCount: data.available_count,
-      city: data.city || [],
-      featuresEn: data.features_en || [],
-      featuresTa: data.features_ta || [],
-      images: data.images || [],
-      whatsappMessageTa: data.whatsapp_message_ta || "",
-    };
-  } catch (err) {
-    console.error(`Failed to query cart ${id}, using static fallback:`, err);
-    return carts.find((cart) => cart.id === id) || null;
-  }
+function generateSql() {
+  const sqlLines: string[] = [];
+  sqlLines.push("INSERT INTO public.carts (id, name_en, name_ta, type, price_per_day, deposit_amount, available, available_count, city, features_en, features_ta, images, whatsapp_message_ta) VALUES");
+  
+  const valueBlocks = carts.map(c => {
+    const formatArray = (arr: string[]) => `ARRAY[${arr.map(s => `'${s.replace(/'/g, "''")}'`).join(", ")}]`;
+    return `(
+  '${c.id}',
+  '${c.name_en.replace(/'/g, "''")}',
+  '${c.name_ta.replace(/'/g, "''")}',
+  ${formatArray(c.type)},
+  ${c.price_per_day},
+  ${c.deposit_amount},
+  ${c.available},
+  ${c.available_count},
+  ${formatArray(c.city)},
+  ${formatArray(c.features_en)},
+  ${formatArray(c.features_ta)},
+  ${formatArray(c.images)},
+  '${c.whatsapp_message_ta.replace(/'/g, "''")}'
+)`;
+  });
+  
+  console.log(sqlLines[0]);
+  console.log(valueBlocks.join(",\n") + ";");
 }
+
+seed();

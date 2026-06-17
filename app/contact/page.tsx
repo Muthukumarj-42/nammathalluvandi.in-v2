@@ -10,6 +10,7 @@ import {
   DISPLAY_RENTAL_WHATSAPP,
 } from "@/lib/utils";
 import { WA_NUMBER, buildWAUrl } from "@/config/whatsapp";
+import { saveContactMessage } from "@/app/actions";
 
 function Text({ en, ta }: { en: string; ta: string }) {
   return (
@@ -507,9 +508,20 @@ export default function ContactPage() {
 கூடுதல் விவரம் / கேள்வி: ${detailsDisplay}`;
   }, [rentFormData]);
 
-  const handleRentSubmit = (e: React.FormEvent) => {
+  const handleRentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isRentFormValid) return;
+    
+    // Save contact message in Supabase
+    try {
+      await saveContactMessage({
+        name: rentFormData.name.trim(),
+        phone: rentFormData.phone.trim(),
+        message: rentCompiledMessage,
+      });
+    } catch (err) {
+      console.error("Failed to save contact message to database:", err);
+    }
     
     const waUrl = buildWAUrl(WA_NUMBER, rentCompiledMessage);
     window.open(waUrl, "_blank");

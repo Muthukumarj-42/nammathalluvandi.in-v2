@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { MessageCircle, PenTool, Truck, Wrench } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CartExplorer } from "@/components/sections/cart-explorer";
+import { getCarts } from "@/lib/carts";
 import { customCartMessage } from "@/lib/utils";
 import { WA_NUMBER, buildWAUrl } from "@/config/whatsapp";
 
@@ -53,10 +54,11 @@ function Text({ en, ta }: { en: string; ta: string }) {
   );
 }
 
-export default function ExplorePage() {
+export default async function ExplorePage() {
+  const allCarts = await getCarts();
   return (
     <main className="pt-0 md:pt-20">
-      <CartExplorer />
+      <CartExplorer initialCarts={allCarts} />
 
       {/* Redesigned Custom Manufacturing teaser section */}
       <section className="py-16 md:py-24 bg-white border-t border-black/10">

@@ -18,6 +18,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Reveal } from "@/components/sections/reveal";
 import { CartExplorer } from "@/components/sections/cart-explorer";
+import { getCarts } from "@/lib/carts";
 import { rentalTamilMessage } from "@/lib/utils";
 import { WA_NUMBER, buildWAUrl } from "@/config/whatsapp";
 
@@ -119,7 +120,8 @@ const faqs = [
   ],
 ];
 
-export default function Home() {
+export default async function Home() {
+  const allCarts = await getCarts();
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
@@ -358,7 +360,7 @@ export default function Home() {
       {/* Catalog Explorer component */}
       <section>
         <h2 className="sr-only">Our Cart Variants</h2>
-        <CartExplorer compact />
+        <CartExplorer initialCarts={allCarts} compact />
       </section>
 
       {/* Redesigned BUY OPTION TEASER SECTION (CHANGE 11) */}

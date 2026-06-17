@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MessageCircle, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { carts, getCart } from "@/lib/carts";
+import { getCarts, getCart } from "@/lib/carts";
 import { CartGallery } from "@/components/sections/cart-gallery";
 
 function Text({ en, ta }: { en: string; ta: string }) {
@@ -49,8 +49,9 @@ function BookingCard({ cart }: { cart: any }) {
   );
 }
 
-export function generateStaticParams() {
-  return carts.map((cart) => ({ slug: cart.id }));
+export async function generateStaticParams() {
+  const allCarts = await getCarts();
+  return allCarts.map((cart) => ({ slug: cart.id }));
 }
 
 export async function generateMetadata({
@@ -59,7 +60,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const cart = getCart(slug);
+  const cart = await getCart(slug);
 
   if (!cart) {
     return {
@@ -101,10 +102,11 @@ export default async function CartDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const cart = getCart(slug);
+  const cart = await getCart(slug);
   if (!cart) notFound();
 
-  const related = carts.filter((item) => item.id !== cart.id).slice(0, 3);
+  const allCarts = await getCarts();
+  const related = allCarts.filter((item) => item.id !== cart.id).slice(0, 3);
 
 
   return (

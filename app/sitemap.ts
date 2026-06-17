@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
-import { carts } from "@/lib/carts";
+import { getCarts } from "@/lib/carts";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = "https://nammathalluvandi.in";
   
   const staticPages = [
@@ -13,7 +13,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: "/how-it-works", priority: 0.7, changeFrequency: "monthly" as const },
   ];
 
-  const dynamicPages = carts.map((cart) => ({
+  const allCarts = await getCarts();
+
+  const dynamicPages = allCarts.map((cart) => ({
     url: `/carts/${cart.id}`,
     priority: 0.8,
     changeFrequency: "weekly" as const,
