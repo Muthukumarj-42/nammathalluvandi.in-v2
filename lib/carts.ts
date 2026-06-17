@@ -1,4 +1,4 @@
-import { supabase } from "./supabase";
+import { supabase, isDbConfigured } from "./supabase";
 
 export interface Cart {
   id: string;
@@ -244,6 +244,9 @@ export const filters = [
 ];
 
 export async function getCarts(): Promise<Cart[]> {
+  if (!isDbConfigured) {
+    return carts;
+  }
   try {
     const { data, error } = await supabase
       .from("carts")
@@ -280,6 +283,9 @@ export async function getCarts(): Promise<Cart[]> {
 }
 
 export async function getCart(id: string): Promise<Cart | null> {
+  if (!isDbConfigured) {
+    return carts.find((cart) => cart.id === id) || null;
+  }
   try {
     const { data, error } = await supabase
       .from("carts")

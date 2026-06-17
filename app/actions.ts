@@ -1,6 +1,6 @@
 "use server";
 
-import { supabase } from "@/lib/supabase";
+import { supabase, isDbConfigured } from "@/lib/supabase";
 
 export async function saveBooking(booking: {
   cartId: string | null;
@@ -11,6 +11,10 @@ export async function saveBooking(booking: {
   duration: string;
   details?: string;
 }) {
+  if (!isDbConfigured) {
+    console.warn("Database is not configured. Bypassing saveBooking.");
+    return { success: true, bypassed: true };
+  }
   try {
     const { data, error } = await supabase
       .from("bookings")
@@ -45,6 +49,10 @@ export async function saveContactMessage(message: {
   phone: string;
   message: string;
 }) {
+  if (!isDbConfigured) {
+    console.warn("Database is not configured. Bypassing saveContactMessage.");
+    return { success: true, bypassed: true };
+  }
   try {
     const { data, error } = await supabase
       .from("contact_messages")
