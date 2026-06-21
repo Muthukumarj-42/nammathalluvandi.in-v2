@@ -7,6 +7,8 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { getCart, type Cart } from "@/lib/carts";
 import { saveBooking } from "@/app/actions";
+import { useCartStore } from "@/lib/store";
+import { ShoppingCart } from "lucide-react";
 
 const TAMIL_DICTIONARY: Record<string, string> = {
   // Pronouns / Particles
@@ -254,6 +256,8 @@ export function BookingFlow() {
   const [lang, setLang] = useState<"en" | "ta">("en");
   const [todayDate, setTodayDate] = useState("");
   const [imgError, setImgError] = useState(false);
+  const [quantity, setQuantity] = useState(1);
+  const addItem = useCartStore((state) => state.addItem);
 
   // Form State
   const [formData, setFormData] = useState({
@@ -512,6 +516,47 @@ export function BookingFlow() {
                       </span>
                     </p>
                   </div>
+                </div>
+
+                {/* Quantity and Add to Cart */}
+                <div className="mt-4 flex flex-col gap-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-bold text-ink uppercase tracking-wider">
+                      <span className="en">Quantity</span>
+                      <span className="ta tamil-text">எண்ணிக்கை</span>
+                    </span>
+                    <select
+                      value={quantity}
+                      onChange={(e) => setQuantity(Number(e.target.value))}
+                      className="h-10 w-24 rounded-lg border border-[#e5e0d8] bg-white px-3 py-1 font-bold outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                    >
+                      {[...Array(Math.min(cart.availableCount, 10))].map((_, i) => (
+                        <option key={i + 1} value={i + 1}>
+                          {i + 1}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  
+                  <Button 
+                    onClick={() => {
+                      addItem({
+                        id: cart.id,
+                        nameEn: cart.nameEn,
+                        nameTa: cart.nameTa,
+                        pricePerDay: cart.pricePerDay,
+                        depositAmount: cart.depositAmount,
+                        quantity,
+                        image: cart.images[0] || "",
+                      });
+                      router.push("/cart");
+                    }}
+                    className="w-full bg-primary hover:bg-primary/90 text-on-primary font-bold rounded-xl h-12 flex items-center justify-center gap-2"
+                  >
+                    <ShoppingCart size={18} />
+                    <span className="en">Add to Cart</span>
+                    <span className="ta tamil-text">கார்ட்டில் சேர்க்கவும்</span>
+                  </Button>
                 </div>
               </div>
             </div>

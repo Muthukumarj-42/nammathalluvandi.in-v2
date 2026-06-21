@@ -23,16 +23,7 @@ function Text({ en, ta }: { en: string; ta: string }) {
 }
 
 export default function MarketplacePage() {
-  const modules = [
-    [Database, "PostgreSQL + Prisma", "Database setup"],
-    [CreditCard, "Razorpay / Stripe", "Payment வசதி"],
-    [Lock, "User authentication", "Login பாதுகாப்பு"],
-    [UsersRound, "Vendor dashboards", "Vendor dashboard"],
-    [PackageSearch, "Cart listing system", "வண்டி listing system"],
-    [Newspaper, "CMS and blog", "Content update வசதி"],
-    [CalendarDays, "Real-time booking", "Live booking"],
-    [BarChart3, "Admin analytics", "Admin reports"]
-  ];
+
 
   return (
     <main className="bg-[#F8F6F2] pt-0 md:pt-28">
@@ -48,14 +39,38 @@ export default function MarketplacePage() {
             <Text en="This frontend is structured for payment gateways, dashboards, database-backed listings, and city-wise scaling." ta="Payment, dashboard, live booking, city-wise listings — அடுத்த கட்ட வளர்ச்சிக்காக இந்த site ready ஆ இருக்கு." />
           </p>
           <div className="mt-12 grid items-stretch gap-4 sm:grid-cols-2 md:grid-cols-4 md:gap-6">
-            {modules.map(([Icon, title, tamil]) => (
-              <div key={title as string} className="flex h-full flex-col rounded-xl border border-black/10 bg-white p-5 shadow-sm">
-                <Icon className="text-primary" />
-                <h2 className="mt-5 font-bold text-ink">
-                  <Text en={title as string} ta={tamil as string} />
-                </h2>
-              </div>
-            ))}
+            <div className="flex h-full flex-col rounded-xl border border-black/10 bg-white p-5 shadow-sm">
+              <Database className="text-primary" />
+              <h2 className="mt-5 font-bold text-ink"><Text en="PostgreSQL + Prisma" ta="Database setup" /></h2>
+            </div>
+            <div className="flex h-full flex-col rounded-xl border border-black/10 bg-white p-5 shadow-sm">
+              <CreditCard className="text-primary" />
+              <h2 className="mt-5 font-bold text-ink"><Text en="Razorpay / Stripe" ta="Payment வசதி" /></h2>
+            </div>
+            <div className="flex h-full flex-col rounded-xl border border-black/10 bg-white p-5 shadow-sm">
+              <Lock className="text-primary" />
+              <h2 className="mt-5 font-bold text-ink"><Text en="User authentication" ta="Login பாதுகாப்பு" /></h2>
+            </div>
+            <div className="flex h-full flex-col rounded-xl border border-black/10 bg-white p-5 shadow-sm">
+              <UsersRound className="text-primary" />
+              <h2 className="mt-5 font-bold text-ink"><Text en="Vendor dashboards" ta="Vendor dashboard" /></h2>
+            </div>
+            <div className="flex h-full flex-col rounded-xl border border-black/10 bg-white p-5 shadow-sm">
+              <PackageSearch className="text-primary" />
+              <h2 className="mt-5 font-bold text-ink"><Text en="Cart listing system" ta="வண்டி listing system" /></h2>
+            </div>
+            <div className="flex h-full flex-col rounded-xl border border-black/10 bg-white p-5 shadow-sm">
+              <Newspaper className="text-primary" />
+              <h2 className="mt-5 font-bold text-ink"><Text en="CMS and blog" ta="Content update வசதி" /></h2>
+            </div>
+            <div className="flex h-full flex-col rounded-xl border border-black/10 bg-white p-5 shadow-sm">
+              <CalendarDays className="text-primary" />
+              <h2 className="mt-5 font-bold text-ink"><Text en="Real-time booking" ta="Live booking" /></h2>
+            </div>
+            <div className="flex h-full flex-col rounded-xl border border-black/10 bg-white p-5 shadow-sm">
+              <BarChart3 className="text-primary" />
+              <h2 className="mt-5 font-bold text-ink"><Text en="Admin analytics" ta="Admin reports" /></h2>
+            </div>
           </div>
         </div>
       </section>

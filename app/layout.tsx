@@ -4,21 +4,14 @@ import type { ReactNode } from "react";
 import Script from "next/script";
 import "./globals.css";
 import { Footer } from "@/components/sections/footer";
-import { MobileBottomNav } from "@/components/sections/mobile-bottom-nav";
+import { MobileNav } from "@/components/sections/mobile-nav";
 import { Navbar } from "@/components/sections/navbar";
 import { WhatsAppFloat } from "@/components/sections/whatsapp-float";
-import { Bebas_Neue, DM_Sans, Noto_Sans_Tamil } from "next/font/google";
+import { Plus_Jakarta_Sans, Noto_Sans_Tamil } from "next/font/google";
 
-const bebasNeue = Bebas_Neue({
-  weight: "400",
+const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
-  variable: "--font-bebas",
-  display: "swap",
-});
-
-const dmSans = DM_Sans({
-  subsets: ["latin"],
-  variable: "--font-dm-sans",
+  variable: "--font-jakarta",
   display: "swap",
 });
 
@@ -100,7 +93,7 @@ export const metadata: Metadata = {
 };
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
   return (
-    <html lang="en" data-lang="en" className={`${bebasNeue.variable} ${dmSans.variable} ${notoTamil.variable}`}>
+    <html lang="en" data-lang="en" className={`${plusJakartaSans.variable} ${notoTamil.variable}`}>
       <link rel="preconnect" href="https://www.google-analytics.com" />
       <link rel="preconnect" href="https://www.googletagmanager.com" />
       <link rel="dns-prefetch" href="https://www.google-analytics.com" />
@@ -124,7 +117,7 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
         {children}
         <Footer />
         <WhatsAppFloat />
-        <MobileBottomNav />
+        <MobileNav />
       </body>
     </html>
   );

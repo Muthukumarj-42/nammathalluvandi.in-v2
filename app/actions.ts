@@ -76,3 +76,39 @@ export async function saveContactMessage(message: {
     return { success: false, error: err.message };
   }
 }
+
+export async function saveCart(cartData: any) {
+  if (!isDbConfigured) {
+    console.warn("Database is not configured. Bypassing saveCart.");
+    return { success: true, bypassed: true };
+  }
+  try {
+    const { data, error } = await supabase
+      .from("carts")
+      .insert([
+        {
+          name_en: cartData.nameEn,
+          name_ta: cartData.nameTa,
+          type: cartData.type,
+          price_per_day: cartData.pricePerDay,
+          deposit_amount: cartData.depositAmount,
+          available_count: cartData.availableCount,
+          description_en: cartData.descriptionEn,
+          description_ta: cartData.descriptionTa,
+          images: cartData.images || [],
+          status: "pending", // require admin review before showing on explore
+        },
+      ])
+      .select();
+
+    if (error) {
+      console.error("Error inserting cart:", error);
+      return { success: false, error: error.message };
+    }
+
+    return { success: true, data };
+  } catch (err: any) {
+    console.error("Server Action saveCart failed:", err);
+    return { success: false, error: err.message };
+  }
+}

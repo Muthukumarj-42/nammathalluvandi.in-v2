@@ -4,6 +4,7 @@ import { useMemo, useState, useEffect } from "react";
 import { CheckCircle2, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { WA_PUBLISH, buildWAUrl } from "@/config/whatsapp";
+import { saveCart } from "@/app/actions";
 
 function Text({ en, ta }: { en: string; ta: string }) {
   return (
@@ -112,10 +113,25 @@ Location: ${publishFormData.location.trim()}
 Equipment & Description: ${extraDetails}`;
   }, [publishFormData]);
 
-  const handlePublishSubmit = (e: React.FormEvent) => {
+  const handlePublishSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isPublishFormValid) return;
     
+    try {
+      await saveCart({
+        nameEn: publishFormData.cartType,
+        nameTa: publishFormData.cartType,
+        type: publishFormData.cartType,
+        pricePerDay: Number(publishFormData.expectedRent) || 0,
+        depositAmount: 0,
+        availableCount: 1,
+        descriptionEn: publishFormData.details,
+        descriptionTa: publishFormData.details,
+      });
+    } catch (err) {
+      console.error("Failed to save cart to backend:", err);
+    }
+
     const waUrl = buildWAUrl(WA_PUBLISH, publishCompiledMessage);
     window.open(waUrl, "_blank");
   };
