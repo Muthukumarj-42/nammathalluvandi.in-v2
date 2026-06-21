@@ -668,6 +668,7 @@ export default function ContactPage() {
                   <Text en="Full Name *" ta="பெயர் *" />
                 </label>
                 <input
+                  suppressHydrationWarning
                   type="text"
                   id="name"
                   required
@@ -684,6 +685,7 @@ export default function ContactPage() {
                   <Text en="Phone Number *" ta="கைபேசி எண் *" />
                 </label>
                 <input
+                  suppressHydrationWarning
                   type="tel"
                   id="phone"
                   required
@@ -709,6 +711,7 @@ export default function ContactPage() {
                   <Text en="Business Type *" ta="தொழில் வகை *" />
                 </label>
                 <select
+                  suppressHydrationWarning
                   id="businessType"
                   value={rentFormData.businessType}
                   onChange={handleRentInputChange}
@@ -740,6 +743,7 @@ export default function ContactPage() {
                   <Text en="What do you need? *" ta="உங்களுக்கு என்ன தேவை? *" />
                 </label>
                 <select
+                  suppressHydrationWarning
                   id="need"
                   value={rentFormData.need}
                   onChange={handleRentInputChange}
@@ -767,6 +771,7 @@ export default function ContactPage() {
                   <Text en="Location in Coimbatore *" ta="இடம் (கோவையில்) *" />
                 </label>
                 <input
+                  suppressHydrationWarning
                   type="text"
                   id="location"
                   required
@@ -783,6 +788,7 @@ export default function ContactPage() {
                   <Text en="Enquiry Message (Optional)" ta="விவரங்கள் / கேள்விகள் (விருப்பம்)" />
                 </label>
                 <textarea
+                  suppressHydrationWarning
                   id="details"
                   rows={4}
                   value={rentFormData.details}
@@ -794,6 +800,7 @@ export default function ContactPage() {
 
               {/* Submit button */}
               <Button
+                suppressHydrationWarning
                 type="submit"
                 disabled={!isRentFormValid}
                 className={`w-full h-14 mt-4 bg-[#25D366] hover:bg-[#20ba5a] text-white rounded-2xl font-bold text-base flex items-center justify-center gap-2 transition duration-200 ${

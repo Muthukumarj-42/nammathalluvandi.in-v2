@@ -63,7 +63,7 @@ export default async function ExplorePage() {
       {/* Redesigned Custom Manufacturing teaser section */}
       <section className="py-16 md:py-24 bg-white border-t border-black/10">
         <div className="site-container">
-          <div className="grid gap-8 md:grid-cols-[0.4fr_0.6fr]">
+          <div className="grid gap-8 lg:grid-cols-[0.4fr_0.6fr]">
             {/* Left Column (40%) */}
             <div className="flex flex-col justify-between">
               <div>
@@ -99,7 +99,7 @@ export default async function ExplorePage() {
             </div>
 
             {/* Right Column (60%) */}
-            <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-3">
+            <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
               {/* DESIGN Card */}
               <div className="bg-orange-50 border border-orange-100 rounded-2xl p-6 flex flex-col justify-between">
                 <div>
@@ -110,22 +110,22 @@ export default async function ExplorePage() {
                   </h3>
                 </div>
                 <ul className="mt-4 space-y-2 text-sm leading-6 text-muted-foreground">
-                  <li className="flex gap-2">
-                    <span className="text-[#f97316] font-bold">•</span>
+                  <li className="flex gap-2 items-start">
+                    <span className="text-[#f97316] font-bold shrink-0 leading-6">•</span>
                     <span>
                       <span className="en">Tell us the size you need</span>
                       <span className="ta tamil-text">தேவையான அளவு சொல்லுங்கள்</span>
                     </span>
                   </li>
-                  <li className="flex gap-2">
-                    <span className="text-[#f97316] font-bold">•</span>
+                  <li className="flex gap-2 items-start">
+                    <span className="text-[#f97316] font-bold shrink-0 leading-6">•</span>
                     <span>
                       <span className="en">Choose counter layout</span>
                       <span className="ta tamil-text">கவுண்டர் வடிவமைப்பு தேர்வு</span>
                     </span>
                   </li>
-                  <li className="flex gap-2">
-                    <span className="text-[#f97316] font-bold">•</span>
+                  <li className="flex gap-2 items-start">
+                    <span className="text-[#f97316] font-bold shrink-0 leading-6">•</span>
                     <span>
                       <span className="en">Plan your branding space</span>
                       <span className="ta tamil-text">உங்கள் பிராண்ட் இடம் திட்டமிடுங்கள்</span>
@@ -144,22 +144,22 @@ export default async function ExplorePage() {
                   </h3>
                 </div>
                 <ul className="mt-4 space-y-2 text-sm leading-6 text-muted-foreground">
-                  <li className="flex gap-2">
-                    <span className="text-[#f97316] font-bold">•</span>
+                  <li className="flex gap-2 items-start">
+                    <span className="text-[#f97316] font-bold shrink-0 leading-6">•</span>
                     <span>
                       <span className="en">Quality steel material</span>
                       <span className="ta tamil-text">தரமான ஸ்டீல் பொருள்</span>
                     </span>
                   </li>
-                  <li className="flex gap-2">
-                    <span className="text-[#f97316] font-bold">•</span>
+                  <li className="flex gap-2 items-start">
+                    <span className="text-[#f97316] font-bold shrink-0 leading-6">•</span>
                     <span>
                       <span className="en">Stove setup (optional)</span>
                       <span className="ta tamil-text">அடுப்பு அமைப்பு (விருப்பம்)</span>
                     </span>
                   </li>
-                  <li className="flex gap-2">
-                    <span className="text-[#f97316] font-bold">•</span>
+                  <li className="flex gap-2 items-start">
+                    <span className="text-[#f97316] font-bold shrink-0 leading-6">•</span>
                     <span>
                       <span className="en">Storage & cover options</span>
                       <span className="ta tamil-text">சேமிப்பு மற்றும் மூடி விருப்பங்கள்</span>
@@ -178,22 +178,22 @@ export default async function ExplorePage() {
                   </h3>
                 </div>
                 <ul className="mt-4 space-y-2 text-sm leading-6 text-muted-foreground">
-                  <li className="flex gap-2">
-                    <span className="text-[#f97316] font-bold">•</span>
+                  <li className="flex gap-2 items-start">
+                    <span className="text-[#f97316] font-bold shrink-0 leading-6">•</span>
                     <span>
                       <span className="en">Ready in 2-4 weeks</span>
                       <span className="ta tamil-text">2-4 வாரங்களில் தயார்</span>
                     </span>
                   </li>
-                  <li className="flex gap-2">
-                    <span className="text-[#f97316] font-bold">•</span>
+                  <li className="flex gap-2 items-start">
+                    <span className="text-[#f97316] font-bold shrink-0 leading-6">•</span>
                     <span>
                       <span className="en">Direct delivery in Coimbatore</span>
                       <span className="ta tamil-text">கோயம்புத்தூரில் நேரடி டெலிவரி</span>
                     </span>
                   </li>
-                  <li className="flex gap-2">
-                    <span className="text-[#f97316] font-bold">•</span>
+                  <li className="flex gap-2 items-start">
+                    <span className="text-[#f97316] font-bold shrink-0 leading-6">•</span>
                     <span>
                       <span className="en">Fully checked before handover</span>
                       <span className="ta tamil-text">கையளிப்பதற்கு முன் முழு சரிபார்ப்பு</span>

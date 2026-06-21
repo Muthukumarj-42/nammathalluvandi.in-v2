@@ -49,10 +49,10 @@ export function Navbar() {
             width={48} 
             height={48} 
             sizes="48px"
-            className="h-6 w-auto" 
+            className="h-6 w-auto shrink-0" 
             priority={true}
           />
-          <span className="font-display text-2xl font-black uppercase tracking-[0.12em] text-ink always-bebas">
+          <span className="font-display text-xl sm:text-2xl font-black uppercase tracking-[0.12em] text-ink always-bebas whitespace-nowrap">
             THALLUVANDI
           </span>
         </Link>
@@ -70,23 +70,23 @@ export function Navbar() {
 
       {/* Desktop Header (768px+) */}
       <header className={`fixed inset-x-0 top-0 z-50 hidden border-b border-outline-variant bg-surface text-ink transition-all duration-300 md:block ${scrolled ? "shadow-sm backdrop-blur-xl" : ""}`}>
-        <div className="site-container flex h-20 items-center justify-between">
-          <Link href="/" className="group flex items-center gap-3" aria-label="Thalluvandi home">
-            <Image src="/brand/text-logo.webp" alt="Thalluvandi food cart rental Tamil Nadu logo" width={230} height={88} priority sizes="230px" className="h-14 w-auto transition-transform duration-300 group-hover:scale-105" />
+        <div className="site-container flex h-20 items-center justify-between gap-4">
+          <Link href="/" className="group flex items-center gap-3 shrink-0" aria-label="Thalluvandi home">
+            <Image src="/brand/text-logo.webp" alt="Thalluvandi food cart rental Tamil Nadu logo" width={230} height={88} priority sizes="230px" className="h-12 lg:h-14 w-auto transition-transform duration-300 group-hover:scale-105" />
           </Link>
 
-          <nav className="hidden items-center gap-6 md:flex">
+          <nav className="hidden items-center gap-3 lg:gap-6 md:flex overflow-hidden">
             {nav.map(([label, tamil, href]) => (
-              <Link key={href} href={href} className={`text-xs font-bold uppercase tracking-[0.14em] transition hover:text-primary ${pathname === href ? "text-primary" : "text-ink/78"}`}>
+              <Link key={href} href={href} className={`text-[10px] lg:text-xs font-bold uppercase tracking-[0.14em] transition hover:text-primary whitespace-nowrap ${pathname === href ? "text-primary" : "text-ink/78"}`}>
                 <span className="en">{label}</span>
                 <span className="ta tamil-text">{tamil}</span>
               </Link>
             ))}
           </nav>
 
-          <div className="hidden items-center gap-3 md:flex">
+          <div className="hidden items-center gap-2 lg:gap-3 md:flex shrink-0">
             <LanguageToggle />
-            <Link href="/cart" className="relative p-2 text-ink/78 hover:text-primary transition" aria-label="Cart">
+            <Link href="/cart" className="relative p-2 text-ink/78 hover:text-primary transition shrink-0" aria-label="Cart">
               <ShoppingCart size={20} />
               {mounted && cartItemsCount > 0 && (
                 <span className="absolute top-0 right-0 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-on-primary">
@@ -94,10 +94,10 @@ export function Navbar() {
                 </span>
               )}
             </Link>
-            <Button asChild size="default" className="bg-primary text-on-primary rounded-full hover:bg-primary/90">
-              <Link href="/contact#enquiry-form">
-                <MessageCircle size={18} />
-                <span className="en">💬 Chat on WhatsApp</span>
+            <Button asChild size="default" className="bg-primary text-on-primary rounded-full hover:bg-primary/90 shrink-0">
+              <Link href="/contact#enquiry-form" className="flex items-center gap-1.5 whitespace-nowrap">
+                <MessageCircle size={18} className="shrink-0" />
+                <span className="en">💬 Chat</span>
                 <span className="ta tamil-text">💬 WhatsApp</span>
               </Link>
             </Button>
