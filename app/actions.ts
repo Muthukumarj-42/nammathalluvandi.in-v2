@@ -37,6 +37,40 @@ export async function saveBooking(booking: {
       return { success: false, error: error.message };
     }
 
+    // Fetch vendor details from the cart
+    let vendorPhone = "";
+    let cartName = "";
+    if (booking.cartId) {
+      const { data: cartData } = await supabase
+        .from("carts")
+        .select("vendor_phone, name_en")
+        .eq("id", booking.cartId)
+        .single();
+        
+      if (cartData) {
+        vendorPhone = cartData.vendor_phone || "";
+        cartName = cartData.name_en || booking.cartId;
+      } else {
+        cartName = booking.cartId;
+      }
+    }
+
+    // Insert admin notification
+    await supabase.from("notifications").insert([{
+      recipient_type: "admin",
+      recipient_phone: "admin",
+      message: `Buyer ${booking.name} (${booking.phone}) confirmed an order for cart ${cartName}${vendorPhone ? ` of vendor ${vendorPhone}` : ""}.`
+    }]);
+
+    // Insert vendor notification
+    if (vendorPhone) {
+      await supabase.from("notifications").insert([{
+        recipient_type: "vendor",
+        recipient_phone: vendorPhone,
+        message: `A booking is confirmed for your cart ${cartName}.`
+      }]);
+    }
+
     return { success: true, data };
   } catch (err: any) {
     console.error("Server Action saveBooking failed:", err);
@@ -97,6 +131,9 @@ export async function saveCart(cartData: any) {
           description_ta: cartData.descriptionTa,
           images: cartData.images || [],
           status: "pending", // require admin review before showing on explore
+          vendor_name: cartData.vendorName,
+          vendor_phone: cartData.vendorPhone,
+          vendor_location: cartData.vendorLocation,
         },
       ])
       .select();
@@ -106,9 +143,63 @@ export async function saveCart(cartData: any) {
       return { success: false, error: error.message };
     }
 
+    // Insert admin notification
+    if (cartData.vendorName) {
+      await supabase.from("notifications").insert([{
+        recipient_type: "admin",
+        recipient_phone: "admin",
+        message: `New cart (${cartData.nameEn}) added by vendor ${cartData.vendorName} (${cartData.vendorPhone}).`
+      }]);
+    }
+
     return { success: true, data };
   } catch (err: any) {
     console.error("Server Action saveCart failed:", err);
+    return { success: false, error: err.message };
+  }
+}
+
+export async function getNotifications(phone: string, isAdmin: boolean) {
+  if (!isDbConfigured) {
+    return { success: false, error: "Database not configured", data: [] };
+  }
+  try {
+    let query = supabase
+      .from("notifications")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (isAdmin) {
+      query = query.eq("recipient_type", "admin");
+    } else {
+      query = query.eq("recipient_type", "vendor").eq("recipient_phone", phone);
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+      console.error("Error fetching notifications:", error);
+      return { success: false, error: error.message, data: [] };
+    }
+
+    return { success: true, data };
+  } catch (err: any) {
+    console.error("Server Action getNotifications failed:", err);
+    return { success: false, error: err.message, data: [] };
+  }
+}
+
+export async function markNotificationAsRead(id: string) {
+  if (!isDbConfigured) return { success: false };
+  try {
+    const { data, error } = await supabase
+      .from("notifications")
+      .update({ is_read: true })
+      .eq("id", id)
+      .select();
+    if (error) return { success: false, error: error.message };
+    return { success: true, data };
+  } catch (err: any) {
     return { success: false, error: err.message };
   }
 }

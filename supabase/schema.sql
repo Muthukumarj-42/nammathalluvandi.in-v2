@@ -19,6 +19,9 @@ CREATE TABLE IF NOT EXISTS public.carts (
     description_en TEXT,
     description_ta TEXT,
     status TEXT DEFAULT 'live',
+    vendor_name TEXT,
+    vendor_phone TEXT,
+    vendor_location TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
@@ -76,4 +79,24 @@ ALTER TABLE public.contact_messages ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow public insert on contact_messages" 
 ON public.contact_messages FOR INSERT 
 TO public 
+WITH CHECK (true);
+
+-- 4. Notifications Table
+CREATE TABLE IF NOT EXISTS public.notifications (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    recipient_type TEXT NOT NULL, -- 'admin' or 'vendor'
+    recipient_phone TEXT NOT NULL,
+    message TEXT NOT NULL,
+    is_read BOOLEAN DEFAULT false,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- Enable RLS for notifications
+ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;
+
+-- Allow public access on notifications
+CREATE POLICY "Allow public access on notifications" 
+ON public.notifications FOR ALL 
+TO public 
+USING (true)
 WITH CHECK (true);

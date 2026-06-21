@@ -127,6 +127,9 @@ Equipment & Description: ${extraDetails}`;
         availableCount: 1,
         descriptionEn: publishFormData.details,
         descriptionTa: publishFormData.details,
+        vendorName: publishFormData.name,
+        vendorPhone: publishFormData.phone,
+        vendorLocation: publishFormData.location,
       });
     } catch (err) {
       console.error("Failed to save cart to backend:", err);

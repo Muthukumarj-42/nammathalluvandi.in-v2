@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { MessageCircle, PhoneCall, ShoppingCart } from "lucide-react";
+import { MessageCircle, PhoneCall, ShoppingCart, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CALL_PHONE, rentalTamilMessage } from "@/lib/utils";
 import { LanguageToggle } from "@/components/sections/language-toggle";
@@ -58,14 +58,19 @@ export function Navbar() {
         </Link>
 
         {/* Right: Cart Button */}
-        <Link href="/cart" className="relative p-2 text-ink/78 hover:text-primary transition" aria-label="Cart">
-          <ShoppingCart size={20} />
-          {mounted && cartItemsCount > 0 && (
-            <span className="absolute top-0 right-0 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-on-primary">
-              {cartItemsCount}
-            </span>
-          )}
-        </Link>
+        <div className="flex items-center gap-1">
+          <Link href="/notifications" className="relative p-2 text-ink/78 hover:text-primary transition" aria-label="Notifications">
+            <Bell size={20} />
+          </Link>
+          <Link href="/cart" className="relative p-2 text-ink/78 hover:text-primary transition" aria-label="Cart">
+            <ShoppingCart size={20} />
+            {mounted && cartItemsCount > 0 && (
+              <span className="absolute top-0 right-0 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-on-primary">
+                {cartItemsCount}
+              </span>
+            )}
+          </Link>
+        </div>
       </header>
 
       {/* Desktop Header (768px+) */}
@@ -86,6 +91,9 @@ export function Navbar() {
 
           <div className="hidden items-center gap-2 lg:gap-3 md:flex shrink-0">
             <LanguageToggle />
+            <Link href="/notifications" className="relative p-2 text-ink/78 hover:text-primary transition shrink-0" aria-label="Notifications">
+              <Bell size={20} />
+            </Link>
             <Link href="/cart" className="relative p-2 text-ink/78 hover:text-primary transition shrink-0" aria-label="Cart">
               <ShoppingCart size={20} />
               {mounted && cartItemsCount > 0 && (
