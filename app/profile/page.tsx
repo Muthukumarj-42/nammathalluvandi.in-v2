@@ -20,8 +20,8 @@ export default function ProfilePage() {
         </div>
 
         <div className="mt-6 flex gap-3">
-          <Button className="flex-1 bg-white text-primary hover:bg-gray-100 font-bold rounded-full">
-            Login / Register
+          <Button asChild className="flex-1 bg-white text-primary hover:bg-gray-100 font-bold rounded-full">
+            <Link href="/contact">Login / Register</Link>
           </Button>
         </div>
       </section>
@@ -30,28 +30,28 @@ export default function ProfilePage() {
       <section className="px-4 mt-8">
         <h3 className="text-sm font-bold text-on-surface-variant uppercase tracking-wider mb-3">Account Settings</h3>
         <div className="bg-white rounded-2xl shadow-sm border border-outline-variant overflow-hidden">
-          <Link href="/profile" className="flex items-center justify-between p-4 border-b border-outline-variant hover:bg-gray-50 transition">
+          <Link href="/cart" className="flex items-center justify-between p-4 border-b border-outline-variant hover:bg-gray-50 transition">
             <div className="flex items-center gap-3 text-on-surface">
               <Package size={20} className="text-primary" />
               <span className="font-semibold">My Active Carts</span>
             </div>
             <ChevronRight size={18} className="text-on-surface-variant" />
           </Link>
-          <Link href="/profile" className="flex items-center justify-between p-4 border-b border-outline-variant hover:bg-gray-50 transition">
+          <Link href="/explore" className="flex items-center justify-between p-4 border-b border-outline-variant hover:bg-gray-50 transition">
             <div className="flex items-center gap-3 text-on-surface">
               <Heart size={20} className="text-secondary" />
               <span className="font-semibold">Saved Listings</span>
             </div>
             <ChevronRight size={18} className="text-on-surface-variant" />
           </Link>
-          <Link href="/profile" className="flex items-center justify-between p-4 border-b border-outline-variant hover:bg-gray-50 transition">
+          <Link href="/contact" className="flex items-center justify-between p-4 border-b border-outline-variant hover:bg-gray-50 transition">
             <div className="flex items-center gap-3 text-on-surface">
               <MapPin size={20} className="text-tertiary" />
               <span className="font-semibold">Saved Addresses</span>
             </div>
             <ChevronRight size={18} className="text-on-surface-variant" />
           </Link>
-          <Link href="/profile" className="flex items-center justify-between p-4 hover:bg-gray-50 transition">
+          <Link href="/contact" className="flex items-center justify-between p-4 hover:bg-gray-50 transition">
             <div className="flex items-center gap-3 text-on-surface">
               <Settings size={20} className="text-gray-500" />
               <span className="font-semibold">Settings</span>
@@ -82,9 +82,11 @@ export default function ProfilePage() {
 
       {/* Logout */}
       <section className="px-4 mt-8 mb-8 text-center">
-        <Button variant="outline" className="w-full h-12 text-error border-error hover:bg-error/10 rounded-xl font-bold flex items-center justify-center gap-2">
-          <LogOut size={18} />
-          Sign Out
+        <Button asChild variant="outline" className="w-full h-12 text-error border-error hover:bg-error/10 rounded-xl font-bold flex items-center justify-center gap-2">
+          <Link href="/">
+            <LogOut size={18} />
+            Sign Out
+          </Link>
         </Button>
       </section>
     </main>

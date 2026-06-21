@@ -1,0 +1,52 @@
+﻿Namma Thalluvandi — Developer Instructions
+This is not the feature spec — see V2 Development plan and V2 Admin Page Spec for that. This doc is about HOW to build, not WHAT to build. Read once before starting.
+________________
+
+
+1. Code comments
+* Comment only where the why isn't obvious from the code itself. Don't comment every line — comment decisions, not syntax.
+* Specifically comment:
+   * Any place implementing the distance-based routing logic (Part 3 of the main dev plan) — this is the core differentiator of the platform, future developers must understand why it's distance-based and not zone-based
+   * The 30-minute escalation logic and wherever the cron/scheduled job lives
+   * Any WhatsApp API integration code — mark clearly which parts are inside a free service-conversation window vs. using a paid template, since this affects cost
+   * Any place where a status enum transitions happen (e.g. pending_review → live) — note what triggers the transition
+* Skip comments on: standard CRUD operations, obvious form handling, styling
+________________
+
+
+2. Repo documentation — required before V2 is considered "done"
+Create a README.md at the project root (or update if one exists) covering:
+* What this project is — one paragraph, plain language, for someone joining the team with zero context
+* Tech stack — Next.js 14, Supabase, any other libraries used, with versions
+* Environment variables required — list every .env key needed (Supabase URL/keys, WhatsApp Cloud API credentials, etc.) with a one-line description of what each one is for. Do NOT put actual secret values in this file — just the variable names and what they're for.
+* Database schema overview — link to or summarize the tables from the main dev plan, since the actual schema may evolve slightly during build
+* Folder/file structure — brief explanation of where to find what (pages, API routes, components, utils)
+* Known limitations / FUTURE items — link back to the FUTURE section of the main dev plan so nobody "discovers" a missing feature and assumes it was forgotten
+This README is for two audiences: a future developer who needs to pick up the codebase, and Muthu (non-technical-on-this-specific-stack) who needs to understand what exists at a glance.
+________________
+
+
+3. Repo visibility and access
+* Repository should be private, not public — this is a live business with real vendor and customer data flowing through it once launched.
+* Only collaborators with a real reason to be there get access (currently: Muthu, you). Don't make it public for portfolio purposes while it's handling real user data — a public portfolio version (with fake/sample data) can be a separate consideration later if wanted, but not this repo.
+________________
+
+
+4. Git workflow
+* Work happens on a new branch off v2-git, not directly on main/v2-git itself
+* Commit messages should describe what changed and why in plain language — not just "fix bugs" or "update code." Example: Add distance calculation for CV routing not update.js
+* Before merging back, do a quick walkthrough with Muthu so he understands what changed, even at a high level — he's the product owner and needs to track progress even without reading every line of code
+________________
+
+
+5. Data handling — important given the platform's nature
+* Real vendor data (names, phone numbers, locations) will be flowing through this system once the field trip listings start coming in. Treat all of this as real personal data, not test data, from day one:
+   * No hardcoded test phone numbers or names committed into the codebase
+   * Use Supabase's environment separation (dev/staging vs. production) if feasible, rather than testing against real data
+   * Be careful with logs — the whatsapp_messages log table is useful for debugging but contains real phone numbers and message content; don't expose this data anywhere outside the protected admin page
+________________
+
+
+6. When in doubt
+* If a feature isn't clearly specified in the main dev plan or admin page spec, don't guess and build it — ask Muthu first. Scope creep into FUTURE features (payments, ratings, etc.) wastes time better spent getting V2 solid.
+* If something in the spec seems technically wrong or there's a better way to implement it (e.g. a more efficient distance query, a better cron alternative for the 30-min escalation), flag it — the spec describes the intended behavior, not a mandate on implementation detail. The distance based routing principle itself is non-negotiable; how you implement it is your call.

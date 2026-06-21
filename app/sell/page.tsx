@@ -88,7 +88,7 @@ export default function SellLandingPage() {
       {/* CTA Button */}
       <section className="px-4 pb-8">
         <Button asChild size="lg" className="w-full h-14 text-lg font-bold bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20 rounded-full text-on-primary">
-          <Link href="/sell/new">
+          <Link href="/publish">
             List Your Cart Now
           </Link>
         </Button>

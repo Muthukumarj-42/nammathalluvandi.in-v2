@@ -29,9 +29,9 @@ export default function HomePage() {
               <p className="font-semibold text-sm">Ondipudur, Coimbatore</p>
             </div>
           </div>
-          <button suppressHydrationWarning className="text-xs font-bold bg-surface text-primary px-4 py-2 rounded-lg shadow-sm">
+          <Link href="/explore" suppressHydrationWarning className="text-xs font-bold bg-surface text-primary px-4 py-2 rounded-lg shadow-sm">
             Change
-          </button>
+          </Link>
         </div>
 
         {/* Search Bar */}
@@ -50,29 +50,29 @@ export default function HomePage() {
       <section className="px-4 mt-8">
         <div className="flex justify-between items-end mb-4">
           <h3 className="text-lg font-bold text-on-surface">Browse by Type</h3>
-          <Link href="/search" className="text-sm font-semibold text-primary flex items-center">
+          <Link href="/explore" className="text-sm font-semibold text-primary flex items-center">
             See all <ChevronRight size={16} />
           </Link>
         </div>
         
         <div className="grid grid-cols-3 gap-3">
-          <Link href="/search?type=stove" className="bg-white border border-gray-100 shadow-sm rounded-2xl p-4 flex flex-col items-center justify-center gap-2 aspect-square text-primary hover:border-primary transition">
+          <Link href="/explore" className="bg-white border border-gray-100 shadow-sm rounded-2xl p-4 flex flex-col items-center justify-center gap-2 aspect-square text-primary hover:border-primary transition">
             <Flame size={32} strokeWidth={1.5} />
             <span className="text-xs font-semibold text-center text-gray-700">With Stove</span>
           </Link>
-          <Link href="/search?type=roof" className="bg-white border border-gray-100 shadow-sm rounded-2xl p-4 flex flex-col items-center justify-center gap-2 aspect-square text-primary hover:border-primary transition">
+          <Link href="/explore" className="bg-white border border-gray-100 shadow-sm rounded-2xl p-4 flex flex-col items-center justify-center gap-2 aspect-square text-primary hover:border-primary transition">
             <Tent size={32} strokeWidth={1.5} />
             <span className="text-xs font-semibold text-center text-gray-700">With Roof</span>
           </Link>
-          <Link href="/search?type=ice-cream" className="bg-white border border-gray-100 shadow-sm rounded-2xl p-4 flex flex-col items-center justify-center gap-2 aspect-square text-primary hover:border-primary transition">
+          <Link href="/explore" className="bg-white border border-gray-100 shadow-sm rounded-2xl p-4 flex flex-col items-center justify-center gap-2 aspect-square text-primary hover:border-primary transition">
             <IceCream size={32} strokeWidth={1.5} />
             <span className="text-xs font-semibold text-center text-gray-700">Ice Cream</span>
           </Link>
-          <Link href="/search?type=tea" className="bg-white border border-gray-100 shadow-sm rounded-2xl p-4 flex flex-col items-center justify-center gap-2 aspect-square text-primary hover:border-primary transition">
+          <Link href="/explore" className="bg-white border border-gray-100 shadow-sm rounded-2xl p-4 flex flex-col items-center justify-center gap-2 aspect-square text-primary hover:border-primary transition">
             <Coffee size={32} strokeWidth={1.5} />
             <span className="text-xs font-semibold text-center text-gray-700">Tea Stall</span>
           </Link>
-          <Link href="/search" className="bg-white border border-gray-100 shadow-sm rounded-2xl p-4 flex flex-col items-center justify-center gap-2 aspect-square text-primary hover:border-primary transition">
+          <Link href="/explore" className="bg-white border border-gray-100 shadow-sm rounded-2xl p-4 flex flex-col items-center justify-center gap-2 aspect-square text-primary hover:border-primary transition">
             <MoreHorizontal size={32} strokeWidth={1.5} />
             <span className="text-xs font-semibold text-center text-gray-700">More Types</span>
           </Link>
@@ -83,7 +83,7 @@ export default function HomePage() {
       <section className="px-4 mt-10">
         <div className="flex justify-between items-end mb-4">
           <h3 className="text-lg font-bold text-on-surface">Premium Models</h3>
-          <Link href="/search" className="text-sm font-semibold text-primary flex items-center">
+          <Link href="/explore" className="text-sm font-semibold text-primary flex items-center">
             See all <ChevronRight size={16} />
           </Link>
         </div>
@@ -135,7 +135,7 @@ export default function HomePage() {
       <section className="px-4 mt-10 mb-6">
         <div className="flex justify-between items-end mb-4">
           <h3 className="text-lg font-bold text-on-surface">Marketplace</h3>
-          <Link href="/search" className="text-sm font-semibold text-primary flex items-center">
+          <Link href="/explore" className="text-sm font-semibold text-primary flex items-center">
             See all <ChevronRight size={16} />
           </Link>
         </div>

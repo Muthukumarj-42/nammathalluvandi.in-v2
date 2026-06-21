@@ -14,6 +14,8 @@ export interface Cart {
   featuresTa: string[];
   images: string[];
   whatsappMessageTa: string;
+  descriptionEn?: string;
+  descriptionTa?: string;
 }
 
 export const carts: Cart[] = [
@@ -275,6 +277,8 @@ export async function getCarts(): Promise<Cart[]> {
       featuresTa: item.features_ta || [],
       images: item.images || [],
       whatsappMessageTa: item.whatsapp_message_ta || "",
+      descriptionEn: item.description_en || "",
+      descriptionTa: item.description_ta || "",
     }));
   } catch (err) {
     console.error("Failed to query carts table, using static fallback:", err);
@@ -315,6 +319,8 @@ export async function getCart(id: string): Promise<Cart | null> {
       featuresTa: data.features_ta || [],
       images: data.images || [],
       whatsappMessageTa: data.whatsapp_message_ta || "",
+      descriptionEn: data.description_en || "",
+      descriptionTa: data.description_ta || "",
     };
   } catch (err) {
     console.error(`Failed to query cart ${id}, using static fallback:`, err);
