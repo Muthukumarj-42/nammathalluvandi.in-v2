@@ -176,11 +176,8 @@ Equipment & Description: ${extraDetails}`;
           <div className="rounded-2xl border border-black/10 bg-[#fffdf7] p-6 shadow-premium md:p-8 flex flex-col gap-5">
             <div>
               <h2 className="font-display text-4xl uppercase leading-none text-ink">
-                <Text en="Publish & List Cart" ta="வண்டி வாடகைக்கு விட" />
+                <Text en="Quick Listing Form" ta="விரைவு பதிவு படிவம்" />
               </h2>
-              <p className="mt-1 text-xs text-[#f97316] font-bold uppercase tracking-wider">
-                <Text en="Interactive WhatsApp Listing" ta="நேரடி வாட்ஸ்அப் பதிவேற்றம்" />
-              </p>
             </div>
 
             <form onSubmit={handlePublishSubmit} className="space-y-4">
@@ -197,7 +194,7 @@ Equipment & Description: ${extraDetails}`;
                   value={publishFormData.name}
                   onChange={handlePublishInputChange}
                   placeholder={lang === "ta" ? "உங்கள் முழு பெயர்" : "Enter your full name"}
-                  className="w-full h-12 border border-[#e5e0d8] focus:border-[#f97316] focus:ring-2 focus:ring-[#f97316]/40 rounded-xl px-4 bg-white text-base outline-none transition"
+                  className="w-full h-12 border border-[#e5e0d8] focus:border-primary focus:ring-2 focus:ring-primary/40 rounded-xl px-4 bg-white text-base outline-none transition"
                 />
               </div>
 
@@ -216,7 +213,7 @@ Equipment & Description: ${extraDetails}`;
                   className={`w-full h-12 border focus:ring-2 rounded-xl px-4 bg-white text-base outline-none transition ${
                     phoneError
                       ? "border-red-500 focus:border-red-500 focus:ring-red-500/40"
-                      : "border-[#e5e0d8] focus:border-[#f97316] focus:ring-[#f97316]/40"
+                      : "border-[#e5e0d8] focus:border-primary focus:ring-primary/40"
                   }`}
                 />
                 {phoneError && (
@@ -235,7 +232,7 @@ Equipment & Description: ${extraDetails}`;
                   id="cartType"
                   value={publishFormData.cartType}
                   onChange={handlePublishInputChange}
-                  className="w-full h-12 border border-[#e5e0d8] focus:border-[#f97316] focus:ring-2 focus:ring-[#f97316]/40 rounded-xl px-4 bg-white text-sm outline-none transition cursor-pointer"
+                  className="w-full h-12 border border-[#e5e0d8] focus:border-primary focus:ring-2 focus:ring-primary/40 rounded-xl px-4 bg-white text-sm outline-none transition cursor-pointer"
                 >
                   {lang === "ta" ? (
                     <>
@@ -268,7 +265,7 @@ Equipment & Description: ${extraDetails}`;
                   id="condition"
                   value={publishFormData.condition}
                   onChange={handlePublishInputChange}
-                  className="w-full h-12 border border-[#e5e0d8] focus:border-[#f97316] focus:ring-2 focus:ring-[#f97316]/40 rounded-xl px-4 bg-white text-sm outline-none transition cursor-pointer"
+                  className="w-full h-12 border border-[#e5e0d8] focus:border-primary focus:ring-2 focus:ring-primary/40 rounded-xl px-4 bg-white text-sm outline-none transition cursor-pointer"
                 >
                   {lang === "ta" ? (
                     <>
@@ -300,7 +297,7 @@ Equipment & Description: ${extraDetails}`;
                   value={publishFormData.expectedRent}
                   onChange={handlePublishInputChange}
                   placeholder={lang === "ta" ? "எ.கா: 3000" : "e.g. 3000"}
-                  className="w-full h-12 border border-[#e5e0d8] focus:border-[#f97316] focus:ring-2 focus:ring-[#f97316]/40 rounded-xl px-4 bg-white text-base outline-none transition"
+                  className="w-full h-12 border border-[#e5e0d8] focus:border-primary focus:ring-2 focus:ring-primary/40 rounded-xl px-4 bg-white text-base outline-none transition"
                 />
               </div>
 
@@ -316,7 +313,7 @@ Equipment & Description: ${extraDetails}`;
                   value={publishFormData.location}
                   onChange={handlePublishInputChange}
                   placeholder={lang === "ta" ? "எ.கா: ஒண்டிப்புதூர், காந்திபுரம்" : "e.g. Ondipudur, Gandhipuram"}
-                  className="w-full h-12 border border-[#e5e0d8] focus:border-[#f97316] focus:ring-2 focus:ring-[#f97316]/40 rounded-xl px-4 bg-white text-base outline-none transition"
+                  className="w-full h-12 border border-[#e5e0d8] focus:border-primary focus:ring-2 focus:ring-primary/40 rounded-xl px-4 bg-white text-base outline-none transition"
                 />
               </div>
 
@@ -331,20 +328,27 @@ Equipment & Description: ${extraDetails}`;
                   value={publishFormData.details}
                   onChange={handlePublishInputChange}
                   placeholder={lang === "ta" ? "வண்டியின் அளவு, அடுப்பு, அலமாரி அல்லது பிற வசதிகள்..." : "Cart size, stove type, shelves, or other features..."}
-                  className="w-full border border-[#e5e0d8] focus:border-[#f97316] focus:ring-2 focus:ring-[#f97316]/40 rounded-xl p-4 bg-white text-base outline-none transition resize-none"
+                  className="w-full border border-[#e5e0d8] focus:border-primary focus:ring-2 focus:ring-primary/40 rounded-xl p-4 bg-white text-base outline-none transition resize-none"
                 />
+              </div>
+
+              <div className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-error/20 bg-error/5 rounded-xl mt-6 mb-4">
+                <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm text-primary mb-2">
+                  <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                </div>
+                <p className="font-bold text-error text-sm">Tap to upload photos</p>
+                <p className="text-xs text-muted mt-1">Add 1 to 5 photos - JPG or PNG</p>
               </div>
 
               {/* Submit button */}
               <Button
                 type="submit"
                 disabled={!isPublishFormValid}
-                className={`w-full h-14 mt-4 bg-[#25D366] hover:bg-[#20ba5a] text-white rounded-2xl font-bold text-base flex items-center justify-center gap-2 transition duration-200 ${
+                className={`w-full h-14 bg-error hover:bg-error/90 text-white rounded-2xl font-bold text-base flex items-center justify-center gap-2 transition duration-200 ${
                   !isPublishFormValid ? "opacity-40 cursor-not-allowed" : ""
                 }`}
               >
-                <MessageCircle size={20} className="shrink-0" />
-                <Text en="Submit Publish Request (WhatsApp) →" ta="பதிவேற்ற கோரிக்கையை அனுப்பவும் (WhatsApp) →" />
+                <Text en="Submit My Listing" ta="எனது வண்டியை பதிவு செய்" />
               </Button>
 
             </form>

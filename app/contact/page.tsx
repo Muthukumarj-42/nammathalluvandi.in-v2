@@ -631,7 +631,7 @@ export default function ContactPage() {
               <Button
                 asChild
                 variant="outline"
-                className="border-primary text-primary hover:bg-orange-50 w-full text-xs font-bold uppercase tracking-wider h-10"
+                className="border-primary text-primary hover:bg-error/5 w-full text-xs font-bold uppercase tracking-wider h-10"
               >
                 <a
                   href="https://maps.app.goo.gl/mdeWyjcpqBQRVzR46"
@@ -655,7 +655,7 @@ export default function ContactPage() {
               <h2 className="font-display text-4xl uppercase leading-none text-ink">
                 <Text en="Rent a Food Cart" ta="உங்களின் விவரங்கள்" />
               </h2>
-              <p className="mt-1 text-sm text-[#f97316] font-bold uppercase tracking-wider">
+              <p className="mt-1 text-sm text-error font-bold uppercase tracking-wider">
                 <Text en="Direct WhatsApp Connection" ta="வாட்ஸ்அப் நேரடி முன்பதிவு" />
               </p>
             </div>
@@ -675,7 +675,7 @@ export default function ContactPage() {
                   value={rentFormData.name}
                   onChange={handleRentInputChange}
                   placeholder={lang === "ta" ? "உங்கள் முழு பெயர்" : "Enter your full name"}
-                  className="w-full h-12 border border-[#e5e0d8] focus:border-[#f97316] focus:ring-2 focus:ring-[#f97316]/40 rounded-xl px-4 bg-white text-base outline-none transition"
+                  className="w-full h-12 border border-[#e5e0d8] focus:border-primary focus:ring-2 focus:ring-primary/40 rounded-xl px-4 bg-white text-base outline-none transition"
                 />
               </div>
 
@@ -695,7 +695,7 @@ export default function ContactPage() {
                   className={`w-full h-12 border focus:ring-2 rounded-xl px-4 bg-white text-base outline-none transition ${
                     phoneError
                       ? "border-red-500 focus:border-red-500 focus:ring-red-500/40"
-                      : "border-[#e5e0d8] focus:border-[#f97316] focus:ring-[#f97316]/40"
+                      : "border-[#e5e0d8] focus:border-primary focus:ring-primary/40"
                   }`}
                 />
                 {phoneError && (
@@ -715,7 +715,7 @@ export default function ContactPage() {
                   id="businessType"
                   value={rentFormData.businessType}
                   onChange={handleRentInputChange}
-                  className="w-full h-12 border border-[#e5e0d8] focus:border-[#f97316] focus:ring-2 focus:ring-[#f97316]/40 rounded-xl px-4 bg-white text-sm outline-none transition cursor-pointer"
+                  className="w-full h-12 border border-[#e5e0d8] focus:border-primary focus:ring-2 focus:ring-primary/40 rounded-xl px-4 bg-white text-sm outline-none transition cursor-pointer"
                 >
                   {lang === "ta" ? (
                     <>
@@ -747,7 +747,7 @@ export default function ContactPage() {
                   id="need"
                   value={rentFormData.need}
                   onChange={handleRentInputChange}
-                  className="w-full h-12 border border-[#e5e0d8] focus:border-[#f97316] focus:ring-2 focus:ring-[#f97316]/40 rounded-xl px-4 bg-white text-sm outline-none transition cursor-pointer"
+                  className="w-full h-12 border border-[#e5e0d8] focus:border-primary focus:ring-2 focus:ring-primary/40 rounded-xl px-4 bg-white text-sm outline-none transition cursor-pointer"
                 >
                   {lang === "ta" ? (
                     <>
@@ -778,7 +778,7 @@ export default function ContactPage() {
                   value={rentFormData.location}
                   onChange={handleRentInputChange}
                   placeholder={lang === "ta" ? "எ.கா: ஒண்டிப்புதூர், காந்திபுரம்" : "e.g. Ondipudur, Gandhipuram"}
-                  className="w-full h-12 border border-[#e5e0d8] focus:border-[#f97316] focus:ring-2 focus:ring-[#f97316]/40 rounded-xl px-4 bg-white text-base outline-none transition"
+                  className="w-full h-12 border border-[#e5e0d8] focus:border-primary focus:ring-2 focus:ring-primary/40 rounded-xl px-4 bg-white text-base outline-none transition"
                 />
               </div>
 
@@ -794,7 +794,7 @@ export default function ContactPage() {
                   value={rentFormData.details}
                   onChange={handleRentInputChange}
                   placeholder={lang === "ta" ? "வண்டி அளவு, குறிப்பிட்ட தேதி, அல்லது உங்கள் கேள்விகள்..." : "Cart size preference, required dates, or other questions..."}
-                  className="w-full border border-[#e5e0d8] focus:border-[#f97316] focus:ring-2 focus:ring-[#f97316]/40 rounded-xl p-4 bg-white text-base outline-none transition resize-none"
+                  className="w-full border border-[#e5e0d8] focus:border-primary focus:ring-2 focus:ring-primary/40 rounded-xl p-4 bg-white text-base outline-none transition resize-none"
                 />
               </div>
 
@@ -808,7 +808,7 @@ export default function ContactPage() {
                 }`}
               >
                 <MessageCircle size={20} className="shrink-0" />
-                <Text en="Send Rental Enquiry (WhatsApp) →" ta="வாடகை முன்பதிவு கேள்வியை அனுப்பவும் (WhatsApp) →" />
+                <Text en=" WhatsApp →" ta=" WhatsApp →" />
               </Button>
 
             </form>

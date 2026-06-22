@@ -6,29 +6,26 @@ export default function SellLandingPage() {
   return (
     <main className="min-h-screen bg-surface pb-20">
       {/* Header Section */}
-      <section className="bg-primary px-4 pt-12 pb-8 text-on-primary rounded-b-3xl shadow-md">
-        <p className="text-xs font-bold uppercase tracking-widest text-primary-fixed-dim mb-2">For Cart Owners</p>
+      <section className="bg-error px-4 pt-12 pb-8 text-white rounded-b-3xl shadow-md">
+        <p className="text-xs font-bold uppercase tracking-widest text-white/80 mb-2">For Cart Owners</p>
         <h1 className="text-3xl font-display uppercase leading-tight mb-2">
           List Your Cart.<br />Reach More Buyers.
         </h1>
-        <p className="text-primary-fixed-dim font-tamil">உங்கள் வண்டியை வாடகைக்கு விடுங்கள். அதிக வாடிக்கையாளர்களைப் பெறுங்கள்.</p>
+        <p className="text-white/90 text-sm">Quick listing • Local reach • Genuine inquiries • Higher visibility</p>
 
         {/* Stats Box */}
-        <div className="bg-surface text-on-surface rounded-xl p-4 mt-6 shadow-sm flex justify-between divide-x divide-outline-variant text-center">
+        <div className="bg-transparent text-white mt-6 flex justify-between text-center divide-x divide-white/20">
           <div className="flex-1 px-2">
-            <Users className="mx-auto mb-1 text-primary" size={20} />
-            <p className="font-bold text-sm">5,000+</p>
-            <p className="text-[10px] text-on-surface-variant uppercase tracking-wider font-semibold">Active Buyers</p>
+            <p className="font-bold text-lg">5,000+</p>
+            <p className="text-[10px] text-white/80 uppercase tracking-wider font-semibold">Active Buyers</p>
           </div>
           <div className="flex-1 px-2">
-            <IndianRupee className="mx-auto mb-1 text-secondary" size={20} />
-            <p className="font-bold text-sm">Free</p>
-            <p className="text-[10px] text-on-surface-variant uppercase tracking-wider font-semibold">To List</p>
+            <p className="font-bold text-lg">Free</p>
+            <p className="text-[10px] text-white/80 uppercase tracking-wider font-semibold">To List</p>
           </div>
           <div className="flex-1 px-2">
-            <Clock className="mx-auto mb-1 text-tertiary" size={20} />
-            <p className="font-bold text-sm">&lt; 2 min</p>
-            <p className="text-[10px] text-on-surface-variant uppercase tracking-wider font-semibold">Setup Time</p>
+            <p className="font-bold text-lg">2 min</p>
+            <p className="text-[10px] text-white/80 uppercase tracking-wider font-semibold">Setup Time</p>
           </div>
         </div>
       </section>

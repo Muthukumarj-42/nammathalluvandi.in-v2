@@ -59,7 +59,7 @@ export default function NotificationsPage() {
                 placeholder="Enter phone number"
                 value={phone}
                 onChange={e => setPhone(e.target.value)}
-                className="w-full h-12 border border-[#e5e0d8] focus:border-[#f97316] focus:ring-2 focus:ring-[#f97316]/40 rounded-xl px-4 text-base outline-none transition"
+                className="w-full h-12 border border-[#e5e0d8] focus:border-primary focus:ring-2 focus:ring-primary/40 rounded-xl px-4 text-base outline-none transition"
               />
               <Button 
                 type="submit" 
@@ -87,13 +87,13 @@ export default function NotificationsPage() {
             ) : (
               <div className="space-y-4">
                 {notifications.map(n => (
-                  <div key={n.id} className={`p-5 rounded-2xl border flex gap-4 items-start transition ${n.is_read ? 'bg-[#F8F6F2] border-black/5 opacity-70' : 'bg-white border-[#f97316]/30 shadow-sm'}`}>
+                  <div key={n.id} className={`p-5 rounded-2xl border flex gap-4 items-start transition ${n.is_read ? 'bg-[#F8F6F2] border-black/5 opacity-70' : 'bg-white border-primary/30 shadow-sm'}`}>
                     <div className="shrink-0 mt-1">
                       {n.is_read ? (
                         <CheckCircle size={24} className="text-green-500/50" />
                       ) : (
-                        <div className="w-6 h-6 rounded-full bg-[#f97316]/20 flex items-center justify-center">
-                          <div className="w-2.5 h-2.5 rounded-full bg-[#f97316]"></div>
+                        <div className="w-6 h-6 rounded-full bg-error/20 flex items-center justify-center">
+                          <div className="w-2.5 h-2.5 rounded-full bg-error"></div>
                         </div>
                       )}
                     </div>

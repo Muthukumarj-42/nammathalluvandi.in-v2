@@ -127,7 +127,7 @@ export default function CartPage() {
 
           {/* Checkout Form */}
           <div className="lg:col-span-5">
-            <div className="bg-white p-6 rounded-2xl border border-[#f97316]/10 shadow-premium-dark sticky top-24">
+            <div className="bg-white p-6 rounded-2xl border border-primary/10 shadow-premium-dark sticky top-24">
               <h2 className="font-display text-2xl uppercase tracking-wide border-b border-[#e5e0d8] pb-3 mb-4">
                 Order Summary
               </h2>
