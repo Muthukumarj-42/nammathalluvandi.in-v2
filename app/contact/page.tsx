@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useEffect } from "react";
 import Link from "next/link";
-import { MapPin, MessageCircle, PhoneCall } from "lucide-react";
+import { MapPin, MessageCircle, PhoneCall, Clock, Zap, Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   CALL_PHONE,
@@ -524,311 +524,314 @@ export default function ContactPage() {
     }
     
     const waUrl = buildWAUrl(WA_NUMBER, rentCompiledMessage);
-    window.open(waUrl, "_blank");
+    if (typeof window !== "undefined") {
+      window.open(waUrl, "_blank");
+    }
   };
 
-  const infoCards = [
-    [
-      PhoneCall,
-      "Phone",
-      "அழைக்க",
-      <a
-        href={`tel:${CALL_PHONE}`}
-        key="phone-link"
-        className="hover:text-primary transition font-mono"
-      >
-        {DISPLAY_CALL_PHONE}
-      </a>,
-    ],
-    [
-      MessageCircle,
-      "WhatsApp",
-      "வாட்ஸ்அப்",
-      <a
-        href={`https://wa.me/${WA_NUMBER}`}
-        target="_blank"
-        key="wa-link"
-        className="hover:text-primary transition font-mono"
-      >
-        {DISPLAY_RENTAL_WHATSAPP}
-      </a>,
-    ],
-  ] as const;
-
   return (
-    <main className="bg-[#F8F6F2] pt-16 md:pt-28">
-      {/* Page Header */}
-      <section className="pb-12 pt-24 md:pb-16 md:pt-0">
-        <div className="site-container">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-primary">
-            <Text en="Contact" ta="தொடர்பு கொள்ள" />
+    <main className="bg-[#0a0a08] pt-20">
+      {/* Hero Section */}
+      <section className="relative min-h-[50vh] flex flex-col justify-center items-center text-center px-6 py-20 border-b border-[#ffb690]/10 overflow-hidden bg-[#160c06]">
+        <div className="absolute inset-0 opacity-10 map-grid"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#0a0a08] to-[#0a0a08]"></div>
+        <div className="relative z-10 max-w-4xl site-container">
+          <p className="font-sans text-xs font-bold uppercase tracking-[0.2em] text-[#ffb690] mb-3">
+            <Text en="GET IN TOUCH" ta="தொடர்பு கொள்ள" />
           </p>
-          <h1 className="mt-3 max-w-4xl font-display text-5xl uppercase leading-none text-ink md:text-7xl">
-            <Text
-              en="Contact Us — Coimbatore Tamil Nadu"
-              ta="தொடர்பு கொள்ளுங்கள் — கோயம்புத்தூர்"
-            />
+          <h1 className="font-display text-5xl md:text-7xl uppercase mb-6 tracking-tighter leading-none text-ink">
+            <Text en="CONNECT WITH THE STREETS" ta="எங்களுடன் இணையுங்கள்" />
           </h1>
-          <p className="mt-6 max-w-[680px] text-lg leading-8 text-muted">
-            <Text
-              en="Reach out to us for premium food cart rentals and custom manufacturing in Coimbatore."
-              ta="கோயம்புத்தூரில் தள்ளுவண்டி வாடகை மற்றும் பிரத்யேக வண்டிகள் தயாரிக்க எங்களை தொடர்பு கொள்ளவும்."
+          <p className="font-sans text-lg text-muted max-w-2xl mx-auto mb-8">
+            <Text 
+              en="Experience the heart of local commerce. Whether you're looking to partner, book a rental, or custom-design a cart, we're one message away." 
+              ta="உள்ளூர் வணிகத்தின் இதயத்தை அனுபவியுங்கள். எங்களுடன் இணைய, தள்ளுவண்டி வாடகைக்கு எடுக்க அல்லது பிரத்யேக வண்டி வடிவமைக்க, ஒரு குறுஞ்செய்தி போதும்." 
             />
           </p>
+          <a 
+            href={`https://wa.me/${WA_NUMBER}`}
+            target="_blank"
+            className="inline-flex items-center gap-3 bg-[#1c110b] text-[#ffb690] hover:text-[#f6ded3] px-8 py-4 font-display text-xl hover:bg-[#45362f] transition-all active:scale-95 border border-[#ffb690]/20"
+          >
+            <MessageCircle size={20} className="shrink-0" />
+            <Text en="CHAT ON WHATSAPP" ta="வாட்ஸ்அப்பில் சாட் செய்ய" />
+          </a>
         </div>
       </section>
 
-      {/* Main Info Cards */}
-      <section className="pb-10">
-        <div className="site-container grid items-stretch gap-4 md:grid-cols-3 md:gap-6">
-          {infoCards.map(([Icon, title, tamilTitle, renderContent]) => (
-            <div
-              key={title}
-              className="flex h-full flex-col justify-between rounded-2xl border border-black/10 bg-white p-5 shadow-sm"
-            >
-              <div>
-                <Icon className="text-primary" size={24} />
-                <h2 className="mt-4 font-display text-3xl uppercase text-ink">
-                  <Text en={title} ta={tamilTitle} />
-                </h2>
-                <div className="mt-2 text-sm font-semibold text-muted-foreground">
-                  {renderContent}
-                </div>
-              </div>
-            </div>
-          ))}
+      {/* Business Hours Strip */}
+      <div className="bg-[#160c06] py-4 border-y border-[#ffb690]/10">
+        <div className="site-container flex flex-wrap justify-between items-center gap-4 text-xs font-bold tracking-widest text-[#e0c0b1]">
+          <div className="flex items-center gap-2">
+            <Clock size={16} className="text-[#ffb690]" />
+            <Text en="OPERATING HOURS: MON-SUN 09:00 AM - 10:00 PM" ta="செயல்படும் நேரம்: திங்கள்-ஞாயிறு காலை 09:00 - இரவு 10:00" />
+          </div>
+          <div className="hidden md:block h-4 w-[1px] bg-[#ffb690]/20"></div>
+          <div className="flex items-center gap-2">
+            <Zap size={16} className="text-[#ffb690]" />
+            <Text en="RESPONSE TIME: WITHIN 15 MINUTES" ta="பதில் அளிக்கும் நேரம்: 15 நிமிடங்களுக்குள்" />
+          </div>
+          <div className="hidden md:block h-4 w-[1px] bg-[#ffb690]/20"></div>
+          <div className="flex items-center gap-2">
+            <Truck size={16} className="text-[#ffb690]" />
+            <Text en="SERVING COIMBATORE & TIRUPPUR" ta="சேவை இடம்: கோயம்புத்தூர் & திருப்பூர்" />
+          </div>
+        </div>
+      </div>
 
-          {/* Physical Address Card */}
-          <div className="flex h-full flex-col justify-between rounded-2xl border border-black/10 bg-white p-5 shadow-sm">
-            <div>
-              <MapPin className="text-primary" size={24} />
-              <h2 className="mt-4 font-display text-3xl uppercase text-ink">
-                <span className="en">D. Nagaraj Thalluvandi — Ondipudur</span>
-                <span className="ta tamil-text">D. நாகராஜ் தளவண்டி — ஒண்டிப்புதூர்</span>
-              </h2>
-              <div className="mt-2 text-sm leading-6 text-muted-foreground">
-                <div className="en">
-                  6 A, Aruljothipuram Jallimedu,
-                  <br />
-                  Ondipudur, Coimbatore,
-                  <br />
-                  Tamil Nadu — 641016
-                  <br />
-                  D. Nagaraj Thallu Vandi — 30+ Years
-                </div>
-                <div className="ta tamil-text">
-                  6 A, அருள்ஜோதிபுரம் ஜல்லிமேடு,
-                  <br />
-                  ஒண்டிப்புதூர், கோயம்புத்தூர்,
-                  <br />
-                  தமிழ்நாடு — 641016
-                  <br />
-                  D. நாகராஜ் தளவண்டி — 30+ ஆண்டுகள்
-                </div>
+      {/* Contact Cards Grid */}
+      <section className="site-container py-16">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Phone Card */}
+          <div className="bg-[#291d16] border border-[#ffb690]/15 p-8 group hover:border-[#ffb690]/40 transition-all duration-300">
+            <div className="text-[#ffb690] mb-6">
+              <PhoneCall size={36} />
+            </div>
+            <h3 className="font-display text-2xl uppercase mb-2 tracking-wider text-ink">
+              <Text en="DIRECT LINE" ta="நேரடி அழைப்பு" />
+            </h3>
+            <p className="font-sans text-sm text-[#e0c0b1] mb-6">
+              <Text en="Immediate assistance for bookings and order inquiries." ta="முன்பதிவுகள் மற்றும் ஆர்டர் விசாரணைகளுக்கு உடனடியாக அழைக்கவும்." />
+            </p>
+            <a 
+              href={`tel:${CALL_PHONE}`}
+              className="font-display text-3xl text-secondary hover:text-[#ffdd75] transition-colors"
+            >
+              {DISPLAY_CALL_PHONE}
+            </a>
+          </div>
+
+          {/* WhatsApp Card */}
+          <div className="bg-[#291d16] border border-[#ffb690]/15 p-8 group hover:border-[#ffb690]/40 transition-all duration-300 relative overflow-hidden">
+            <div className="absolute top-0 right-0 p-4">
+              <div className="bg-[#ffb690]/10 text-[#ffb690] px-2 py-1 text-[10px] font-bold tracking-widest uppercase">
+                <Text en="FASTEST" ta="மிக விரைவு" />
               </div>
             </div>
-            <div className="mt-4">
-              <Button
-                asChild
-                variant="outline"
-                className="border-primary text-primary hover:bg-error/5 w-full text-xs font-bold uppercase tracking-wider h-10"
-              >
-                <a
-                  href="https://maps.app.goo.gl/mdeWyjcpqBQRVzR46"
-                  target="_blank"
-                >
-                  <span className="en">Get Directions →</span>
-                  <span className="ta tamil-text">வழித்தடம் பெற →</span>
-                </a>
-              </Button>
+            <div className="text-[#ffb690] mb-6">
+              <MessageCircle size={36} />
             </div>
+            <h3 className="font-display text-2xl uppercase mb-2 tracking-wider text-ink">
+              <Text en="WHATSAPP CHAT" ta="வாட்ஸ்அப் சாட்" />
+            </h3>
+            <p className="font-sans text-sm text-[#e0c0b1] mb-6">
+              <Text en="Share locations, send photos, and get instant updates." ta="இருப்பிடத்தை பகிர, புகைப்படங்கள் அனுப்ப மற்றும் உடனடி விவரங்கள் பெற." />
+            </p>
+            <a 
+              href={`https://wa.me/${WA_NUMBER}`}
+              target="_blank"
+              className="font-display text-3xl text-secondary hover:text-[#ffdd75] transition-colors font-mono"
+            >
+              {DISPLAY_RENTAL_WHATSAPP}
+            </a>
+          </div>
+
+          {/* Physical Address / Headquarters Card */}
+          <div className="bg-[#291d16] border border-[#ffb690]/15 p-8 group hover:border-[#ffb690]/40 transition-all duration-300">
+            <div className="text-[#ffb690] mb-6">
+              <MapPin size={36} />
+            </div>
+            <h3 className="font-display text-2xl uppercase mb-2 tracking-wider text-ink">
+              <Text en="HEADQUARTERS" ta="தலைமையகம்" />
+            </h3>
+            <p className="font-sans text-sm text-[#e0c0b1] mb-4">
+              <Text en="D. Nagaraj Thalluvandi — Ondipudur (30+ Years)" ta="D. நாகராஜ் தள்ளுவண்டி — ஒண்டிப்புதூர் (30+ ஆண்டுகள்)" />
+            </p>
+            <div className="font-sans text-xs leading-6 text-[#e0c0b1]/80 mb-6">
+              <div className="en">
+                6 A, Aruljothipuram Jallimedu, Ondipudur, Coimbatore, Tamil Nadu — 641016
+              </div>
+              <div className="ta tamil-text">
+                6 A, அருள்ஜோதிபுரம் ஜல்லிமேடு, ஒண்டிப்புதூர், கோயம்புத்தூர், தமிழ்நாடு — 641016
+              </div>
+            </div>
+            <a 
+              href="https://maps.app.goo.gl/mdeWyjcpqBQRVzR46"
+              target="_blank"
+              className="font-display text-sm tracking-wider text-secondary hover:text-[#ffdd75] border-b border-secondary/30 pb-1 transition-all"
+            >
+              <Text en="GET DIRECTIONS →" ta="வழித்தடம் பெற →" />
+            </a>
           </div>
         </div>
       </section>
 
-      {/* WhatsApp Booking Interactive Form */}
-      <section id="enquiry-form" className="py-12 bg-white border-t border-black/5">
-        <div className="site-container max-w-3xl">
-          <div className="rounded-2xl border border-black/10 bg-[#fffdf7] p-6 md:p-10 shadow-premium flex flex-col gap-6">
+      {/* Message and Map Section */}
+      <section className="site-container py-16 grid grid-cols-1 lg:grid-cols-2 gap-12 items-stretch border-t border-[#ffb690]/10">
+        {/* Form Column */}
+        <div className="flex flex-col justify-between">
+          <div>
+            <h2 className="font-display text-4xl uppercase mb-4 text-ink">
+              <Text en="SEND US A MESSAGE" ta="விவரங்களை அனுப்பவும்" />
+            </h2>
+            <p className="font-sans text-sm text-[#e0c0b1] mb-8">
+              <Text 
+                en="For business inquiries, vendor partnerships, or rentals, please fill out the form below. Our team will reach out within 24 hours." 
+                ta="தொழில் விசாரணைகள், கூட்டாண்மை அல்லது தள்ளுவண்டி வாடகைகளுக்கு, கீழே உள்ள படிவத்தை நிரப்பவும். எங்கள் குழு 24 மணி நேரத்திற்குள் உங்களைத் தொடர்பு கொள்ளும்." 
+              />
+            </p>
             
-            <div className="text-center">
-              <h2 className="font-display text-4xl uppercase leading-none text-ink">
-                <Text en="Rent a Food Cart" ta="உங்களின் விவரங்கள்" />
-              </h2>
-              <p className="mt-1 text-sm text-error font-bold uppercase tracking-wider">
-                <Text en="Direct WhatsApp Connection" ta="வாட்ஸ்அப் நேரடி முன்பதிவு" />
-              </p>
-            </div>
+            <form onSubmit={handleRentSubmit} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Field 1: Name */}
+                <div className="space-y-2">
+                  <label htmlFor="name" className="text-xs font-bold tracking-widest text-[#e0c0b1] block">
+                    <Text en="FULL NAME *" ta="முழு பெயர் *" />
+                  </label>
+                  <input
+                    type="text"
+                    id="name"
+                    required
+                    value={rentFormData.name}
+                    onChange={handleRentInputChange}
+                    placeholder={lang === "ta" ? "உங்கள் முழு பெயர்" : "Karthik Raja"}
+                    className="w-full bg-[#251913] border-0 border-b border-[#e0c0b1]/30 py-3 px-3 text-[#f6ded3] placeholder-[#e0c0b1]/40 focus:border-[#f97316] transition-colors focus:ring-0 focus:outline-none"
+                  />
+                </div>
 
-            <form onSubmit={handleRentSubmit} className="space-y-4">
-              
-              {/* Field 1: Name */}
-              <div className="flex flex-col">
-                <label htmlFor="name" className="text-sm font-semibold mb-1 block">
-                  <Text en="Full Name *" ta="பெயர் *" />
-                </label>
-                <input
-                  suppressHydrationWarning
-                  type="text"
-                  id="name"
-                  required
-                  value={rentFormData.name}
-                  onChange={handleRentInputChange}
-                  placeholder={lang === "ta" ? "உங்கள் முழு பெயர்" : "Enter your full name"}
-                  className="w-full h-12 border border-[#e5e0d8] focus:border-primary focus:ring-2 focus:ring-primary/40 rounded-xl px-4 bg-white text-base outline-none transition"
-                />
-              </div>
-
-              {/* Field 2: Phone */}
-              <div className="flex flex-col">
-                <label htmlFor="phone" className="text-sm font-semibold mb-1 block">
-                  <Text en="Phone Number *" ta="கைபேசி எண் *" />
-                </label>
-                <input
-                  suppressHydrationWarning
-                  type="tel"
-                  id="phone"
-                  required
-                  value={rentFormData.phone}
-                  onChange={handleRentInputChange}
-                  placeholder={lang === "ta" ? "கைபேசி எண் (10 இலக்கங்கள்)" : "Enter your mobile number"}
-                  className={`w-full h-12 border focus:ring-2 rounded-xl px-4 bg-white text-base outline-none transition ${
-                    phoneError
-                      ? "border-red-500 focus:border-red-500 focus:ring-red-500/40"
-                      : "border-[#e5e0d8] focus:border-primary focus:ring-primary/40"
-                  }`}
-                />
-                {phoneError && (
-                  <span className="text-xs text-red-500 mt-1 font-semibold">
-                    {phoneError}
-                  </span>
-                )}
-              </div>
-
-              {/* Field 3: Business Type Dropdown */}
-              <div className="flex flex-col">
-                <label htmlFor="businessType" className="text-sm font-semibold mb-1 block">
-                  <Text en="Business Type *" ta="தொழில் வகை *" />
-                </label>
-                <select
-                  suppressHydrationWarning
-                  id="businessType"
-                  value={rentFormData.businessType}
-                  onChange={handleRentInputChange}
-                  className="w-full h-12 border border-[#e5e0d8] focus:border-primary focus:ring-2 focus:ring-primary/40 rounded-xl px-4 bg-white text-sm outline-none transition cursor-pointer"
-                >
-                  {lang === "ta" ? (
-                    <>
-                      <option value="Tea">டீ / காபி கடை</option>
-                      <option value="Juice">ஜூஸ் / மில்க்ஷேக் வண்டி</option>
-                      <option value="FastFood">ஃபாஸ்ட் ஃபுட் / காரசார கடை</option>
-                      <option value="Snacks">ஸ்நாக்ஸ் / சாட் வண்டி</option>
-                      <option value="Other">மற்ற உணவு தொழில்</option>
-                    </>
-                  ) : (
-                    <>
-                      <option value="Tea">Tea / Coffee Stall</option>
-                      <option value="Juice">Juice / Milkshake Cart</option>
-                      <option value="FastFood">Fast Food / Chinese Stall</option>
-                      <option value="Snacks">Snacks / Chaat Cart</option>
-                      <option value="Other">Other Business</option>
-                    </>
+                {/* Field 2: Phone */}
+                <div className="space-y-2">
+                  <label htmlFor="phone" className="text-xs font-bold tracking-widest text-[#e0c0b1] block">
+                    <Text en="PHONE NUMBER *" ta="கைபேசி எண் *" />
+                  </label>
+                  <input
+                    type="tel"
+                    id="phone"
+                    required
+                    value={rentFormData.phone}
+                    onChange={handleRentInputChange}
+                    placeholder={lang === "ta" ? "கைபேசி எண் (10 இலக்கங்கள்)" : "+91 00000 00000"}
+                    className={`w-full bg-[#251913] border-0 border-b py-3 px-3 text-[#f6ded3] placeholder-[#e0c0b1]/40 focus:ring-0 focus:outline-none transition-colors ${
+                      phoneError
+                        ? "border-red-500 focus:border-red-500"
+                        : "border-[#e0c0b1]/30 focus:border-[#f97316]"
+                    }`}
+                  />
+                  {phoneError && (
+                    <span className="text-xs text-red-400 mt-1 block font-semibold">
+                      {phoneError}
+                    </span>
                   )}
-                </select>
+                </div>
               </div>
 
-              {/* Field 4: What do you need Dropdown */}
-              <div className="flex flex-col">
-                <label htmlFor="need" className="text-sm font-semibold mb-1 block">
-                  <Text en="What do you need? *" ta="உங்களுக்கு என்ன தேவை? *" />
-                </label>
-                <select
-                  suppressHydrationWarning
-                  id="need"
-                  value={rentFormData.need}
-                  onChange={handleRentInputChange}
-                  className="w-full h-12 border border-[#e5e0d8] focus:border-primary focus:ring-2 focus:ring-primary/40 rounded-xl px-4 bg-white text-sm outline-none transition cursor-pointer"
-                >
-                  {lang === "ta" ? (
-                    <>
-                      <option value="rent">தள்ளுவண்டி வாடகைக்கு எடுக்க</option>
-                      <option value="custom">பிரத்யேக வண்டி தயாரிக்க/வாங்க</option>
-                      <option value="other">பொதுவான கேள்விகள்</option>
-                    </>
-                  ) : (
-                    <>
-                      <option value="rent">Rent a Food Cart</option>
-                      <option value="custom">Custom Cart Design/Order</option>
-                      <option value="other">General Question</option>
-                    </>
-                  )}
-                </select>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Field 3: Business Type */}
+                <div className="space-y-2">
+                  <label htmlFor="businessType" className="text-xs font-bold tracking-widest text-[#e0c0b1] block">
+                    <Text en="BUSINESS TYPE *" ta="தொழில் வகை *" />
+                  </label>
+                  <select
+                    id="businessType"
+                    value={rentFormData.businessType}
+                    onChange={handleRentInputChange}
+                    className="w-full bg-[#251913] border-0 border-b border-[#e0c0b1]/30 py-3 px-2 text-[#f6ded3] focus:border-[#f97316] transition-colors focus:ring-0 focus:outline-none cursor-pointer"
+                  >
+                    {lang === "ta" ? (
+                      <>
+                        <option value="Tea">டீ / காபி கடை</option>
+                        <option value="Juice">ஜூஸ் / மில்க்ஷேக் வண்டி</option>
+                        <option value="FastFood">ஃபாஸ்ட் ஃபுட் / காரசார கடை</option>
+                        <option value="Snacks">ஸ்நாக்ஸ் / சாட் வண்டி</option>
+                        <option value="Other">மற்ற உணவு தொழில்</option>
+                      </>
+                    ) : (
+                      <>
+                        <option value="Tea">Tea / Coffee Stall</option>
+                        <option value="Juice">Juice / Milkshake Cart</option>
+                        <option value="FastFood">Fast Food / Chinese Stall</option>
+                        <option value="Snacks">Snacks / Chaat Cart</option>
+                        <option value="Other">Other Business</option>
+                      </>
+                    )}
+                  </select>
+                </div>
+
+                {/* Field 4: Need */}
+                <div className="space-y-2">
+                  <label htmlFor="need" className="text-xs font-bold tracking-widest text-[#e0c0b1] block">
+                    <Text en="WHAT DO YOU NEED? *" ta="உங்களுக்கு என்ன தேவை? *" />
+                  </label>
+                  <select
+                    id="need"
+                    value={rentFormData.need}
+                    onChange={handleRentInputChange}
+                    className="w-full bg-[#251913] border-0 border-b border-[#e0c0b1]/30 py-3 px-2 text-[#f6ded3] focus:border-[#f97316] transition-colors focus:ring-0 focus:outline-none cursor-pointer"
+                  >
+                    {lang === "ta" ? (
+                      <>
+                        <option value="rent">தள்ளுவண்டி வாடகைக்கு எடுக்க</option>
+                        <option value="custom">பிரத்யேக வண்டி தயாரிக்க/வாங்க</option>
+                        <option value="other">பொதுவான கேள்விகள்</option>
+                      </>
+                    ) : (
+                      <>
+                        <option value="rent">Rent a Food Cart</option>
+                        <option value="custom">Custom Cart Design/Order</option>
+                        <option value="other">General Question</option>
+                      </>
+                    )}
+                  </select>
+                </div>
               </div>
 
-              {/* Field 5: Location in Coimbatore */}
-              <div className="flex flex-col">
-                <label htmlFor="location" className="text-sm font-semibold mb-1 block">
-                  <Text en="Location in Coimbatore *" ta="இடம் (கோவையில்) *" />
+              {/* Field 5: Location */}
+              <div className="space-y-2">
+                <label htmlFor="location" className="text-xs font-bold tracking-widest text-[#e0c0b1] block">
+                  <Text en="LOCATION IN COIMBATORE *" ta="இடம் (கோவையில்) *" />
                 </label>
                 <input
-                  suppressHydrationWarning
                   type="text"
                   id="location"
                   required
                   value={rentFormData.location}
                   onChange={handleRentInputChange}
                   placeholder={lang === "ta" ? "எ.கா: ஒண்டிப்புதூர், காந்திபுரம்" : "e.g. Ondipudur, Gandhipuram"}
-                  className="w-full h-12 border border-[#e5e0d8] focus:border-primary focus:ring-2 focus:ring-primary/40 rounded-xl px-4 bg-white text-base outline-none transition"
+                  className="w-full bg-[#251913] border-0 border-b border-[#e0c0b1]/30 py-3 px-3 text-[#f6ded3] placeholder-[#e0c0b1]/40 focus:border-[#f97316] transition-colors focus:ring-0 focus:outline-none"
                 />
               </div>
 
               {/* Field 6: Details Message */}
-              <div className="flex flex-col">
-                <label htmlFor="details" className="text-sm font-semibold mb-1 block">
-                  <Text en="Enquiry Message (Optional)" ta="விவரங்கள் / கேள்விகள் (விருப்பம்)" />
+              <div className="space-y-2">
+                <label htmlFor="details" className="text-xs font-bold tracking-widest text-[#e0c0b1] block">
+                  <Text en="ENQUIRY MESSAGE (OPTIONAL)" ta="விவரங்கள் / கேள்விகள் (விருப்பம்)" />
                 </label>
                 <textarea
-                  suppressHydrationWarning
                   id="details"
                   rows={4}
                   value={rentFormData.details}
                   onChange={handleRentInputChange}
                   placeholder={lang === "ta" ? "வண்டி அளவு, குறிப்பிட்ட தேதி, அல்லது உங்கள் கேள்விகள்..." : "Cart size preference, required dates, or other questions..."}
-                  className="w-full border border-[#e5e0d8] focus:border-primary focus:ring-2 focus:ring-primary/40 rounded-xl p-4 bg-white text-base outline-none transition resize-none"
+                  className="w-full bg-[#251913] border-0 border-b border-[#e0c0b1]/30 py-3 px-3 text-[#f6ded3] placeholder-[#e0c0b1]/40 focus:border-[#f97316] transition-colors focus:ring-0 focus:outline-none resize-none"
                 />
               </div>
 
               {/* Submit button */}
-              <Button
-                suppressHydrationWarning
+              <button
                 type="submit"
                 disabled={!isRentFormValid}
-                className={`w-full h-14 mt-4 bg-[#25D366] hover:bg-[#20ba5a] text-white rounded-2xl font-bold text-base flex items-center justify-center gap-2 transition duration-200 ${
+                className={`w-full md:w-auto bg-[#f97316] hover:bg-[#e2640e] text-white px-12 py-4 font-display text-2xl tracking-wider uppercase active:scale-95 transition-all ${
                   !isRentFormValid ? "opacity-40 cursor-not-allowed" : ""
                 }`}
               >
-                <MessageCircle size={20} className="shrink-0" />
-                <Text en=" WhatsApp →" ta=" WhatsApp →" />
-              </Button>
-
+                <Text en="SUBMIT TO WHATSAPP →" ta="வாட்ஸ்அப்பிற்கு அனுப்பவும் →" />
+              </button>
             </form>
           </div>
         </div>
-      </section>
 
-      {/* Google Maps Embed Section */}
-      <section className="pb-16 pt-8">
-        <div className="site-container">
-          <h2 className="text-sm font-bold uppercase tracking-widest text-[#f97316] mb-3 text-center md:text-left">
-            <Text en="📍 Our Location — Ondipudur, Coimbatore" ta="📍 எங்கள் இருப்பிடம் — ஒண்டிப்புதூர், கோயம்புத்தூர்" />
-          </h2>
-          <div className="relative w-full overflow-hidden rounded-2xl border border-[rgba(249,115,22,0.3)] bg-white h-[260px] md:h-[420px]">
-            <iframe
-              title="Thalluvandi location - Ondipudur Coimbatore"
-              src="https://maps.google.com/maps?q=11.0072893,77.057818&z=17&output=embed"
-              className="absolute inset-0 h-full w-full rounded-lg"
-              loading="lazy"
-            />
+        {/* Map Column */}
+        <div className="relative h-full min-h-[400px] border border-[#ffb690]/25 overflow-hidden bg-[#291d16]">
+          <iframe
+            title="Thalluvandi location - Ondipudur Coimbatore"
+            src="https://maps.google.com/maps?q=11.0072893,77.057818&z=17&output=embed"
+            className="absolute inset-0 h-full w-full opacity-60 grayscale invert contrast-125 border-none"
+            loading="lazy"
+          />
+          {/* Editorial grid overlay for map */}
+          <div className="absolute inset-0 pointer-events-none border-[12px] border-[#0a0a08]"></div>
+          <div className="absolute inset-0 pointer-events-none opacity-20">
+            <div className="w-full h-full border border-[#f97316]"></div>
           </div>
         </div>
       </section>

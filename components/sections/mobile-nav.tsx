@@ -9,13 +9,13 @@ export function MobileNav() {
 
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-50 border-t border-gray-100 bg-white px-2 pb-[env(safe-area-inset-bottom)] md:hidden"
+      className="fixed inset-x-0 bottom-0 z-50 border-t border-outline-variant/20 bg-surface/95 backdrop-blur-md px-2 pb-[env(safe-area-inset-bottom)] md:hidden"
       aria-label="Mobile navigation"
     >
       <div className="flex h-[60px] items-stretch justify-around max-w-md mx-auto relative">
         <Link
           href="/"
-          className={`flex flex-col items-center justify-center gap-1 text-[10px] font-bold w-16 ${pathname === "/" ? "text-[#dc2626]" : "text-gray-500"}`}
+          className={`flex flex-col items-center justify-center gap-1 text-[10px] font-bold w-16 transition-colors ${pathname === "/" ? "text-primary" : "text-on-surface-variant/60 hover:text-primary"}`}
         >
           <Home className="w-5 h-5" />
           <span>Home</span>
@@ -23,9 +23,8 @@ export function MobileNav() {
 
         <Link
           href="/explore"
-          className={`flex flex-col items-center justify-center gap-1 text-[10px] font-bold w-16 ${pathname === "/explore" ? "text-[#dc2626]" : "text-gray-500"}`}
+          className={`flex flex-col items-center justify-center gap-1 text-[10px] font-bold w-16 transition-colors ${pathname === "/explore" ? "text-primary" : "text-on-surface-variant/60 hover:text-primary"}`}
         >
-          {/* Using a generic box/browse icon */}
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5">
             <rect x="3" y="3" width="7" height="7" rx="1" />
             <rect x="14" y="3" width="7" height="7" rx="1" />
@@ -35,32 +34,32 @@ export function MobileNav() {
           <span>Browse</span>
         </Link>
 
-        {/* Sell Button - Elevated Circular */}
+        {/* Sell/List Button - Elevated Circular */}
         <div className="flex flex-col items-center justify-start w-16 relative">
           <Link
-            href="/sell"
+            href="/publish"
             className="absolute -top-5 flex flex-col items-center justify-center"
           >
-            <div className="w-12 h-12 bg-[#dc2626] text-white rounded-full flex items-center justify-center shadow-md border-4 border-white">
+            <div className="w-12 h-12 bg-primary-container text-on-primary-container rounded-full flex items-center justify-center shadow-md border-4 border-surface transition-transform active:scale-95">
               <Plus className="w-6 h-6" strokeWidth={3} />
             </div>
-            <span className={`text-[10px] font-bold mt-1 ${pathname === "/sell" ? "text-[#dc2626]" : "text-gray-500"}`}>
-              Sell
+            <span className={`text-[10px] font-bold mt-1 ${pathname === "/publish" ? "text-primary" : "text-on-surface-variant/60"}`}>
+              List
             </span>
           </Link>
         </div>
 
         <Link
-          href="/chats"
-          className={`flex flex-col items-center justify-center gap-1 text-[10px] font-bold w-16 ${pathname === "/chats" ? "text-[#dc2626]" : "text-gray-500"}`}
+          href="/contact"
+          className={`flex flex-col items-center justify-center gap-1 text-[10px] font-bold w-16 transition-colors ${pathname === "/contact" ? "text-primary" : "text-on-surface-variant/60 hover:text-primary"}`}
         >
           <MessageSquare className="w-5 h-5" />
-          <span>Chats</span>
+          <span>Contact</span>
         </Link>
 
         <Link
           href="/profile"
-          className={`flex flex-col items-center justify-center gap-1 text-[10px] font-bold w-16 ${pathname === "/profile" ? "text-[#dc2626]" : "text-gray-500"}`}
+          className={`flex flex-col items-center justify-center gap-1 text-[10px] font-bold w-16 transition-colors ${pathname === "/profile" ? "text-primary" : "text-on-surface-variant/60 hover:text-primary"}`}
         >
           <User className="w-5 h-5" />
           <span>Profile</span>

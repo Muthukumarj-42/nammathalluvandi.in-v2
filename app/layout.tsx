@@ -7,9 +7,16 @@ import { Footer } from "@/components/sections/footer";
 import { MobileNav } from "@/components/sections/mobile-nav";
 import { Navbar } from "@/components/sections/navbar";
 import { WhatsAppFloat } from "@/components/sections/whatsapp-float";
-import { Plus_Jakarta_Sans, Noto_Sans_Tamil } from "next/font/google";
+import { Bebas_Neue, DM_Sans, Noto_Sans_Tamil } from "next/font/google";
 
-const plusJakartaSans = Plus_Jakarta_Sans({
+const bebasNeue = Bebas_Neue({
+  weight: "400",
+  subsets: ["latin"],
+  variable: "--font-bebas",
+  display: "swap",
+});
+
+const dmSans = DM_Sans({
   subsets: ["latin"],
   variable: "--font-jakarta",
   display: "swap",
@@ -93,12 +100,13 @@ export const metadata: Metadata = {
 };
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
   return (
-    <html lang="en" data-lang="en" className={`${plusJakartaSans.variable} ${notoTamil.variable}`}>
+    <html lang="en" data-lang="en" className={`dark ${bebasNeue.variable} ${dmSans.variable} ${notoTamil.variable}`}>
       <link rel="preconnect" href="https://www.google-analytics.com" />
       <link rel="preconnect" href="https://www.googletagmanager.com" />
       <link rel="dns-prefetch" href="https://www.google-analytics.com" />
       <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
-      <body className="font-sans antialiased">
+      <body className="font-sans antialiased text-on-surface bg-background">
+        <div className="noise-overlay" />
         {/* Google Analytics 4 Setup - REPLACE_THIS_WITH_YOUR_GA4_MEASUREMENT_ID */}
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-ZKJMPC7793"

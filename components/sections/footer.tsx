@@ -35,18 +35,13 @@ const groups = {
 
 export function Footer() {
   return (
-    <footer className="hidden md:block border-t border-outline-variant bg-surface pb-24 text-on-surface md:pb-0">
+    <footer className="hidden md:block border-t border-outline-variant/20 bg-surface pb-24 text-on-surface md:pb-0">
       <div className="site-container py-16">
         <div className="grid gap-10 lg:grid-cols-[1.1fr_2fr]">
           <div>
-            <Image
-              src="/brand/full-logo-with-background.webp"
-              alt="Thalluvandi food cart rental Tamil Nadu logo"
-              width={168}
-              height={82}
-              sizes="168px"
-              className="h-20 w-auto transition hover:scale-105"
-            />
+            <span className="font-display text-2xl font-black uppercase tracking-[0.15em] text-on-surface">
+              THALLUVANDI
+            </span>
             <p className="mt-6 max-w-sm text-sm leading-7 text-on-surface-variant">
               <span className="en">
                 Food cart rentals for Coimbatore vendors. Start your business with ease and low investment.
@@ -61,7 +56,7 @@ export function Footer() {
                 href="https://wa.me/918838292849"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="grid h-11 w-11 place-items-center rounded border border-outline-variant text-on-surface-variant hover:bg-surface-container transition"
+                className="grid h-11 w-11 place-items-center rounded-none border border-outline-variant/30 text-on-surface-variant hover:bg-surface-variant transition"
               >
                 <span className="sr-only">WhatsApp</span>
                 <svg className="h-5 w-5 fill-current" viewBox="0 0 24 24">
@@ -71,17 +66,17 @@ export function Footer() {
               {/* Phone Icon Link */}
               <a
                 href="tel:+919442763940"
-                className="grid h-11 w-11 place-items-center rounded border border-outline-variant text-on-surface-variant hover:bg-surface-container transition"
+                className="grid h-11 w-11 place-items-center rounded-none border border-outline-variant/30 text-on-surface-variant hover:bg-surface-variant transition"
               >
                 <span className="sr-only">Phone</span>
                 <Phone size={18} />
               </a>
-              {/* Instagram Icon Link - https://www.instagram.com/nammathalluvandi.in */}
+              {/* Instagram Icon Link */}
               <a
                 href="https://www.instagram.com/nammathalluvandi.in"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="grid h-11 w-11 place-items-center rounded border border-outline-variant text-on-surface-variant hover:bg-surface-container transition"
+                className="grid h-11 w-11 place-items-center rounded-none border border-outline-variant/30 text-on-surface-variant hover:bg-surface-variant transition"
               >
                 <span className="sr-only">Instagram</span>
                 <Instagram size={18} />
@@ -91,7 +86,7 @@ export function Footer() {
           <div className="grid gap-9 sm:grid-cols-3">
             {Object.entries(groups).map(([title, links]) => (
               <div key={title}>
-                <h3 className="text-xs font-bold uppercase tracking-[0.18em] text-primary">
+                <h3 className="font-display text-sm uppercase tracking-[0.18em] text-primary-container">
                   {title}
                 </h3>
                 <ul className="mt-5 space-y-3 text-sm text-on-surface-variant">
@@ -99,7 +94,7 @@ export function Footer() {
                     <li key={label}>
                       <Link
                         href={href}
-                        className="transition hover:text-primary"
+                        className="transition hover:text-primary-container"
                       >
                         <span className="en">{label}</span>
                         <span className="ta tamil-text">{tamil}</span>
@@ -111,16 +106,12 @@ export function Footer() {
             ))}
           </div>
         </div>
-        <div className="mt-14 flex flex-col gap-3 border-t border-outline-variant pt-6 text-xs uppercase tracking-[0.14em] text-on-surface-variant md:flex-row md:justify-between">
+        <div className="mt-14 flex flex-col gap-3 border-t border-outline-variant/20 pt-6 text-xs uppercase tracking-[0.14em] text-on-surface-variant md:flex-row md:justify-between">
           <div className="flex flex-col gap-1 normal-case tracking-normal">
-            <span className="uppercase tracking-[0.14em]">© 2026 Namma Thalluvandi</span>
+            <span className="font-display uppercase tracking-[0.14em] text-sm text-primary-container">© 2026 Namma Thalluvandi</span>
             <span>D. Nagaraj Thallu Vandi — 30+ Years of Trust</span>
             <span>Ondipudur, Coimbatore</span>
           </div>
-          <span>
-            <span className="en"></span>
-            <span className="ta tamil-text"></span>
-          </span>
         </div>
       </div>
     </footer>

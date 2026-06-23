@@ -99,21 +99,23 @@ export default function HowItWorksPage() {
   };
 
   return (
-    <main className="bg-[#F8F6F2] pt-0 md:pt-28">
+    <main className="bg-[#0a0a08] pt-20 pb-16">
+      <div className="noise-overlay"></div>
+      
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
 
-      <section className="pb-16 pt-12 md:pb-20 md:pt-0">
-        <div className="site-container">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-primary">
+      <section className="pb-16 pt-12 md:pb-20 md:pt-10">
+        <div className="site-container max-w-[1000px]">
+          <p className="font-display text-xs tracking-widest text-[#f97316] uppercase">
             <Text en="How It Works" ta="எப்படி வாடகைக்கு எடுப்பது?" />
           </p>
-          <h1 className="mt-3 max-w-4xl font-display text-6xl uppercase leading-none text-ink md:text-8xl">
+          <h1 className="mt-3 max-w-4xl font-display text-5xl uppercase leading-none text-on-surface md:text-7xl">
             <Text en="How to Rent a Food Cart from Thalluvandi" ta="எளிய முறையில் வாடகைக்கு தள்ளுவண்டி" />
           </h1>
-          <p className="mt-6 max-w-2xl text-lg leading-8 text-muted">
+          <p className="mt-6 max-w-2xl text-base leading-7 text-on-surface-variant">
             <Text en="Simple WhatsApp-first rental process. WhatsApp to book, same-day response. Food cart rentals in Coimbatore." ta="புதிய தொழில் தொடங்க நினைப்பவர்களுக்கு வாட்ஸ்அப் மூலம் எளிய மற்றும் விரைவான முன்பதிவு சேவை." />
           </p>
         </div>
@@ -122,14 +124,14 @@ export default function HowItWorksPage() {
       <section className="pb-20 md:pb-24">
         <div className="site-container max-w-[1000px]">
           <div className="relative">
-            <div className="absolute left-7 top-8 h-[calc(100%-64px)] w-px bg-black/12" />
+            <div className="absolute left-7 top-8 h-[calc(100%-64px)] w-px bg-[#f97316]/20" />
             {steps.map(([step, tamilStep], index) => (
               <Reveal key={step} className="relative grid grid-cols-[72px_1fr] gap-4 py-4 md:grid-cols-[92px_1fr] md:gap-6 md:py-6">
-                <div className="relative z-10 grid h-14 w-14 place-items-center rounded-full bg-primary font-display text-3xl text-white shadow-glow">
-                  {index + 1}
+                <div className="relative z-10 grid h-14 w-14 place-items-center rounded-none bg-[#f97316] font-display text-3xl text-[#0a0a08] font-bold">
+                  {String(index + 1).padStart(2, "0")}
                 </div>
-                <div className="rounded-2xl border border-black/10 bg-white p-6 shadow-sm">
-                  <h2 className="font-display text-3xl uppercase leading-none text-ink md:text-4xl">
+                <div className="rounded-none border border-outline-variant/20 bg-surface p-6">
+                  <h2 className="font-display text-2xl uppercase leading-none text-on-surface md:text-3xl">
                     <Text en={step} ta={tamilStep} />
                   </h2>
                 </div>
@@ -137,22 +139,24 @@ export default function HowItWorksPage() {
             ))}
           </div>
 
-          <div className="mt-10 grid gap-4 rounded-2xl border border-black/10 bg-white p-6 md:grid-cols-2 md:gap-6">
-            <div>
-              <MessageCircle className="text-primary" />
-              <h3 className="mt-4 font-display text-4xl uppercase text-ink">
+          <div className="mt-10 grid gap-4 rounded-none border border-outline-variant/20 bg-surface p-6 md:grid-cols-2 md:gap-6">
+            <div className="relative pl-6">
+              <div className="absolute left-0 top-0 w-1 h-full bg-[#f97316]" />
+              <MessageCircle className="text-[#f97316] mb-2" />
+              <h3 className="font-display text-xl uppercase text-on-surface tracking-wider">
                 <Text en="Pre-filled inquiry" ta="விரைவான தகவல்" />
               </h3>
-              <p className="mt-2 text-sm leading-7 text-muted">
+              <p className="mt-2 text-sm leading-6 text-on-surface-variant">
                 <Text en="Each cart opens WhatsApp with that cart name." ta="ஒவ்வொரு தள்ளுவண்டிக்கும் தனிப்பட்ட வாட்ஸ்அப் மெசேஜ் தயாராக இருக்கும்." />
               </p>
             </div>
-            <div>
-              <WalletCards className="text-primary" />
-              <h3 className="mt-4 font-display text-4xl uppercase text-ink">
+            <div className="relative pl-6">
+              <div className="absolute left-0 top-0 w-1 h-full bg-[#f97316]" />
+              <WalletCards className="text-[#f97316] mb-2" />
+              <h3 className="font-display text-xl uppercase text-on-surface tracking-wider">
                 <Text en="Clear deposit" ta="தெளிவான முன்பணம்" />
               </h3>
-              <p className="mt-2 text-sm leading-7 text-muted">
+              <p className="mt-2 text-sm leading-6 text-on-surface-variant">
                 <Text en="Deposit is confirmed before booking." ta="முன்பதிவு செய்வதற்கு முன்பே முன்பணத் தொகை தெளிவாகத் தெரிவிக்கப்படும்." />
               </p>
             </div>
@@ -162,21 +166,21 @@ export default function HowItWorksPage() {
 
       <section className="pb-24">
         <div className="site-container max-w-[1000px]">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-primary">FAQ</p>
-          <h2 className="mt-3 font-display text-5xl uppercase leading-none text-ink">
+          <p className="font-display text-xs tracking-widest text-[#f97316] uppercase">FAQ</p>
+          <h2 className="mt-3 font-display text-4xl uppercase leading-none text-on-surface">
             <Text en="Frequently Asked Questions" ta="அடிக்கடி கேட்கப்படும் கேள்விகள்" />
           </h2>
-          <div className="mt-8 divide-y divide-black/10 rounded-2xl border border-black/10 bg-white">
+          <div className="mt-8 divide-y divide-outline-variant/20 rounded-none border border-outline-variant/20 bg-surface">
             {faqs.map(([question, tamilQuestion, answer, tamilAnswer]) => (
-              <details key={question} className="group p-6 open:bg-[#F8F6F2]">
-                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-bold text-ink">
-                  <span className="font-display text-xl uppercase tracking-[0.14em] text-ink faq-question-title">
+              <details key={question} className="group p-6 open:bg-[#251913] transition-colors duration-300">
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-bold text-on-surface">
+                  <span className="font-display text-lg uppercase tracking-[0.14em] text-on-surface faq-question-title">
                     <Text en={question} ta={tamilQuestion} />
                   </span>
-                  <span className="text-xl text-primary group-open:hidden">+</span>
-                  <span className="hidden text-xl text-primary group-open:inline">−</span>
+                  <span className="text-xl text-[#f97316] group-open:hidden">+</span>
+                  <span className="hidden text-xl text-[#f97316] group-open:inline">−</span>
                 </summary>
-                <p className="mt-3 text-[0.95rem] leading-7 text-muted">
+                <p className="mt-3 text-sm leading-6 text-on-surface-variant">
                   <Text en={answer} ta={tamilAnswer} />
                 </p>
               </details>

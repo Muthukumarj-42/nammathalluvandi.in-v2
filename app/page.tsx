@@ -1,135 +1,173 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Search, MapPin, ChevronRight, PlusCircle, MoreHorizontal } from "lucide-react";
+import { Search, ChevronRight, MoreHorizontal, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { IconStove, IconTent, IconIceCream, IconCoffee, IconRickshaw, IconCheckCircle, IconMapPinRed, IconRupee, IconWhatsApp, IconSearchStove } from "@/components/ui/icons";
+import { IconStove, IconTent, IconIceCream, IconCoffee, IconRickshaw, IconMapPinRed, IconRupee, IconWhatsApp, IconSearchStove } from "@/components/ui/icons";
 
 export default function HomePage() {
   return (
-    <main className="min-h-screen bg-white pb-20 md:pb-10">
-      {/* Header Section */}
-      <section className="bg-[#0f5a34] pt-8 pb-6 px-4 rounded-b-[2rem] text-white">
-        <div className="site-container max-w-md mx-auto">
-          {/* Top Bar */}
-          <div className="flex justify-between items-center mb-6">
-            <h1 className="text-xl font-bold tracking-tight">Thallivandi</h1>
-            <button suppressHydrationWarning className="text-[10px] font-bold bg-[#e8f5e9] text-[#16a34a] px-3 py-1 rounded-full flex items-center gap-1">
-              <span className="w-3 h-3 rounded-full bg-[#16a34a] text-white flex items-center justify-center text-[8px]">EN</span>
-              EN / தமிழ்
-            </button>
-          </div>
+    <main className="min-h-screen bg-[#0a0a08] pb-20 md:pb-10 pt-16">
+      {/* Hero Section */}
+      <section className="relative overflow-hidden border-b border-outline-variant/20 pt-12 pb-16 px-4 md:px-8">
+        <div className="absolute inset-0 editorial-grid opacity-30"></div>
+        <div className="absolute inset-0 cinematic-vignette"></div>
 
-          <p className="text-[10px] font-bold tracking-widest text-white/80 uppercase mb-2 flex items-center gap-1">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3 h-3"><path d="M3 3h18v18H3z"/><path d="M3 9h18M9 21V9"/></svg>
-            FOOD CART MARKETPLACE
-          </p>
-          <h2 className="text-[28px] font-bold leading-[1.1] mb-3">
-            Find the Right Cart<br />for Your Business
-          </h2>
-          <p className="text-sm text-white/80 mb-6">
-            A wide range of food carts, premium models,<br />and verified sellers — all in one place.
+        <div className="site-container max-w-4xl mx-auto relative z-10 text-center flex flex-col items-center">
+          {/* Saffron tag */}
+          <span className="font-display text-sm tracking-[0.2em] text-[#f97316] bg-[#f97316]/10 px-4 py-1.5 uppercase mb-6 border border-[#f97316]/20">
+            ★ FOOD CART MARKETPLACE ★
+          </span>
+
+          <h1 className="font-display text-5xl md:text-8xl tracking-tight text-on-surface leading-none mb-6">
+            THALLUVANDI<br />
+            <span className="text-[#f97316]">PREMIUM RENTAL</span>
+          </h1>
+
+          <p className="font-body text-lg md:text-xl text-on-surface-variant max-w-xl mb-8 leading-relaxed">
+            Find the right cart for your street business. High quality, premium models, and verified vendors — active in Coimbatore and Tiruppur.
           </p>
 
-          {/* Location Bar */}
-          <div className="bg-[#1b6b40] rounded-xl p-3 flex justify-between items-center mb-4">
-            <div className="flex items-center gap-3">
-              <div className="bg-white/10 p-1.5 rounded-full">
-                <IconMapPinRed className="w-5 h-5" />
-              </div>
-              <div>
-                <p className="text-[10px] text-white/70">Delivering to</p>
-                <p className="font-semibold text-sm">Coimbatore, Tamil Nadu</p>
+          {/* Search bar & Location bar in editorial style */}
+          <form action="/explore" method="GET" className="w-full max-w-2xl bg-surface border border-outline-variant/30 p-2 flex flex-col md:flex-row gap-2">
+            <div className="relative flex-grow">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant/60 w-5 h-5" />
+              <input 
+                type="text" 
+                name="search"
+                placeholder="Search by cart type, features, or size..." 
+                className="w-full bg-[#160c06] text-on-surface border-none px-4 py-3 pl-10 text-sm outline-none placeholder:text-on-surface-variant/40"
+              />
+            </div>
+            
+            <div className="flex items-center bg-[#251913] px-4 py-2 border border-outline-variant/10 shrink-0 md:w-60">
+              <IconMapPinRed className="w-4 h-4 text-[#f97316] mr-2 shrink-0" />
+              <div className="flex flex-col text-left flex-grow">
+                <select 
+                  name="location"
+                  className="bg-transparent text-xs font-display tracking-wider text-on-surface uppercase outline-none w-full cursor-pointer appearance-none pr-4"
+                >
+                  <option value="all" className="bg-[#1c110b] text-[#f6ded3]">Coimbatore / Tiruppur</option>
+                  <option value="coimbatore" className="bg-[#1c110b] text-[#f6ded3]">Coimbatore</option>
+                  <option value="tiruppur" className="bg-[#1c110b] text-[#f6ded3]">Tiruppur</option>
+                </select>
               </div>
             </div>
-            <Link href="/explore" suppressHydrationWarning className="text-xs font-bold bg-[#dc2626] hover:bg-red-700 text-white px-4 py-2 rounded-lg shadow-sm">
-              Change
-            </Link>
-          </div>
 
-          {/* Search Bar */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
-            <input 
-              type="text" 
-              suppressHydrationWarning
-              placeholder="Search carts, type, or location..." 
-              className="w-full bg-white text-gray-900 rounded-xl py-3 pl-10 pr-4 shadow-sm outline-none placeholder:text-gray-400 text-sm"
-            />
-          </div>
+            <Button type="submit" className="bg-[#f97316] text-[#0a0a08] hover:bg-[#f97316]/95 border-none rounded-none font-display uppercase tracking-wider text-sm py-3 px-8">
+              Search
+            </Button>
+          </form>
         </div>
       </section>
 
-      <div className="site-container max-w-md mx-auto px-4 mt-6">
+      {/* Marquee Ticker */}
+      <div className="bg-[#f97316] py-2 overflow-hidden whitespace-nowrap border-y border-[#f97316]/30">
+        <div className="marquee-content flex">
+          <div className="flex items-center gap-12 px-6">
+            <span className="font-display text-sm text-[#0a0a08] uppercase tracking-widest font-bold">WITH STOVE</span>
+            <span className="text-[#0a0a08]/40">●</span>
+            <span className="font-display text-sm text-[#0a0a08] uppercase tracking-widest font-bold">WITH ROOF</span>
+            <span className="text-[#0a0a08]/40">●</span>
+            <span className="font-display text-sm text-[#0a0a08] uppercase tracking-widest font-bold">TEA / COFFEE STATION</span>
+            <span className="text-[#0a0a08]/40">●</span>
+            <span className="font-display text-sm text-[#0a0a08] uppercase tracking-widest font-bold">ICE CREAM CART</span>
+            <span className="text-[#0a0a08]/40">●</span>
+            <span className="font-display text-sm text-[#0a0a08] uppercase tracking-widest font-bold">E-RICKSHAW CARTS</span>
+            <span className="text-[#0a0a08]/40">●</span>
+          </div>
+          <div className="flex items-center gap-12 px-6">
+            <span className="font-display text-sm text-[#0a0a08] uppercase tracking-widest font-bold">WITH STOVE</span>
+            <span className="text-[#0a0a08]/40">●</span>
+            <span className="font-display text-sm text-[#0a0a08] uppercase tracking-widest font-bold">WITH ROOF</span>
+            <span className="text-[#0a0a08]/40">●</span>
+            <span className="font-display text-sm text-[#0a0a08] uppercase tracking-widest font-bold">TEA / COFFEE STATION</span>
+            <span className="text-[#0a0a08]/40">●</span>
+            <span className="font-display text-sm text-[#0a0a08] uppercase tracking-widest font-bold">ICE CREAM CART</span>
+            <span className="text-[#0a0a08]/40">●</span>
+            <span className="font-display text-sm text-[#0a0a08] uppercase tracking-widest font-bold">E-RICKSHAW CARTS</span>
+            <span className="text-[#0a0a08]/40">●</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="site-container max-w-5xl mx-auto px-4 mt-16">
         {/* Browse by Type */}
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-base font-bold text-gray-900">Browse by Type</h3>
-          <Link href="/explore" className="text-xs font-bold text-[#dc2626] flex items-center">
-            See all <ChevronRight className="w-3 h-3 ml-0.5" />
+        <div className="flex justify-between items-end mb-6 border-b border-outline-variant/20 pb-4">
+          <div>
+            <span className="font-display text-xs tracking-widest text-[#f97316] uppercase">Categories</span>
+            <h3 className="font-display text-3xl text-on-surface mt-1">BROWSE BY CART TYPE</h3>
+          </div>
+          <Link href="/explore" className="font-display text-sm text-[#f97316] hover:underline flex items-center tracking-widest uppercase">
+            See all <ChevronRight className="w-4 h-4 ml-1" />
           </Link>
         </div>
         
-        <div className="grid grid-cols-3 gap-3">
-          <Link href="/explore" className="bg-white border-2 border-[#dc2626] shadow-sm rounded-xl p-3 flex flex-col items-center justify-center gap-2 aspect-[4/3]">
-            <IconSearchStove className="w-7 h-7 text-gray-800" />
-            <span className="text-[10px] font-bold text-[#dc2626]">With Stove</span>
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
+          <Link href="/explore?type=stove" className="bg-surface border border-outline-variant/30 hover:border-[#f97316]/50 transition-all duration-300 p-4 flex flex-col items-center justify-center gap-3 aspect-square text-center">
+            <IconSearchStove className="w-8 h-8 text-[#f97316]" />
+            <span className="font-display text-sm tracking-wider text-on-surface uppercase">With Stove</span>
           </Link>
-          <Link href="/explore" className="bg-white border border-gray-100 shadow-sm rounded-xl p-3 flex flex-col items-center justify-center gap-2 aspect-[4/3]">
-            <IconTent className="w-7 h-7" />
-            <span className="text-[10px] font-semibold text-gray-700">With Roof</span>
+          <Link href="/explore?type=roof" className="bg-surface border border-outline-variant/30 hover:border-[#f97316]/50 transition-all duration-300 p-4 flex flex-col items-center justify-center gap-3 aspect-square text-center">
+            <IconTent className="w-8 h-8 text-[#f97316]" />
+            <span className="font-display text-sm tracking-wider text-on-surface uppercase">With Roof</span>
           </Link>
-          <Link href="/explore" className="bg-white border border-gray-100 shadow-sm rounded-xl p-3 flex flex-col items-center justify-center gap-2 aspect-[4/3]">
-            <IconIceCream className="w-7 h-7" />
-            <span className="text-[10px] font-semibold text-gray-700">Ice Cream</span>
+          <Link href="/explore?type=icecream" className="bg-surface border border-outline-variant/30 hover:border-[#f97316]/50 transition-all duration-300 p-4 flex flex-col items-center justify-center gap-3 aspect-square text-center">
+            <IconIceCream className="w-8 h-8 text-[#f97316]" />
+            <span className="font-display text-sm tracking-wider text-on-surface uppercase">Ice Cream</span>
           </Link>
-          <Link href="/explore" className="bg-white border border-gray-100 shadow-sm rounded-xl p-3 flex flex-col items-center justify-center gap-2 aspect-[4/3]">
-            <IconCoffee className="w-7 h-7" />
-            <span className="text-[10px] font-semibold text-gray-700">Tea / Coffee</span>
+          <Link href="/explore?type=coffee" className="bg-surface border border-outline-variant/30 hover:border-[#f97316]/50 transition-all duration-300 p-4 flex flex-col items-center justify-center gap-3 aspect-square text-center">
+            <IconCoffee className="w-8 h-8 text-[#f97316]" />
+            <span className="font-display text-sm tracking-wider text-on-surface uppercase">Tea / Coffee</span>
           </Link>
-          <Link href="/explore" className="bg-white border border-gray-100 shadow-sm rounded-xl p-3 flex flex-col items-center justify-center gap-2 aspect-[4/3]">
-            <IconRickshaw className="w-7 h-7" />
-            <span className="text-[10px] font-semibold text-gray-700">E-Rickshaw</span>
+          <Link href="/explore?type=erickshaw" className="bg-surface border border-outline-variant/30 hover:border-[#f97316]/50 transition-all duration-300 p-4 flex flex-col items-center justify-center gap-3 aspect-square text-center">
+            <IconRickshaw className="w-8 h-8 text-[#f97316]" />
+            <span className="font-display text-sm tracking-wider text-on-surface uppercase">E-Rickshaw</span>
           </Link>
-          <Link href="/explore" className="bg-white border border-gray-100 shadow-sm rounded-xl p-3 flex flex-col items-center justify-center gap-2 aspect-[4/3]">
-            <MoreHorizontal className="w-7 h-7 text-gray-400" />
-            <span className="text-[10px] font-semibold text-gray-700">More Types</span>
+          <Link href="/explore" className="bg-surface border border-outline-variant/30 hover:border-[#f97316]/50 transition-all duration-300 p-4 flex flex-col items-center justify-center gap-3 aspect-square text-center">
+            <MoreHorizontal className="w-8 h-8 text-on-surface-variant/60" />
+            <span className="font-display text-sm tracking-wider text-on-surface uppercase">Others</span>
           </Link>
         </div>
 
         {/* Premium Models */}
-        <div className="mt-8">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-base font-bold text-gray-900">Premium Models</h3>
-            <Link href="/explore" className="text-xs font-bold text-[#dc2626] flex items-center">
-              See all <ChevronRight className="w-3 h-3 ml-0.5" />
+        <div className="mt-20">
+          <div className="flex justify-between items-end mb-6 border-b border-outline-variant/20 pb-4">
+            <div>
+              <span className="font-display text-xs tracking-widest text-[#f97316] uppercase">Exclusive Fleet</span>
+              <h3 className="font-display text-3xl text-on-surface mt-1">PREMIUM CART MODELS</h3>
+            </div>
+            <Link href="/explore" className="font-display text-sm text-[#f97316] hover:underline flex items-center tracking-widest uppercase">
+              See all <ChevronRight className="w-4 h-4 ml-1" />
             </Link>
           </div>
 
-          <div className="flex gap-4 overflow-x-auto snap-x hide-scrollbar pb-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {[
-              { tag: "BESTSELLER", tagColor: "bg-[#dc2626]", title: "Elite Stainless Pro V2", desc: "Dual burners & transport storage shelf", price: "₹24,500" },
-              { tag: "NEW", tagColor: "bg-[#16a34a]", title: "Classic TeaX V1", desc: "With partition & sink", price: "₹16,000" }
+              { tag: "BESTSELLER", tagColor: "bg-[#f97316] text-[#0a0a08]", title: "ELITE STAINLESS PRO V2", desc: "Dual integrated high-power burners, premium food-grade steel & display shelf.", price: "₹24,500" },
+              { tag: "NEW ARRIVAL", tagColor: "bg-[#ffca45] text-[#0a0a08]", title: "CLASSIC TEAX STATION V1", desc: "Equipped with wide partition counters, utility lock-box, and waste sink.", price: "₹16,000" }
             ].map((item, i) => (
-              <div key={i} className="min-w-[220px] bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden snap-center flex flex-col">
-                <div className="aspect-[16/10] bg-[#eef5f0] relative shrink-0 p-4 flex items-center justify-center">
-                  <span className={`absolute top-2 left-2 text-[8px] font-bold text-white px-1.5 py-0.5 rounded ${item.tagColor} z-10`}>
+              <div key={i} className="bg-surface border border-[#f97316]/25 hover:border-[#f97316]/60 transition-all duration-300 flex flex-col">
+                <div className="aspect-[16/9] bg-[#251913] relative shrink-0 p-6 flex items-center justify-center">
+                  <span className={`absolute top-4 left-4 text-[10px] font-display font-bold px-3 py-1 ${item.tagColor} tracking-wider`}>
                     {item.tag}
                   </span>
-                  <Image src="/brand/full-logo-with-background.webp" alt="Premium Cart" fill className="object-cover opacity-20" />
-                  {/* Mock cart illustration */}
-                  <svg viewBox="0 0 100 80" className="w-20 h-20 text-gray-400 z-10" fill="currentColor">
+                  
+                  {/* Vector cart illustration */}
+                  <svg viewBox="0 0 100 80" className="w-24 h-24 text-on-surface-variant/20" fill="currentColor">
                     <path d="M20 20 h60 v40 h-60 z M30 60 v10 M70 60 v10 M25 70 h50 M35 70 v5 M65 70 v5"/>
                   </svg>
                 </div>
-                <div className="p-3 flex flex-col flex-grow">
-                  <h4 className="font-bold text-sm text-gray-900 line-clamp-1">{item.title}</h4>
-                  <p className="text-[10px] text-gray-500 line-clamp-1 mt-0.5">{item.desc}</p>
-                  <div className="flex justify-between items-center mt-3">
+                <div className="p-6 flex flex-col flex-grow border-t border-outline-variant/20">
+                  <h4 className="font-display text-xl text-on-surface tracking-wider">{item.title}</h4>
+                  <p className="font-body text-sm text-on-surface-variant mt-2 mb-6 flex-grow">{item.desc}</p>
+                  
+                  <div className="flex justify-between items-center pt-4 border-t border-outline-variant/10">
                     <div>
-                      <span className="font-bold text-[#16a34a] block">{item.price}</span>
-                      <span className="text-[8px] text-gray-500 block">Ex-Showroom</span>
+                      <span className="font-display text-2xl text-[#ffca45] block">{item.price}</span>
+                      <span className="text-[10px] uppercase tracking-wider text-on-surface-variant/60 block">Daily/Monthly Plans</span>
                     </div>
-                    <Button suppressHydrationWarning asChild className="bg-[#dc2626] hover:bg-red-700 text-white rounded-lg px-3 py-1 h-auto text-[10px] font-bold">
-                      <Link href="/book">Read More</Link>
+                    <Button asChild className="bg-transparent border border-[#f97316] text-[#f97316] hover:bg-[#f97316]/10 rounded-none px-6 py-2 h-auto font-display tracking-wider text-xs">
+                      <Link href={`/cart/${i === 0 ? "1" : "2"}`}>Read More</Link>
                     </Button>
                   </div>
                 </div>
@@ -138,72 +176,97 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Why Thallivandi? */}
-        <div className="mt-8">
-          <h3 className="text-base font-bold text-gray-900 mb-3">Why Thallivandi?</h3>
-          <div className="bg-white border border-gray-100 rounded-xl p-4 shadow-sm flex flex-col gap-4">
-            <div className="flex items-start gap-3">
-              <div className="w-6 h-6 bg-[#dcfce7] rounded-md flex items-center justify-center shrink-0 mt-0.5">
-                <IconCheckCircle className="w-4 h-4 text-[#16a34a]" />
-              </div>
-              <div>
-                <h4 className="font-bold text-xs text-gray-900">Verified Sellers</h4>
-                <p className="text-[10px] text-gray-500 mt-0.5">Every seller is personally checked for quality</p>
-              </div>
+        {/* Why Thalluvandi / Editorial Advantage */}
+        <div className="mt-24">
+          <div className="text-center max-w-xl mx-auto mb-12">
+            <span className="font-display text-xs tracking-widest text-[#f97316] uppercase">Why Choose Us</span>
+            <h3 className="font-display text-4xl text-on-surface mt-1 leading-none">BUILT FOR SCALE, PRICED FOR GROWTH</h3>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="bg-surface border border-outline-variant/20 p-6 relative">
+              <div className="absolute top-0 left-0 w-1 h-full bg-[#f97316]"></div>
+              <h4 className="font-display text-lg text-on-surface tracking-wider uppercase mb-2">Verified Sellers</h4>
+              <p className="font-body text-sm text-on-surface-variant">Every vendor is personally vetted for physical quality, stainless steel grades, and functional suitability.</p>
             </div>
-            <div className="h-px bg-gray-100 w-full" />
-            <div className="flex items-start gap-3">
-              <div className="w-6 h-6 bg-[#fee2e2] rounded-md flex items-center justify-center shrink-0 mt-0.5">
-                <IconMapPinRed className="w-4 h-4 text-[#dc2626]" />
-              </div>
-              <div>
-                <h4 className="font-bold text-xs text-gray-900">Local Focus</h4>
-                <p className="text-[10px] text-gray-500 mt-0.5">Connect with sellers in your neighbourhood</p>
-              </div>
+            <div className="bg-surface border border-outline-variant/20 p-6 relative">
+              <div className="absolute top-0 left-0 w-1 h-full bg-[#f97316]"></div>
+              <h4 className="font-display text-lg text-on-surface tracking-wider uppercase mb-2">Local Focus</h4>
+              <p className="font-body text-sm text-on-surface-variant">Distance-based routing algorithm matches you with available carts nearby, saving transport overhead.</p>
             </div>
-            <div className="h-px bg-gray-100 w-full" />
-            <div className="flex items-start gap-3">
-              <div className="w-6 h-6 bg-[#dcfce7] rounded-md flex items-center justify-center shrink-0 mt-0.5">
-                <IconRupee className="w-4 h-4 text-[#16a34a]" />
+            <div className="bg-surface border border-outline-variant/20 p-6 relative">
+              <div className="absolute top-0 left-0 w-1 h-full bg-[#f97316]"></div>
+              <h4 className="font-display text-lg text-on-surface tracking-wider uppercase mb-2">Fair Pricing</h4>
+              <p className="font-body text-sm text-on-surface-variant">No hidden broker fees. Direct rentals from owners at standardized daily/monthly rates.</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Territory / Active Regions */}
+        <div className="mt-24 bg-[#160c06] border border-[#f97316]/20 p-8 md:p-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+            <div>
+              <span className="font-display text-xs tracking-widest text-[#f97316] uppercase">Our Territory</span>
+              <h3 className="font-display text-4xl md:text-5xl text-on-surface mt-1 mb-4">WHERE WE OPERATE</h3>
+              <p className="font-body text-sm text-on-surface-variant max-w-sm">
+                Providing reliable food cart solutions across Western Tamil Nadu. Seamless onboarding and delivery setup.
+              </p>
+            </div>
+            
+            <div className="space-y-3">
+              <div className="flex items-center justify-between p-4 border border-[#f97316]/30 bg-surface/50">
+                <span className="font-display text-lg tracking-wider text-on-surface">COIMBATORE</span>
+                <span className="text-[10px] font-display bg-[#f97316] text-[#0a0a08] px-3 py-1 font-bold">ACTIVE</span>
               </div>
-              <div>
-                <h4 className="font-bold text-xs text-gray-900">Fair Pricing</h4>
-                <p className="text-[10px] text-gray-500 mt-0.5">Compare prices from multiple vendors easily</p>
+              <div className="flex items-center justify-between p-4 border border-[#f97316]/30 bg-surface/50">
+                <span className="font-display text-lg tracking-wider text-on-surface">TIRUPPUR</span>
+                <span className="text-[10px] font-display bg-[#f97316] text-[#0a0a08] px-3 py-1 font-bold">ACTIVE</span>
+              </div>
+              <div className="flex items-center justify-between p-4 border border-outline-variant/20 bg-surface/20 opacity-40">
+                <span className="font-display text-lg tracking-wider text-on-surface">ERODE & SALEM</span>
+                <span className="text-[10px] font-display border border-[#f97316]/40 text-[#f97316] px-3 py-1">COMING 2026</span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Marketplace */}
-        <div className="mt-8">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-base font-bold text-gray-900">Marketplace</h3>
-            <Link href="/explore" className="text-xs font-bold text-[#dc2626] flex items-center">
-              See all <ChevronRight className="w-3 h-3 ml-0.5" />
+        {/* Used Carts Marketplace */}
+        <div className="mt-24">
+          <div className="flex justify-between items-end mb-6 border-b border-outline-variant/20 pb-4">
+            <div>
+              <span className="font-display text-xs tracking-widest text-[#f97316] uppercase">Used & Affordable Fleet</span>
+              <h3 className="font-display text-3xl text-on-surface mt-1">MARKETPLACE LISTINGS</h3>
+            </div>
+            <Link href="/explore" className="font-display text-sm text-[#f97316] hover:underline flex items-center tracking-widest uppercase">
+              See all <ChevronRight className="w-4 h-4 ml-1" />
             </Link>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {[
-              { title: "Standard MS Food Cart (3ft)", price: "₹12,000" },
-              { title: "Minimalist Tea Station", price: "₹15,000" }
+              { title: "STANDARD MS PUSH FOOD CART (3FT)", price: "₹12,000", location: "Ondipudur, Coimbatore" },
+              { title: "MINIMALIST FAST FOOD TEA STATION", price: "₹15,000", location: "Tiruppur Junction" }
             ].map((item, i) => (
-              <div key={i} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
-                <div className="aspect-[4/3] bg-gray-100 relative shrink-0 p-2">
-                  <span className="absolute top-2 left-2 text-[8px] font-bold bg-[#fef08a] text-[#854d0e] px-1.5 py-0.5 rounded z-10">
-                    USED
+              <div key={i} className="bg-surface border border-outline-variant/30 flex flex-col p-4">
+                <div className="aspect-[16/10] bg-[#251913] relative shrink-0 p-4 flex items-center justify-center mb-4">
+                  <span className="absolute top-2 left-2 text-[8px] font-display tracking-widest bg-[#ffca45] text-[#0a0a08] px-2 py-0.5 font-bold">
+                    PRE-OWNED
                   </span>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <Image src="/brand/full-logo-with-background.webp" alt="Cart" fill className="object-cover opacity-20" />
-                  </div>
+                  <svg viewBox="0 0 100 80" className="w-20 h-20 text-on-surface-variant/10" fill="currentColor">
+                    <path d="M20 20 h60 v40 h-60 z M30 60 v10 M70 60 v10 M25 70 h50 M35 70 v5 M65 70 v5"/>
+                  </svg>
                 </div>
-                <div className="p-2 flex flex-col flex-grow">
-                  <h4 className="font-bold text-xs text-gray-900 line-clamp-2 h-8">{item.title}</h4>
-                  <span className="font-bold text-[#111827] text-sm mt-1 mb-2">{item.price}</span>
-                  <Button suppressHydrationWarning asChild className="w-full h-8 bg-[#16a34a] hover:bg-[#15803d] text-white rounded-lg text-[10px] font-bold">
-                    <Link href="/cart/1">
-                      <IconWhatsApp className="w-3 h-3 mr-1" />
-                      WhatsApp
+                <div className="flex flex-col flex-grow">
+                  <h4 className="font-display text-lg text-on-surface tracking-wider line-clamp-1">{item.title}</h4>
+                  <span className="font-display text-xl text-[#ffca45] mt-1 mb-1 block">{item.price}</span>
+                  <p className="text-xs text-on-surface-variant mb-4 flex items-center gap-1">
+                    📍 {item.location}
+                  </p>
+                  
+                  <Button asChild className="w-full bg-[#16a34a] hover:bg-[#15803d] text-white border-none rounded-none font-display uppercase tracking-widest text-xs py-2">
+                    <Link href={`/cart/${i+1}`}>
+                      <IconWhatsApp className="w-4 h-4 mr-1.5 inline-block align-middle" />
+                      WhatsApp Inquiry
                     </Link>
                   </Button>
                 </div>
@@ -213,24 +276,26 @@ export default function HomePage() {
         </div>
 
         {/* Sell Banner */}
-        <div className="mt-8 mb-6">
-          <div className="bg-[#dc2626] rounded-2xl p-5 relative overflow-hidden shadow-sm">
-            <div className="relative z-10">
-              <div className="flex items-center gap-1.5 text-white/90 mb-2">
-                <IconStove className="w-4 h-4" />
-                <span className="text-[10px] font-bold uppercase tracking-wider">Own a Food Cart?</span>
-              </div>
-              <p className="text-xs text-white/90 mb-4 max-w-[200px] leading-tight">
-                List it in just a quick 2 min and reach local buyers faster!
+        <div className="mt-24 mb-16">
+          <div className="bg-[#f97316] text-[#0a0a08] p-8 md:p-12 relative overflow-hidden flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+            <div className="relative z-10 max-w-md">
+              <span className="font-display text-xs tracking-widest text-[#0a0a08]/80 uppercase block mb-1">Earn From Your Idle Asset</span>
+              <h3 className="font-display text-4xl tracking-tight text-[#0a0a08] mb-3">OWN A FOOD CART?</h3>
+              <p className="font-body text-sm text-[#0a0a08]/80 leading-relaxed">
+                List it on Namma Thalluvandi in less than 2 minutes. Reach verified buyers and vendors across the region.
               </p>
-              <Button asChild className="bg-white hover:bg-gray-100 text-[#dc2626] rounded-full h-8 px-4 text-xs font-bold inline-flex w-auto">
-                <Link href="/sell">
-                  Start Selling <ChevronRight className="w-3 h-3 ml-1" />
-                </Link>
-              </Button>
             </div>
-            {/* Watermark icon on the right */}
-            <IconStove className="absolute -right-4 -bottom-4 w-32 h-32 text-white opacity-10" />
+            
+            <Button asChild className="bg-[#0a0a08] text-[#f97316] hover:bg-[#0a0a08]/90 border-none rounded-none font-display uppercase tracking-widest text-sm py-4 px-8 shrink-0 relative z-10">
+              <Link href="/sell">
+                Start Selling <ChevronRight className="w-4 h-4 ml-1.5 inline-block" />
+              </Link>
+            </Button>
+
+            {/* Decorative Vector */}
+            <svg viewBox="0 0 100 80" className="absolute -right-12 -bottom-12 w-64 h-64 text-[#0a0a08]/5" fill="currentColor">
+              <path d="M20 20 h60 v40 h-60 z M30 60 v10 M70 60 v10 M25 70 h50 M35 70 v5 M65 70 v5"/>
+            </svg>
           </div>
         </div>
       </div>
