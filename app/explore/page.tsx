@@ -1,289 +1,111 @@
-export const runtime = "edge";
-
-import type { Metadata } from "next";
-import { MessageCircle, PenTool, Truck, Wrench } from "lucide-react";
+import Link from "next/link";
+import Image from "next/image";
+import { ArrowLeft, MoreHorizontal, Filter, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { CartExplorer } from "@/components/sections/cart-explorer";
-import { getCarts } from "@/lib/carts";
-import { customCartMessage } from "@/lib/utils";
-import { WA_NUMBER, buildWAUrl } from "@/config/whatsapp";
 
-export const metadata: Metadata = {
-  title: "Food Carts for Rent in Coimbatore | Namma Thalluvandi | Thallu Vandi Vadagai",
-  description:
-    "Browse rental thallu vandis in Coimbatore. Tea carts, juice carts, stove carts, covered premium carts. Starting ₹50/day. WhatsApp to book instantly.",
-  keywords: [
-    "d nagaraj thalluvandi ondipudur",
-    "ondipudur thallu vandi rental",
-    "thallu vandi ondipudur coimbatore",
-    "D நாகராஜ் தளவண்டி ஒண்டிப்புதூர்"
-  ],
-  alternates: {
-    canonical: "https://nammathalluvandi.in/explore"
-  },
-  openGraph: {
-    title: "Food Carts for Rent in Coimbatore | Namma Thalluvandi | Thallu Vandi Vadagai",
-    description: "Browse rental thallu vandis in Coimbatore. Tea carts, juice carts, stove carts, covered premium carts. Starting ₹50/day. WhatsApp to book instantly.",
-    url: "https://nammathalluvandi.in/explore",
-    siteName: "Namma Thalluvandi",
-    images: [
-      {
-        url: "https://nammathalluvandi.in/brand/full-logo-with-background.webp",
-        width: 1200,
-        height: 630,
-        alt: "Namma Thalluvandi logo"
-      }
-    ],
-    locale: "ta_IN",
-    type: "website"
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Food Carts for Rent in Coimbatore | Namma Thalluvandi | Thallu Vandi Vadagai",
-    description: "Browse rental thallu vandis in Coimbatore. Tea carts, juice carts, stove carts, covered premium carts. Starting ₹50/day. WhatsApp to book instantly.",
-    images: ["https://nammathalluvandi.in/brand/full-logo-with-background.webp"]
-  }
-};
-
-function Text({ en, ta }: { en: string; ta: string }) {
+export default function BrowseCartsPage() {
   return (
-    <>
-      <span className="en">{en}</span>
-      <span className="ta tamil-text">{ta}</span>
-    </>
-  );
-}
+    <main className="min-h-screen bg-white pb-20 md:pb-10">
+      {/* Header */}
+      <header className="sticky top-0 bg-white z-20 flex items-center justify-between px-4 py-4 border-b border-gray-100">
+        <div className="flex items-center gap-3">
+          <Link href="/" className="text-gray-900">
+            <ArrowLeft className="w-6 h-6" />
+          </Link>
+          <h1 className="text-lg font-bold text-gray-900">Browse Carts</h1>
+        </div>
+        <button className="text-gray-900">
+          <MoreHorizontal className="w-6 h-6" />
+        </button>
+      </header>
 
-export default async function ExplorePage() {
-  const allCarts = await getCarts();
-  return (
-    <main className="pt-0 md:pt-20">
-      <CartExplorer initialCarts={allCarts} />
+      {/* Filter Chips */}
+      <div className="bg-white px-4 py-3 flex gap-2 overflow-x-auto hide-scrollbar border-b border-gray-100">
+        <button className="whitespace-nowrap px-4 py-1.5 bg-[#16a34a] text-white rounded-full text-[11px] font-bold">
+          All (40)
+        </button>
+        <button className="whitespace-nowrap px-4 py-1.5 bg-white border border-gray-200 text-gray-700 rounded-full text-[11px] font-bold">
+          With Stove
+        </button>
+        <button className="whitespace-nowrap px-4 py-1.5 bg-white border border-gray-200 text-gray-700 rounded-full text-[11px] font-bold">
+          With Roof
+        </button>
+        <button className="whitespace-nowrap px-4 py-1.5 bg-white border border-gray-200 text-gray-700 rounded-full text-[11px] font-bold">
+          Ice Cream
+        </button>
+      </div>
 
-      {/* Redesigned Custom Manufacturing teaser section */}
-      <section className="py-16 md:py-24 bg-white border-t border-black/10">
-        <div className="site-container">
-          <div className="grid gap-8 lg:grid-cols-[0.4fr_0.6fr]">
-            {/* Left Column (40%) */}
-            <div className="flex flex-col justify-between">
+      {/* Subheader */}
+      <div className="px-4 py-3 flex justify-between items-center bg-white">
+        <h2 className="text-[11px] font-bold text-gray-700">40 carts near Coimbatore</h2>
+        <button className="flex items-center gap-1 text-[11px] font-bold text-gray-900 bg-white border border-gray-200 px-3 py-1.5 rounded-lg shadow-sm">
+          <Filter className="w-3 h-3" /> Filters
+        </button>
+      </div>
+
+      {/* List */}
+      <div className="px-4 flex flex-col gap-4 mt-2">
+        {/* Item 1 */}
+        <div className="flex gap-3 bg-white border border-gray-100 rounded-xl overflow-hidden shadow-sm p-3">
+          <div className="w-[100px] h-[100px] bg-gray-50 rounded-lg relative flex items-center justify-center shrink-0">
+            {/* Mock Image */}
+            <Image src="/brand/full-logo-with-background.webp" alt="Cart" fill className="object-cover opacity-20 rounded-lg" />
+            <svg viewBox="0 0 100 80" className="w-16 h-16 text-gray-400 z-10" fill="currentColor">
+              <path d="M20 20 h60 v40 h-60 z M30 60 v10 M70 60 v10 M25 70 h50 M35 70 v5 M65 70 v5"/>
+            </svg>
+          </div>
+          <div className="flex flex-col flex-grow">
+            <div className="flex gap-1 mb-1">
+              <span className="text-[8px] font-bold bg-[#fef08a] text-[#854d0e] px-1.5 py-0.5 rounded">USED</span>
+              <span className="text-[8px] font-bold bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded">WITH STOVE</span>
+            </div>
+            <h3 className="font-bold text-xs text-gray-900 leading-tight mb-1">Standard MS Food Cart (3ft)</h3>
+            <div className="flex items-center gap-1 text-[9px] text-gray-500 mb-2">
+              <span className="text-red-500">★</span>
+              <span className="font-bold text-gray-700">4.3</span>
+              <span>(21 reviews)</span>
+            </div>
+            <div className="mt-auto flex justify-between items-end">
               <div>
-                <p className="text-xs font-bold uppercase tracking-[0.2em] text-error font-semibold">
-                  <span className="en">CUSTOM MANUFACTURING</span>
-                  <span className="ta tamil-text">தனிப்பயன் தயாரிப்பு</span>
-                </p>
-                <h2 className="mt-3 font-display text-4xl uppercase leading-none text-ink md:text-5xl">
-                  <span className="en">CUSTOMIZE YOUR CART & OWN IT</span>
-                  <span className="ta tamil-text">உங்களுக்கே ஒரு வண்டி — நீங்களே வடிவமையுங்கள்!</span>
-                </h2>
-                <p className="mt-4 text-base leading-7 text-muted">
-                  <span className="en">Build your own customized food cart based on your business needs. Delivery in 2–4 weeks.</span>
-                  <span className="ta tamil-text">உங்கள் தேவைக்கேற்ப தனிப்பட்ட உணவு வண்டி. 2-4 வாரங்களில் டெலிவரி.</span>
-                </p>
+                <span className="font-bold text-[#16a34a] block text-sm">₹12,000</span>
+                <span className="text-[8px] text-gray-500">Ex-Showroom</span>
               </div>
-
-              <div className="mt-6 bg-error/5 border border-error/20 rounded-xl p-4">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-error">
-                  <span className="en">ESTIMATED RANGE</span>
-                  <span className="ta tamil-text">மதிப்பிடப்பட்ட விலை</span>
-                </p>
-                <p className="mt-1 font-display text-3xl font-bold text-ink whitespace-nowrap">₹30,000 – ₹70,000+</p>
-              </div>
-
-              <Button asChild size="lg" className="mt-6 w-full bg-[#15803d] hover:bg-[#16a34a] text-white">
-                <a href={buildWAUrl(WA_NUMBER, customCartMessage)} target="_blank">
-                  <MessageCircle size={18} /> 
-                  <span className="en">🔧 REQUEST CUSTOM CART</span>
-                  <span className="ta tamil-text">🔧 தனிப்பயன் வண்டிக்கு கேட்க</span>
-                </a>
+              <Button asChild className="bg-[#dc2626] hover:bg-red-700 text-white rounded-lg h-7 px-4 text-[10px] font-bold">
+                <Link href="/cart/1">Contact</Link>
               </Button>
             </div>
+          </div>
+        </div>
 
-            {/* Right Column (60%) */}
-            <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
-              {/* DESIGN Card */}
-              <div className="bg-error/5 border border-error/10 rounded-2xl p-6 flex flex-col justify-between">
-                <div>
-                  <PenTool className="text-error" size={24} />
-                  <h3 className="mt-4 font-display text-xl uppercase font-bold text-ink">
-                    <span className="en">DESIGN</span>
-                    <span className="ta tamil-text">வடிவமைப்பு</span>
-                  </h3>
-                </div>
-                <ul className="mt-4 space-y-2 text-sm leading-6 text-muted-foreground">
-                  <li className="flex gap-2 items-start">
-                    <span className="text-error font-bold shrink-0 leading-6">•</span>
-                    <span>
-                      <span className="en">Tell us the size you need</span>
-                      <span className="ta tamil-text">தேவையான அளவு சொல்லுங்கள்</span>
-                    </span>
-                  </li>
-                  <li className="flex gap-2 items-start">
-                    <span className="text-error font-bold shrink-0 leading-6">•</span>
-                    <span>
-                      <span className="en">Choose counter layout</span>
-                      <span className="ta tamil-text">கவுண்டர் வடிவமைப்பு தேர்வு</span>
-                    </span>
-                  </li>
-                  <li className="flex gap-2 items-start">
-                    <span className="text-error font-bold shrink-0 leading-6">•</span>
-                    <span>
-                      <span className="en">Plan your branding space</span>
-                      <span className="ta tamil-text">உங்கள் பிராண்ட் இடம் திட்டமிடுங்கள்</span>
-                    </span>
-                  </li>
-                </ul>
+        {/* Item 2 */}
+        <div className="flex gap-3 bg-white border border-gray-100 rounded-xl overflow-hidden shadow-sm p-3">
+          <div className="w-[100px] h-[100px] bg-gray-50 rounded-lg relative flex items-center justify-center shrink-0">
+            {/* Mock Image */}
+            <Image src="/brand/full-logo-with-background.webp" alt="Cart" fill className="object-cover opacity-20 rounded-lg" />
+            <svg viewBox="0 0 100 80" className="w-16 h-16 text-gray-400 z-10" fill="currentColor">
+              <path d="M20 20 h60 v40 h-60 z M30 60 v10 M70 60 v10 M25 70 h50 M35 70 v5 M65 70 v5"/>
+            </svg>
+          </div>
+          <div className="flex flex-col flex-grow">
+            <div className="flex gap-1 mb-1">
+              <span className="text-[8px] font-bold bg-[#fef08a] text-[#854d0e] px-1.5 py-0.5 rounded">USED</span>
+            </div>
+            <h3 className="font-bold text-xs text-gray-900 leading-tight mb-1">Minimalist Tea Station</h3>
+            <div className="flex items-center gap-1 text-[9px] text-gray-500 mb-2">
+              <span className="text-gray-300">★</span>
+              <span className="text-gray-400">No reviews</span>
+            </div>
+            <div className="mt-auto flex justify-between items-end">
+              <div>
+                <span className="font-bold text-[#16a34a] block text-sm">₹15,000</span>
               </div>
-
-              {/* BUILD Card */}
-              <div className="bg-error/5 border border-error/10 rounded-2xl p-6 flex flex-col justify-between">
-                <div>
-                  <Wrench className="text-error" size={24} />
-                  <h3 className="mt-4 font-display text-xl uppercase font-bold text-ink">
-                    <span className="en">BUILD</span>
-                    <span className="ta tamil-text">கட்டுமானம்</span>
-                  </h3>
-                </div>
-                <ul className="mt-4 space-y-2 text-sm leading-6 text-muted-foreground">
-                  <li className="flex gap-2 items-start">
-                    <span className="text-error font-bold shrink-0 leading-6">•</span>
-                    <span>
-                      <span className="en">Quality steel material</span>
-                      <span className="ta tamil-text">தரமான ஸ்டீல் பொருள்</span>
-                    </span>
-                  </li>
-                  <li className="flex gap-2 items-start">
-                    <span className="text-error font-bold shrink-0 leading-6">•</span>
-                    <span>
-                      <span className="en">Stove setup (optional)</span>
-                      <span className="ta tamil-text">அடுப்பு அமைப்பு (விருப்பம்)</span>
-                    </span>
-                  </li>
-                  <li className="flex gap-2 items-start">
-                    <span className="text-error font-bold shrink-0 leading-6">•</span>
-                    <span>
-                      <span className="en">Storage & cover options</span>
-                      <span className="ta tamil-text">சேமிப்பு மற்றும் மூடி விருப்பங்கள்</span>
-                    </span>
-                  </li>
-                </ul>
-              </div>
-
-              {/* DELIVER Card */}
-              <div className="bg-error/5 border border-error/10 rounded-2xl p-6 flex flex-col justify-between">
-                <div>
-                  <Truck className="text-error" size={24} />
-                  <h3 className="mt-4 font-display text-xl uppercase font-bold text-ink">
-                    <span className="en">DELIVER</span>
-                    <span className="ta tamil-text">டெலிவரி</span>
-                  </h3>
-                </div>
-                <ul className="mt-4 space-y-2 text-sm leading-6 text-muted-foreground">
-                  <li className="flex gap-2 items-start">
-                    <span className="text-error font-bold shrink-0 leading-6">•</span>
-                    <span>
-                      <span className="en">Ready in 2-4 weeks</span>
-                      <span className="ta tamil-text">2-4 வாரங்களில் தயார்</span>
-                    </span>
-                  </li>
-                  <li className="flex gap-2 items-start">
-                    <span className="text-error font-bold shrink-0 leading-6">•</span>
-                    <span>
-                      <span className="en">Direct delivery in Coimbatore</span>
-                      <span className="ta tamil-text">கோயம்புத்தூரில் நேரடி டெலிவரி</span>
-                    </span>
-                  </li>
-                  <li className="flex gap-2 items-start">
-                    <span className="text-error font-bold shrink-0 leading-6">•</span>
-                    <span>
-                      <span className="en">Fully checked before handover</span>
-                      <span className="ta tamil-text">கையளிப்பதற்கு முன் முழு சரிபார்ப்பு</span>
-                    </span>
-                  </li>
-                </ul>
-              </div>
+              <Button asChild className="bg-[#dc2626] hover:bg-red-700 text-white rounded-lg h-7 px-4 text-[10px] font-bold">
+                <Link href="/cart/2">Contact</Link>
+              </Button>
             </div>
           </div>
         </div>
-      </section>
-
-      {/* FAQ Section */}
-      <section className="py-16 md:py-24 bg-[#F8F6F2] border-t border-black/10">
-        <div className="site-container max-w-4xl">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-error text-center font-semibold">
-            <Text en="FAQ" ta="கேள்வி பதில்" />
-          </p>
-          <h2 className="mt-3 font-display text-4xl uppercase leading-none text-ink text-center md:text-5xl">
-            <Text en="Cart Rentals FAQ" ta="வண்டி வாடகை கேள்வி பதில்" />
-          </h2>
-
-          <div className="mt-12 space-y-4">
-            {exploreFaqs.map(([question, tamilQuestion, answer, tamilAnswer]) => (
-              <details
-                key={question}
-                className="group rounded-2xl border border-black/10 bg-white p-6 [&_summary::-webkit-details-marker]:hidden"
-              >
-                <summary className="flex cursor-pointer items-center justify-between gap-1.5 text-ink font-bold">
-                  <h3 className="font-display text-xl uppercase tracking-wide leading-tight">
-                    <Text en={question} ta={tamilQuestion} />
-                  </h3>
-                  <span className="shrink-0 rounded-full bg-error/5 border border-error/20 p-1.5 text-primary group-open:-rotate-180 transition duration-300">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-4 w-4"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth="3"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M19 9l-7 7-7-7"
-                      />
-                    </svg>
-                  </span>
-                </summary>
-                <p className="mt-3 text-[0.95rem] leading-7 text-muted border-t border-black/5 pt-3">
-                  <Text en={answer} ta={tamilAnswer} />
-                </p>
-              </details>
-            ))}
-          </div>
-        </div>
-      </section>
+      </div>
     </main>
   );
 }
-
-const exploreFaqs = [
-  [
-    "Deposit amount?",
-    "முன்பணம் எவ்வளவு?",
-    "Refundable security deposit is ₹2,000 – ₹10,000 depending on the cart type, model features, and built-in equipment. This amount is completely refunded within 1 week of cart return.",
-    "வண்டி வகை, மாடல் மற்றும் வசதிகளைப் பொறுத்து ₹2,000 முதல் ₹10,000 வரை முன்பணம் (Deposit) பெறப்படும். வண்டியை பத்திரமாகத் திரும்பக் கொடுக்கும் போது இது 1 வாரத்திற்குள் முழுமையாகத் திருப்பித் தரப்படும்.",
-  ],
-  [
-    "How and when is the daily rent collected?",
-    "வாடகை எப்போது, எப்படி வசூலிக்கப்படும்?",
-    "The daily rent is accumulated and collected weekly, mostly on Saturdays. Alternatively, we will discuss and inform you of the exact rent collection schedule during booking.",
-    "தினசரி வாடகை வாரந்தோறும் கணக்கிடப்பட்டு, பெரும்பாலும் சனிக்கிழமைகளில் வசூலிக்கப்படும். அல்லது வண்டி முன்பதிவு செய்யும் போது எப்போது வசூலிக்கப்படும் என்ற விவரம் உங்களுக்குத் தெளிவுபடுத்தப்படும்.",
-  ],
-  [
-    "Are there different cart prices?",
-    "வண்டி வாடகை விலைகள் வெவ்வேறா?",
-    "Yes. Daily rentals range from ₹50/day up to ₹150/day depending on the size of the cart, built-in stove burners, roof covers, and premium materials used.",
-    "ஆம். வண்டியின் அளவு, அடுப்பு வசதி, மேல் கவர் மற்றும் பயன்படுத்தப்படும் ஸ்டீல் தரத்தைப் பொறுத்து ஒரு நாள் வாடகை ₹50 முதல் ₹150 வரை மாறுபடும்.",
-  ],
-  [
-    "Is transport included in the daily rent?",
-    "போக்குவரத்து வாடகையில் அடங்குமா?",
-    "No. Transporting (picking up from Ondipudur and returning) the cart is entirely the renter's responsibility. You can easily rent a local tempo for transport.",
-    "இல்லை. வண்டியை ஒண்டிப்புதூரிலிருந்து எடுத்துச் செல்வதும், திரும்பக் கொண்டு வந்து ஒப்படைப்பதும் வாடிக்கையாளரின் பொறுப்பாகும். இதற்கு உள்ளூர் டெம்போக்களை வாடகைக்கு எடுத்துப் பயன்படுத்திக் கொள்ளலாம்.",
-  ],
-  [
-    "What is the minimum rental period?",
-    "குறைந்தபட்ச வாடகை காலம் எவ்வளவு?",
-    "The minimum rental period is 1 month as per our standard terms. Early return before 1 month will still be charged for the full month's rental.",
-    "எங்கள் விதிகளின்படி குறைந்தபட்ச வாடகை காலம் 1 மாதம் ஆகும். ஒரு மாதத்திற்கு முன்பாக வண்டியைத் திரும்பிக் கொடுத்தாலும் 1 மாத வாடகை முழுமையாக வசூலிக்கப்படும்.",
-  ],
-];
