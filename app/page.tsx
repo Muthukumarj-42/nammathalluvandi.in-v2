@@ -14,7 +14,7 @@ export default function HomePage() {
 
         <div className="site-container max-w-4xl mx-auto relative z-10 text-center flex flex-col items-center">
           {/* Saffron tag */}
-          <span className="font-display text-sm tracking-[0.2em] text-[#f97316] bg-[#f97316]/10 px-4 py-1.5 uppercase mb-6 border border-[#f97316]/20">
+          <span className="font-display text-sm tracking-[0.2em] text-[#f97316] bg-[#f97316]/10 px-4 py-1.5 uppercase mb-6 border border-[#f97316]/20 rounded-full">
             ★ FOOD CART MARKETPLACE ★
           </span>
 
@@ -28,18 +28,18 @@ export default function HomePage() {
           </p>
 
           {/* Search bar & Location bar in editorial style */}
-          <form action="/explore" method="GET" className="w-full max-w-2xl bg-surface border border-outline-variant/30 p-2 flex flex-col md:flex-row gap-2">
+          <form action="/explore" method="GET" className="w-full max-w-2xl bg-surface border border-outline-variant/30 p-2.5 flex flex-col md:flex-row gap-2.5 rounded-3xl shadow-premium">
             <div className="relative flex-grow">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant/60 w-5 h-5" />
               <input 
                 type="text" 
                 name="search"
                 placeholder="Search by cart type, features, or size..." 
-                className="w-full bg-[#160c06] text-on-surface border-none px-4 py-3 pl-10 text-sm outline-none placeholder:text-on-surface-variant/40"
+                className="w-full bg-[#160c06] text-on-surface border-none px-4 py-3 pl-10 text-sm outline-none placeholder:text-on-surface-variant/40 rounded-2xl"
               />
             </div>
             
-            <div className="flex items-center bg-[#251913] px-4 py-2 border border-outline-variant/10 shrink-0 md:w-60">
+            <div className="flex items-center bg-[#251913] px-4 py-2 border border-outline-variant/10 shrink-0 md:w-60 rounded-2xl">
               <IconMapPinRed className="w-4 h-4 text-[#f97316] mr-2 shrink-0" />
               <div className="flex flex-col text-left flex-grow">
                 <select 
@@ -53,7 +53,7 @@ export default function HomePage() {
               </div>
             </div>
 
-            <Button type="submit" className="bg-[#f97316] text-[#0a0a08] hover:bg-[#f97316]/95 border-none rounded-none font-display uppercase tracking-wider text-sm py-3 px-8">
+            <Button type="submit" className="bg-[#f97316] text-[#0a0a08] hover:bg-[#f97316]/95 border-none rounded-2xl font-display uppercase tracking-wider text-sm py-3 px-8">
               Search
             </Button>
           </form>
@@ -103,27 +103,27 @@ export default function HomePage() {
         </div>
         
         <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
-          <Link href="/explore?type=stove" className="bg-surface border border-outline-variant/30 hover:border-[#f97316]/50 transition-all duration-300 p-4 flex flex-col items-center justify-center gap-3 aspect-square text-center">
+          <Link href="/explore?type=stove" className="bg-surface border border-outline-variant/30 hover:border-[#f97316]/50 transition-all duration-300 p-4 flex flex-col items-center justify-center gap-3 aspect-square text-center rounded-2xl">
             <IconSearchStove className="w-8 h-8 text-[#f97316]" />
             <span className="font-display text-sm tracking-wider text-on-surface uppercase">With Stove</span>
           </Link>
-          <Link href="/explore?type=roof" className="bg-surface border border-outline-variant/30 hover:border-[#f97316]/50 transition-all duration-300 p-4 flex flex-col items-center justify-center gap-3 aspect-square text-center">
+          <Link href="/explore?type=roof" className="bg-surface border border-outline-variant/30 hover:border-[#f97316]/50 transition-all duration-300 p-4 flex flex-col items-center justify-center gap-3 aspect-square text-center rounded-2xl">
             <IconTent className="w-8 h-8 text-[#f97316]" />
             <span className="font-display text-sm tracking-wider text-on-surface uppercase">With Roof</span>
           </Link>
-          <Link href="/explore?type=icecream" className="bg-surface border border-outline-variant/30 hover:border-[#f97316]/50 transition-all duration-300 p-4 flex flex-col items-center justify-center gap-3 aspect-square text-center">
+          <Link href="/explore?type=icecream" className="bg-surface border border-outline-variant/30 hover:border-[#f97316]/50 transition-all duration-300 p-4 flex flex-col items-center justify-center gap-3 aspect-square text-center rounded-2xl">
             <IconIceCream className="w-8 h-8 text-[#f97316]" />
             <span className="font-display text-sm tracking-wider text-on-surface uppercase">Ice Cream</span>
           </Link>
-          <Link href="/explore?type=coffee" className="bg-surface border border-outline-variant/30 hover:border-[#f97316]/50 transition-all duration-300 p-4 flex flex-col items-center justify-center gap-3 aspect-square text-center">
+          <Link href="/explore?type=coffee" className="bg-surface border border-outline-variant/30 hover:border-[#f97316]/50 transition-all duration-300 p-4 flex flex-col items-center justify-center gap-3 aspect-square text-center rounded-2xl">
             <IconCoffee className="w-8 h-8 text-[#f97316]" />
             <span className="font-display text-sm tracking-wider text-on-surface uppercase">Tea / Coffee</span>
           </Link>
-          <Link href="/explore?type=erickshaw" className="bg-surface border border-outline-variant/30 hover:border-[#f97316]/50 transition-all duration-300 p-4 flex flex-col items-center justify-center gap-3 aspect-square text-center">
+          <Link href="/explore?type=erickshaw" className="bg-surface border border-outline-variant/30 hover:border-[#f97316]/50 transition-all duration-300 p-4 flex flex-col items-center justify-center gap-3 aspect-square text-center rounded-2xl">
             <IconRickshaw className="w-8 h-8 text-[#f97316]" />
             <span className="font-display text-sm tracking-wider text-on-surface uppercase">E-Rickshaw</span>
           </Link>
-          <Link href="/explore" className="bg-surface border border-outline-variant/30 hover:border-[#f97316]/50 transition-all duration-300 p-4 flex flex-col items-center justify-center gap-3 aspect-square text-center">
+          <Link href="/explore" className="bg-surface border border-outline-variant/30 hover:border-[#f97316]/50 transition-all duration-300 p-4 flex flex-col items-center justify-center gap-3 aspect-square text-center rounded-2xl">
             <MoreHorizontal className="w-8 h-8 text-on-surface-variant/60" />
             <span className="font-display text-sm tracking-wider text-on-surface uppercase">Others</span>
           </Link>
@@ -146,9 +146,9 @@ export default function HomePage() {
               { tag: "BESTSELLER", tagColor: "bg-[#f97316] text-[#0a0a08]", title: "ELITE STAINLESS PRO V2", desc: "Dual integrated high-power burners, premium food-grade steel & display shelf.", price: "₹24,500" },
               { tag: "NEW ARRIVAL", tagColor: "bg-[#ffca45] text-[#0a0a08]", title: "CLASSIC TEAX STATION V1", desc: "Equipped with wide partition counters, utility lock-box, and waste sink.", price: "₹16,000" }
             ].map((item, i) => (
-              <div key={i} className="bg-surface border border-[#f97316]/25 hover:border-[#f97316]/60 transition-all duration-300 flex flex-col">
+              <div key={i} className="bg-surface border border-[#f97316]/25 hover:border-[#f97316]/60 transition-all duration-300 flex flex-col rounded-3xl overflow-hidden shadow-premium">
                 <div className="aspect-[16/9] bg-[#251913] relative shrink-0 p-6 flex items-center justify-center">
-                  <span className={`absolute top-4 left-4 text-[10px] font-display font-bold px-3 py-1 ${item.tagColor} tracking-wider`}>
+                  <span className={`absolute top-4 left-4 text-[10px] font-display font-bold px-3 py-1 ${item.tagColor} tracking-wider rounded-full`}>
                     {item.tag}
                   </span>
                   
@@ -166,7 +166,7 @@ export default function HomePage() {
                       <span className="font-display text-2xl text-[#ffca45] block">{item.price}</span>
                       <span className="text-[10px] uppercase tracking-wider text-on-surface-variant/60 block">Daily/Monthly Plans</span>
                     </div>
-                    <Button asChild className="bg-transparent border border-[#f97316] text-[#f97316] hover:bg-[#f97316]/10 rounded-none px-6 py-2 h-auto font-display tracking-wider text-xs">
+                    <Button asChild className="bg-transparent border border-[#f97316] text-[#f97316] hover:bg-[#f97316]/10 rounded-xl px-6 py-2 h-auto font-display tracking-wider text-xs">
                       <Link href={`/cart/${i === 0 ? "1" : "2"}`}>Read More</Link>
                     </Button>
                   </div>
@@ -184,17 +184,17 @@ export default function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-surface border border-outline-variant/20 p-6 relative">
+            <div className="bg-surface border border-outline-variant/20 p-6 relative rounded-2xl overflow-hidden">
               <div className="absolute top-0 left-0 w-1 h-full bg-[#f97316]"></div>
               <h4 className="font-display text-lg text-on-surface tracking-wider uppercase mb-2">Verified Sellers</h4>
               <p className="font-body text-sm text-on-surface-variant">Every vendor is personally vetted for physical quality, stainless steel grades, and functional suitability.</p>
             </div>
-            <div className="bg-surface border border-outline-variant/20 p-6 relative">
+            <div className="bg-surface border border-outline-variant/20 p-6 relative rounded-2xl overflow-hidden">
               <div className="absolute top-0 left-0 w-1 h-full bg-[#f97316]"></div>
               <h4 className="font-display text-lg text-on-surface tracking-wider uppercase mb-2">Local Focus</h4>
               <p className="font-body text-sm text-on-surface-variant">Distance-based routing algorithm matches you with available carts nearby, saving transport overhead.</p>
             </div>
-            <div className="bg-surface border border-outline-variant/20 p-6 relative">
+            <div className="bg-surface border border-outline-variant/20 p-6 relative rounded-2xl overflow-hidden">
               <div className="absolute top-0 left-0 w-1 h-full bg-[#f97316]"></div>
               <h4 className="font-display text-lg text-on-surface tracking-wider uppercase mb-2">Fair Pricing</h4>
               <p className="font-body text-sm text-on-surface-variant">No hidden broker fees. Direct rentals from owners at standardized daily/monthly rates.</p>
@@ -203,7 +203,7 @@ export default function HomePage() {
         </div>
 
         {/* Territory / Active Regions */}
-        <div className="mt-24 bg-[#160c06] border border-[#f97316]/20 p-8 md:p-12">
+        <div className="mt-24 bg-[#160c06] border border-[#f97316]/20 p-8 md:p-12 rounded-3xl shadow-premium">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
             <div>
               <span className="font-display text-xs tracking-widest text-[#f97316] uppercase">Our Territory</span>
@@ -214,17 +214,17 @@ export default function HomePage() {
             </div>
             
             <div className="space-y-3">
-              <div className="flex items-center justify-between p-4 border border-[#f97316]/30 bg-surface/50">
+              <div className="flex items-center justify-between p-4 border border-[#f97316]/30 bg-surface/50 rounded-2xl">
                 <span className="font-display text-lg tracking-wider text-on-surface">COIMBATORE</span>
-                <span className="text-[10px] font-display bg-[#f97316] text-[#0a0a08] px-3 py-1 font-bold">ACTIVE</span>
+                <span className="text-[10px] font-display bg-[#f97316] text-[#0a0a08] px-3 py-1 font-bold rounded-full">ACTIVE</span>
               </div>
-              <div className="flex items-center justify-between p-4 border border-[#f97316]/30 bg-surface/50">
+              <div className="flex items-center justify-between p-4 border border-[#f97316]/30 bg-surface/50 rounded-2xl">
                 <span className="font-display text-lg tracking-wider text-on-surface">TIRUPPUR</span>
-                <span className="text-[10px] font-display bg-[#f97316] text-[#0a0a08] px-3 py-1 font-bold">ACTIVE</span>
+                <span className="text-[10px] font-display bg-[#f97316] text-[#0a0a08] px-3 py-1 font-bold rounded-full">ACTIVE</span>
               </div>
-              <div className="flex items-center justify-between p-4 border border-outline-variant/20 bg-surface/20 opacity-40">
+              <div className="flex items-center justify-between p-4 border border-outline-variant/20 bg-surface/20 opacity-40 rounded-2xl">
                 <span className="font-display text-lg tracking-wider text-on-surface">ERODE & SALEM</span>
-                <span className="text-[10px] font-display border border-[#f97316]/40 text-[#f97316] px-3 py-1">COMING 2026</span>
+                <span className="text-[10px] font-display border border-[#f97316]/40 text-[#f97316] px-3 py-1 rounded-full">COMING 2026</span>
               </div>
             </div>
           </div>
@@ -247,9 +247,9 @@ export default function HomePage() {
               { title: "STANDARD MS PUSH FOOD CART (3FT)", price: "₹12,000", location: "Ondipudur, Coimbatore" },
               { title: "MINIMALIST FAST FOOD TEA STATION", price: "₹15,000", location: "Tiruppur Junction" }
             ].map((item, i) => (
-              <div key={i} className="bg-surface border border-outline-variant/30 flex flex-col p-4">
-                <div className="aspect-[16/10] bg-[#251913] relative shrink-0 p-4 flex items-center justify-center mb-4">
-                  <span className="absolute top-2 left-2 text-[8px] font-display tracking-widest bg-[#ffca45] text-[#0a0a08] px-2 py-0.5 font-bold">
+              <div key={i} className="bg-surface border border-outline-variant/30 flex flex-col p-4 rounded-3xl shadow-premium">
+                <div className="aspect-[16/10] bg-[#251913] relative shrink-0 p-4 flex items-center justify-center mb-4 rounded-2xl">
+                  <span className="absolute top-2 left-2 text-[8px] font-display tracking-widest bg-[#ffca45] text-[#0a0a08] px-2.5 py-1 font-bold rounded-full">
                     PRE-OWNED
                   </span>
                   <svg viewBox="0 0 100 80" className="w-20 h-20 text-on-surface-variant/10" fill="currentColor">
@@ -263,7 +263,7 @@ export default function HomePage() {
                     📍 {item.location}
                   </p>
                   
-                  <Button asChild className="w-full bg-[#16a34a] hover:bg-[#15803d] text-white border-none rounded-none font-display uppercase tracking-widest text-xs py-2">
+                  <Button asChild className="w-full bg-[#16a34a] hover:bg-[#15803d] text-white border-none rounded-xl font-display uppercase tracking-widest text-xs py-2">
                     <Link href={`/cart/${i+1}`}>
                       <IconWhatsApp className="w-4 h-4 mr-1.5 inline-block align-middle" />
                       WhatsApp Inquiry
@@ -277,7 +277,7 @@ export default function HomePage() {
 
         {/* Sell Banner */}
         <div className="mt-24 mb-16">
-          <div className="bg-[#f97316] text-[#0a0a08] p-8 md:p-12 relative overflow-hidden flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+          <div className="bg-[#f97316] text-[#0a0a08] p-8 md:p-12 relative overflow-hidden flex flex-col md:flex-row justify-between items-start md:items-center gap-6 rounded-3xl shadow-premium">
             <div className="relative z-10 max-w-md">
               <span className="font-display text-xs tracking-widest text-[#0a0a08]/80 uppercase block mb-1">Earn From Your Idle Asset</span>
               <h3 className="font-display text-4xl tracking-tight text-[#0a0a08] mb-3">OWN A FOOD CART?</h3>
@@ -286,7 +286,7 @@ export default function HomePage() {
               </p>
             </div>
             
-            <Button asChild className="bg-[#0a0a08] text-[#f97316] hover:bg-[#0a0a08]/90 border-none rounded-none font-display uppercase tracking-widest text-sm py-4 px-8 shrink-0 relative z-10">
+            <Button asChild className="bg-[#0a0a08] text-[#f97316] hover:bg-[#0a0a08]/90 border-none rounded-xl font-display uppercase tracking-widest text-sm py-4 px-8 shrink-0 relative z-10">
               <Link href="/sell">
                 Start Selling <ChevronRight className="w-4 h-4 ml-1.5 inline-block" />
               </Link>

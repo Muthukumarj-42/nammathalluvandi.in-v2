@@ -266,7 +266,34 @@ export function BookingFlow() {
     date: "",
     location: "",
     details: "",
+    latitude: "",
+    longitude: "",
   });
+  const [geoStatus, setGeoStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+
+  // Auto-detect current coordinates using Geolocation API
+  const handleDetectLocation = () => {
+    if (!navigator.geolocation) {
+      setGeoStatus("error");
+      return;
+    }
+    setGeoStatus("loading");
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setFormData((prev) => ({
+          ...prev,
+          latitude: position.coords.latitude.toFixed(6),
+          longitude: position.coords.longitude.toFixed(6),
+        }));
+        setGeoStatus("success");
+      },
+      (error) => {
+        console.error("Error fetching location:", error);
+        setGeoStatus("error");
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  };
 
   // Validation States
   const [phoneError, setPhoneError] = useState("");
@@ -356,6 +383,8 @@ export function BookingFlow() {
     formData.date !== "" &&
     formData.date >= todayDate &&
     formData.location.trim() !== "" &&
+    formData.latitude.trim() !== "" &&
+    formData.longitude.trim() !== "" &&
     agreed &&
     phoneError === "";
 
@@ -369,7 +398,7 @@ export function BookingFlow() {
       ? translateSentenceToTamil(formData.details.trim()) 
       : "இல்லை";
 
-    // Persist booking lead in Supabase
+    // Persist booking lead in database
     try {
       await saveBooking({
         cartId: cart.id,
@@ -379,18 +408,21 @@ export function BookingFlow() {
         location: formData.location.trim(),
         duration: "1 month",
         details: formData.details.trim(),
+        latitude: Number(formData.latitude),
+        longitude: Number(formData.longitude),
       });
     } catch (err) {
       console.error("Failed to save booking to database:", err);
     }
 
     // Build message dynamically strictly in Tamil as required
-    const message = `வணக்கம், நான் ${cart.nameTa} வாடகைக்கு எடுக்க விரும்புகிறேன்.
+    const message = `வணக்கம், நான் ${cart.nameTa} வாடகைக்கு எடுக்க விரும்புகிறேன் (வி2 வண்டிகள் தேடல்).
 
 பெயர்: ${translatedName}
 தொலைபேசி: ${formData.phone.trim()}
 தேவையான தேதி: ${formData.date}
 இடம் (கோவையில்): ${translatedLocation}
+இருப்பிடம்: Lat ${formData.latitude}, Lng ${formData.longitude}
 மேலும் விவரம்: ${translatedDetails}
 
 அனைத்து வாடகை விதிகளையும் படித்து ஒப்புக்கொண்டேன். ✓`;
@@ -667,7 +699,61 @@ export function BookingFlow() {
                 />
               </div>
 
+              {/* Field 5: GPS Coordinates */}
+              <div className="bg-orange-50/50 border border-orange-200/50 rounded-xl p-4 space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-xs font-bold uppercase tracking-wider text-ink flex items-center gap-1">
+                    <MapPin className="w-3.5 h-3.5 text-[#f97316]" />
+                    <span className="en">GPS Coordinates (Required) *</span>
+                    <span className="ta tamil-text text-[10px]">GPS இருப்பிடம் *</span>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={handleDetectLocation}
+                    className="text-xs font-bold text-[#f97316] hover:text-[#f97316]/80 flex items-center gap-1 transition"
+                  >
+                    <span className="en">Auto-Detect</span>
+                    <span className="ta tamil-text text-[10px]">கண்டறியவும்</span>
+                  </button>
+                </div>
 
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex flex-col">
+                    <label htmlFor="latitude" className="text-[10px] uppercase text-[#78716c] mb-1">Latitude</label>
+                    <input
+                      type="text"
+                      id="latitude"
+                      required
+                      placeholder="e.g. 11.0030"
+                      value={formData.latitude}
+                      onChange={handleInputChange}
+                      className="w-full h-10 border border-[#e5e0d8] rounded-lg px-3 text-sm bg-white text-ink outline-none"
+                    />
+                  </div>
+                  <div className="flex flex-col">
+                    <label htmlFor="longitude" className="text-[10px] uppercase text-[#78716c] mb-1">Longitude</label>
+                    <input
+                      type="text"
+                      id="longitude"
+                      required
+                      placeholder="e.g. 77.0350"
+                      value={formData.longitude}
+                      onChange={handleInputChange}
+                      className="w-full h-10 border border-[#e5e0d8] rounded-lg px-3 text-sm bg-white text-ink outline-none"
+                    />
+                  </div>
+                </div>
+
+                {geoStatus === "loading" && (
+                  <p className="text-[10px] text-amber-600 animate-pulse">Detecting GPS coordinates...</p>
+                )}
+                {geoStatus === "success" && (
+                  <p className="text-[10px] text-green-600 font-bold">Successfully populated GPS coordinates!</p>
+                )}
+                {geoStatus === "error" && (
+                  <p className="text-[10px] text-red-500">Could not retrieve GPS automatically. Please input manually.</p>
+                )}
+              </div>
 
               {/* Field 6: Details */}
               <div className="flex flex-col">

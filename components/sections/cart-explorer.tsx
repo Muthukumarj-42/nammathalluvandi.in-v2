@@ -126,7 +126,7 @@ export function CartExplorer({
       // 1. Filter pill match
       const matchesFilter =
         activeFilter === "All" ||
-        cart.type.some((t) => t.toLowerCase() === activeFilter.toLowerCase());
+        cart.type.some((t: string) => t.toLowerCase() === activeFilter.toLowerCase());
 
       // 2. Search query match
       const q = searchQuery.toLowerCase().trim();
@@ -141,7 +141,7 @@ export function CartExplorer({
       const textMatch = keywords.every((keyword) => {
         // Exact type-tag match: e.g. "stove" matches "Has Stove" but NOT "No Stove"
         // We check if any type tag's words include the keyword as a whole word
-        const typeTagMatch = cart.type.some((tag) => {
+        const typeTagMatch = cart.type.some((tag: string) => {
           const tagWords = tag.toLowerCase().split(/\s+/);
           return tagWords.includes(keyword);
         });
@@ -383,7 +383,7 @@ export function CartExplorer({
 
                       {/* Features wrapper truncation */}
                       <div className="mt-2 flex flex-wrap gap-1 max-w-full">
-                        {cart.type.map((tag) => (
+                        {cart.type.map((tag: string) => (
                           <span
                             key={tag}
                             title={tag}
@@ -563,7 +563,7 @@ export function CartExplorer({
 
                     {/* Tag wrapper constraints - flex-wrap gap-1 max-w-full - FIX 3 */}
                     <div className="mt-4 flex flex-wrap gap-1 max-w-full">
-                      {cart.type.map((tag) => (
+                      {cart.type.map((tag: string) => (
                         <span
                           key={tag}
                           title={tag}
@@ -599,7 +599,7 @@ export function CartExplorer({
                     <ul className="mt-5 space-y-2 text-sm text-muted flex-1">
                       {(lang === "ta" ? cart.featuresTa : cart.featuresEn)
                         .slice(0, 3)
-                        .map((feature, idx) => (
+                        .map((feature: string, idx: number) => (
                           <li key={idx} className="flex gap-2">
                             <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
                             <span className={lang === "ta" ? "tamil-text" : ""}>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState, useEffect } from "react";
-import { CheckCircle2, MessageCircle } from "lucide-react";
+import { CheckCircle2, MapPin, Navigation, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { WA_PUBLISH, buildWAUrl } from "@/config/whatsapp";
 import { saveCart } from "@/app/actions";
@@ -16,14 +16,15 @@ function Text({ en, ta }: { en: string; ta: string }) {
 }
 
 const benefits = [
-  ["Reach more rental customers", "அதிக வாடகை வாடிக்கையாளர்களை அடையுங்கள்"],
-  ["Earn from idle carts", "பயன்படாத வண்டிகள் மூலம் வருமானம் ஈட்டுங்கள்"],
-  ["Get listed in a premium marketplace", "பிரீமியம் சந்தையில் உங்கள் வண்டியை பதிவு செய்யுங்கள்"],
-  ["Agree platform fee before listing", "பதிவு செய்வதற்கு முன் கட்டணத்தை ஒப்புக்கொள்ளுங்கள்"]
+  ["Distance-based match assigns closest renters", "அருகிலுள்ள வாடிக்கையாளர்களுக்கு உங்களை இணைக்கும்"],
+  ["Earn recurring monthly rent from idle carts", "மாதாந்திர வாடகை மூலம் நிலையான வருமானம் ஈட்டுங்கள்"],
+  ["Verified status gains customer trust", "சரிபார்க்கப்பட்ட வண்டிகளுக்கு கூடுதல் முன்னுரிமை"],
+  ["Completely free to list - pay small platform fee", "பதிவு செய்ய முற்றிலும் இலவசம் - சிறிய சேவை கட்டணம் மட்டுமே"]
 ];
 
 export default function PublishPage() {
   const [lang, setLang] = useState<"en" | "ta">("en");
+  const [geoStatus, setGeoStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
 
   // Sync language toggle dynamically
   useEffect(() => {
@@ -48,11 +49,16 @@ export default function PublishPage() {
   const [publishFormData, setPublishFormData] = useState({
     name: "",
     phone: "",
-    cartType: "Tea", // Tea, Juice, FastFood, Snacks, Empty, Other
-    condition: "excellent", // new, excellent, good, fair
+    cartType: "With Store", // With Store, With Roof, Ice Cream, Tea Stall, Other
+    condition: "New", // New, Used - Very Good, Used - Good, Fair
     expectedRent: "",
     location: "",
+    size: "6ft x 4ft",
+    weight: "100kg",
+    stoveType: "None",
     details: "",
+    latitude: "",
+    longitude: "",
   });
 
   const [phoneError, setPhoneError] = useState("");
@@ -77,40 +83,58 @@ export default function PublishPage() {
     }
   };
 
+  // Auto-detect current coordinates using Geolocation API
+  const handleDetectLocation = () => {
+    if (!navigator.geolocation) {
+      setGeoStatus("error");
+      return;
+    }
+    setGeoStatus("loading");
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setPublishFormData((prev) => ({
+          ...prev,
+          latitude: position.coords.latitude.toFixed(6),
+          longitude: position.coords.longitude.toFixed(6),
+        }));
+        setGeoStatus("success");
+      },
+      (error) => {
+        console.error("Error fetching location:", error);
+        setGeoStatus("error");
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  };
+
   const isPublishFormValid =
     publishFormData.name.trim() !== "" &&
     publishFormData.phone.replace(/\D/g, "").length === 10 &&
     publishFormData.location.trim() !== "" &&
     publishFormData.expectedRent.trim() !== "" &&
+    publishFormData.latitude.trim() !== "" &&
+    publishFormData.longitude.trim() !== "" &&
     phoneError === "";
 
-  // This message goes to 7305514199, which must ALWAYS be in English
+  // Compiles structured message to admin WhatsApp
   const publishCompiledMessage = useMemo(() => {
     const extraDetails = publishFormData.details.trim() !== "" ? publishFormData.details.trim() : "None";
     
-    const cartTypeText = 
-      publishFormData.cartType === "Tea" ? "Tea / Coffee Cart" :
-      publishFormData.cartType === "Juice" ? "Juice / Milkshake Cart" :
-      publishFormData.cartType === "FastFood" ? "Fast Food / Chinese Stall" :
-      publishFormData.cartType === "Snacks" ? "Snacks / Chaat Cart" :
-      publishFormData.cartType === "Empty" ? "Empty / General Cart" : "Other Cart Variant";
-      
-    const conditionText =
-      publishFormData.condition === "new" ? "Brand New" :
-      publishFormData.condition === "excellent" ? "Excellent (Under 1 year)" :
-      publishFormData.condition === "good" ? "Good (1-2 years old)" : "Fair (2+ years old)";
-
     return `Hello Thalluvandi team,
 
-I want to list/publish my cart for rent:
+I want to list my food cart for rent (V2 Listing Request):
 
 Name: ${publishFormData.name.trim()}
 Phone: ${publishFormData.phone.trim()}
-Cart Type: ${cartTypeText}
-Cart Condition: ${conditionText}
+Cart Type: ${publishFormData.cartType}
+Condition: ${publishFormData.condition}
+Size: ${publishFormData.size}
+Weight: ${publishFormData.weight}
+Stove Type: ${publishFormData.stoveType}
 Expected Monthly Rent: ₹${publishFormData.expectedRent.trim()}
 Location: ${publishFormData.location.trim()}
-Equipment & Description: ${extraDetails}`;
+Coordinates: Lat ${publishFormData.latitude}, Lng ${publishFormData.longitude}
+Description: ${extraDetails}`;
   }, [publishFormData]);
 
   const handlePublishSubmit = async (e: React.FormEvent) => {
@@ -122,15 +146,23 @@ Equipment & Description: ${extraDetails}`;
         nameEn: publishFormData.cartType,
         nameTa: publishFormData.cartType,
         type: publishFormData.cartType,
-        pricePerDay: Number(publishFormData.expectedRent) || 0,
-        depositAmount: 0,
+        pricePerDay: Number(publishFormData.expectedRent) || 2000,
+        depositAmount: 2000, // standard default deposit
         availableCount: 1,
         descriptionEn: publishFormData.details,
         descriptionTa: publishFormData.details,
         vendorName: publishFormData.name,
         vendorPhone: publishFormData.phone,
         vendorLocation: publishFormData.location,
+        latitude: Number(publishFormData.latitude),
+        longitude: Number(publishFormData.longitude),
+        condition: publishFormData.condition,
+        size: publishFormData.size,
+        weight: publishFormData.weight,
+        stoveType: publishFormData.stoveType,
       });
+      
+      alert(lang === "ta" ? "வண்டி பதிவு படிவம் சமர்ப்பிக்கப்பட்டது! சரிபார்ப்பிற்குப் பிறகு இது நேரலையில் இருக்கும்." : "Cart listing submitted! It will be live after admin review.");
     } catch (err) {
       console.error("Failed to save cart to backend:", err);
     }
@@ -141,33 +173,32 @@ Equipment & Description: ${extraDetails}`;
 
   return (
     <main className="bg-[#F8F6F2] pt-16 md:pt-28">
-      {/* Dynamic SEO Meta Tags are generated by metadata config in layout/page metadata */}
       <section className="pb-20 pt-24 md:pb-24 md:pt-0">
-        <div className="site-container grid gap-12 md:grid-cols-[1fr_1.1fr] md:gap-12 items-start">
+        <div className="site-container grid gap-12 md:grid-cols-[1fr_1.2fr] md:gap-12 items-start">
           <div className="flex flex-col justify-between h-full py-4">
             <div>
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-primary">
-                <Text en="Vendor Network" ta="வண்டி உரிமையாளர் நெட்வொர்க்" />
+                <Text en="Vendor Network [V2]" ta="வண்டி உரிமையாளர் நெட்வொர்க் [V2]" />
               </p>
               <h1 className="mt-3 font-display text-5xl uppercase leading-none text-ink md:text-7xl">
                 <Text en="List Your Thallu Vandi Across Tamil Nadu" ta="தமிழ்நாடு முழுவதும் உங்கள் வண்டியை பதிவு செய்யுங்கள்" />
               </h1>
               <p className="mt-6 max-w-[680px] text-lg leading-8 text-muted">
                 <Text 
-                  en="If you own a food cart and want more rental customers, publish it on Thalluvandi. We list verified carts on our premium platform for local vendors to hire daily!" 
-                  ta="உங்களுக்கு தள்ளுவண்டி இருந்தால் தள்ளுவண்டி தளத்தில் உங்கள் வண்டியை பதிவு செய்யுங்கள் — உங்கள் பகுதிக்கேற்ப வாடிக்கையாளர்களை நாங்கள் பெற்றுத் தருகிறோம்!" 
+                  en="If you own a food cart and want more rental customers, publish it on Thalluvandi. We list verified carts on our premium platform, and nearby enquiries are routed directly to you via distance-based matching!" 
+                  ta="உங்களுக்கு தள்ளுவண்டி இருந்தால் தள்ளுவண்டி தளத்தில் உங்கள் வண்டியை பதிவு செய்யுங்கள் — அருகிலுள்ள வாடிக்கையாளர்களை உங்களுக்கு உடனடியாக இணைத்துத் தருகிறோம்!" 
                 />
               </p>
             </div>
             
             <div className="mt-10 border-t border-black/5 pt-8">
               <h3 className="font-bold text-sm uppercase tracking-wider text-primary mb-4">
-                <Text en="Need Quick Info?" ta="விரைவான தகவல் தேவையா?" />
+                <Text en="How coordinates routing works" ta="இருப்பிட வழிகாட்டி எவ்வாறு இயங்குகிறது?" />
               </h3>
               <p className="text-sm leading-relaxed text-muted max-w-md">
                 <Text 
-                  en="Filling the listing form on the right compiles a structured email/message instantly to our list coordinator on WhatsApp. We will verify your cart specifications and list it within 24 hours." 
-                  ta="வலதுபுறம் உள்ள படிவத்தை நிரப்பினால், உங்கள் வண்டி வாடகைக்கு விடப்படும் விவரங்கள் உடனடியாக எங்கள் ஒருங்கிணைப்பாளருக்கு வாட்ஸ்அப்பில் அனுப்பப்படும். 24 மணி நேரத்திற்குள் சரிபார்க்கப்பட்டு பதிவு செய்யப்படும்." 
+                  en="We capture your exact latitude and longitude coordinates. When a business owner searches for a cart near them, our algorithm calculates the distance and maps them to you if you are the closest available provider." 
+                  ta="உங்கள் வண்டியின் சரியான அட்சரேகை (Latitude) மற்றும் தீர்க்கரேகை (Longitude) தகவல்களைப் பயன்படுத்துகிறோம். இதன் மூலம் அருகிலுள்ள வாடிக்கையாளர் தேடும்போது உங்கள் வண்டி முன்னிலைப்படுத்தப்படும்." 
                 />
               </p>
             </div>
@@ -176,168 +207,231 @@ Equipment & Description: ${extraDetails}`;
           <div className="rounded-2xl border border-black/10 bg-[#fffdf7] p-6 shadow-premium md:p-8 flex flex-col gap-5">
             <div>
               <h2 className="font-display text-4xl uppercase leading-none text-ink">
-                <Text en="Quick Listing Form" ta="விரைவு பதிவு படிவம்" />
+                <Text en="Quick Listing Form [V2]" ta="விரைவு பதிவு படிவம் [V2]" />
               </h2>
             </div>
 
             <form onSubmit={handlePublishSubmit} className="space-y-4">
               
-              {/* Field 1: Name */}
-              <div className="flex flex-col">
-                <label htmlFor="name" className="text-sm font-semibold mb-1 block">
-                  <Text en="Full Name *" ta="பெயர் *" />
-                </label>
-                <input
-                  type="text"
-                  id="name"
-                  required
-                  value={publishFormData.name}
-                  onChange={handlePublishInputChange}
-                  placeholder={lang === "ta" ? "உங்கள் முழு பெயர்" : "Enter your full name"}
-                  className="w-full h-12 border border-[#e5e0d8] focus:border-primary focus:ring-2 focus:ring-primary/40 rounded-xl px-4 bg-white text-base outline-none transition"
-                />
+              {/* Name & Phone */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="flex flex-col">
+                  <label htmlFor="name" className="text-xs font-bold uppercase tracking-wider mb-1 block">
+                    <Text en="Full Name *" ta="பெயர் *" />
+                  </label>
+                  <input
+                    type="text"
+                    id="name"
+                    required
+                    value={publishFormData.name}
+                    onChange={handlePublishInputChange}
+                    placeholder={lang === "ta" ? "உங்கள் பெயர்" : "Enter your name"}
+                    className="w-full h-12 border border-[#e5e0d8] focus:border-primary focus:ring-2 focus:ring-primary/40 rounded-xl px-4 bg-white text-base outline-none transition"
+                  />
+                </div>
+                <div className="flex flex-col">
+                  <label htmlFor="phone" className="text-xs font-bold uppercase tracking-wider mb-1 block">
+                    <Text en="WhatsApp Phone Number *" ta="வாட்ஸ்அப் எண் *" />
+                  </label>
+                  <input
+                    type="tel"
+                    id="phone"
+                    required
+                    value={publishFormData.phone}
+                    onChange={handlePublishInputChange}
+                    placeholder={lang === "ta" ? "10 இலக்கங்கள்" : "10 digits"}
+                    className={`w-full h-12 border focus:ring-2 rounded-xl px-4 bg-white text-base outline-none transition ${
+                      phoneError
+                        ? "border-red-500 focus:border-red-500 focus:ring-red-500/40"
+                        : "border-[#e5e0d8] focus:border-primary focus:ring-primary/40"
+                    }`}
+                  />
+                  {phoneError && (
+                    <span className="text-xs text-red-500 mt-1 font-semibold">{phoneError}</span>
+                  )}
+                </div>
               </div>
 
-              {/* Field 2: Phone */}
-              <div className="flex flex-col">
-                <label htmlFor="phone" className="text-sm font-semibold mb-1 block">
-                  <Text en="Phone Number *" ta="கைபேசி எண் *" />
-                </label>
-                <input
-                  type="tel"
-                  id="phone"
-                  required
-                  value={publishFormData.phone}
-                  onChange={handlePublishInputChange}
-                  placeholder={lang === "ta" ? "கைபேசி எண் (10 இலக்கங்கள்)" : "Enter your mobile number"}
-                  className={`w-full h-12 border focus:ring-2 rounded-xl px-4 bg-white text-base outline-none transition ${
-                    phoneError
-                      ? "border-red-500 focus:border-red-500 focus:ring-red-500/40"
-                      : "border-[#e5e0d8] focus:border-primary focus:ring-primary/40"
-                  }`}
-                />
-                {phoneError && (
-                  <span className="text-xs text-red-500 mt-1 font-semibold">
-                    {phoneError}
+              {/* Cart Details */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="flex flex-col">
+                  <label htmlFor="cartType" className="text-xs font-bold uppercase tracking-wider mb-1 block">
+                    <Text en="Cart Type / Variant *" ta="வண்டி வகை *" />
+                  </label>
+                  <select
+                    id="cartType"
+                    value={publishFormData.cartType}
+                    onChange={handlePublishInputChange}
+                    className="w-full h-12 border border-[#e5e0d8] focus:border-primary focus:ring-2 focus:ring-primary/40 rounded-xl px-4 bg-white text-sm outline-none transition cursor-pointer"
+                  >
+                    <option value="With Store">With Store / Stove Cart</option>
+                    <option value="With Roof">With Roof / Covered</option>
+                    <option value="Ice Cream">Ice Cream Cart</option>
+                    <option value="Tea Stall">Tea Stall Station</option>
+                    <option value="Other">Other Custom Variant</option>
+                  </select>
+                </div>
+                <div className="flex flex-col">
+                  <label htmlFor="condition" className="text-xs font-bold uppercase tracking-wider mb-1 block">
+                    <Text en="Condition *" ta="நிலை *" />
+                  </label>
+                  <select
+                    id="condition"
+                    value={publishFormData.condition}
+                    onChange={handlePublishInputChange}
+                    className="w-full h-12 border border-[#e5e0d8] focus:border-primary focus:ring-2 focus:ring-primary/40 rounded-xl px-4 bg-white text-sm outline-none transition cursor-pointer"
+                  >
+                    <option value="New">Brand New</option>
+                    <option value="Used - Very Good">Used - Very Good</option>
+                    <option value="Used - Good">Used - Good</option>
+                    <option value="Fair">Fair / Work Needed</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Size, Weight, Stove */}
+              <div className="grid grid-cols-3 gap-2">
+                <div className="flex flex-col">
+                  <label htmlFor="size" className="text-[10px] font-bold uppercase tracking-wider mb-1 block">
+                    <Text en="Size" ta="அளவு" />
+                  </label>
+                  <input
+                    type="text"
+                    id="size"
+                    value={publishFormData.size}
+                    onChange={handlePublishInputChange}
+                    placeholder="e.g. 5ft x 3ft"
+                    className="w-full h-10 border border-[#e5e0d8] rounded-lg px-2 bg-white text-xs outline-none"
+                  />
+                </div>
+                <div className="flex flex-col">
+                  <label htmlFor="weight" className="text-[10px] font-bold uppercase tracking-wider mb-1 block">
+                    <Text en="Weight" ta="எடை" />
+                  </label>
+                  <input
+                    type="text"
+                    id="weight"
+                    value={publishFormData.weight}
+                    onChange={handlePublishInputChange}
+                    placeholder="e.g. 100kg"
+                    className="w-full h-10 border border-[#e5e0d8] rounded-lg px-2 bg-white text-xs outline-none"
+                  />
+                </div>
+                <div className="flex flex-col">
+                  <label htmlFor="stoveType" className="text-[10px] font-bold uppercase tracking-wider mb-1 block">
+                    <Text en="Stove Type" ta="அடுப்பு வகை" />
+                  </label>
+                  <input
+                    type="text"
+                    id="stoveType"
+                    value={publishFormData.stoveType}
+                    onChange={handlePublishInputChange}
+                    placeholder="e.g. Single Burner"
+                    className="w-full h-10 border border-[#e5e0d8] rounded-lg px-2 bg-white text-xs outline-none"
+                  />
+                </div>
+              </div>
+
+              {/* Expected Rent & Location Text */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="flex flex-col">
+                  <label htmlFor="expectedRent" className="text-xs font-bold uppercase tracking-wider mb-1 block">
+                    <Text en="Expected Monthly Rent (₹) *" ta="மாத வாடகை (₹) *" />
+                  </label>
+                  <input
+                    type="number"
+                    id="expectedRent"
+                    required
+                    value={publishFormData.expectedRent}
+                    onChange={handlePublishInputChange}
+                    placeholder="e.g. 2500"
+                    className="w-full h-12 border border-[#e5e0d8] focus:border-primary focus:ring-2 focus:ring-primary/40 rounded-xl px-4 bg-white text-base outline-none transition"
+                  />
+                </div>
+                <div className="flex flex-col">
+                  <label htmlFor="location" className="text-xs font-bold uppercase tracking-wider mb-1 block">
+                    <Text en="Location / Area *" ta="இடம் / பகுதி *" />
+                  </label>
+                  <input
+                    type="text"
+                    id="location"
+                    required
+                    value={publishFormData.location}
+                    onChange={handlePublishInputChange}
+                    placeholder="e.g. Ondipudur, Coimbatore"
+                    className="w-full h-12 border border-[#e5e0d8] focus:border-primary focus:ring-2 focus:ring-primary/40 rounded-xl px-4 bg-white text-base outline-none transition"
+                  />
+                </div>
+              </div>
+
+              {/* Coordinates Section */}
+              <div className="bg-[#fcfbf9] border border-black/5 rounded-xl p-4 space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-xs font-bold uppercase tracking-wider text-ink flex items-center gap-1">
+                    <MapPin className="w-3.5 h-3.5 text-primary" />
+                    <Text en="GPS Coordinates (Required) *" ta="GPS இருப்பிட புள்ளிகள் *" />
                   </span>
+                  <button
+                    type="button"
+                    onClick={handleDetectLocation}
+                    className="text-xs font-bold text-primary hover:text-primary/80 flex items-center gap-1 transition"
+                  >
+                    <Navigation className="w-3 h-3" />
+                    <Text en="Auto-Detect Location" ta="தானியங்கி இருப்பிடம்" />
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex flex-col">
+                    <label htmlFor="latitude" className="text-[10px] uppercase text-muted mb-1">Latitude</label>
+                    <input
+                      type="text"
+                      id="latitude"
+                      required
+                      placeholder="e.g. 11.0028"
+                      value={publishFormData.latitude}
+                      onChange={handlePublishInputChange}
+                      className="w-full h-10 border border-[#e5e0d8] rounded-lg px-3 text-sm bg-white"
+                    />
+                  </div>
+                  <div className="flex flex-col">
+                    <label htmlFor="longitude" className="text-[10px] uppercase text-muted mb-1">Longitude</label>
+                    <input
+                      type="text"
+                      id="longitude"
+                      required
+                      placeholder="e.g. 77.0347"
+                      value={publishFormData.longitude}
+                      onChange={handlePublishInputChange}
+                      className="w-full h-10 border border-[#e5e0d8] rounded-lg px-3 text-sm bg-white"
+                    />
+                  </div>
+                </div>
+
+                {geoStatus === "loading" && (
+                  <p className="text-[10px] text-amber-600 animate-pulse">Fetching GPS coordinates from browser...</p>
+                )}
+                {geoStatus === "success" && (
+                  <p className="text-[10px] text-green-600 font-bold">Successfully populated GPS coordinates!</p>
+                )}
+                {geoStatus === "error" && (
+                  <p className="text-[10px] text-red-500">Could not retrieve GPS coordinates automatically. Please input manually.</p>
                 )}
               </div>
 
-              {/* Field 3: Cart Type Dropdown */}
+              {/* Description */}
               <div className="flex flex-col">
-                <label htmlFor="cartType" className="text-sm font-semibold mb-1 block">
-                  <Text en="Cart Type / Variant *" ta="வண்டி வகை *" />
-                </label>
-                <select
-                  id="cartType"
-                  value={publishFormData.cartType}
-                  onChange={handlePublishInputChange}
-                  className="w-full h-12 border border-[#e5e0d8] focus:border-primary focus:ring-2 focus:ring-primary/40 rounded-xl px-4 bg-white text-sm outline-none transition cursor-pointer"
-                >
-                  {lang === "ta" ? (
-                    <>
-                      <option value="Tea">டீ / காபி வண்டி</option>
-                      <option value="Juice">ஜூஸ் / மில்க்ஷேக் வண்டி</option>
-                      <option value="FastFood">ஃபாஸ்ட் ஃபுட் வண்டி</option>
-                      <option value="Snacks">ஸ்நாக்ஸ் / சாட் வண்டி</option>
-                      <option value="Empty">பொதுவான / காலி வண்டி</option>
-                      <option value="Other">இதர வண்டி வகை</option>
-                    </>
-                  ) : (
-                    <>
-                      <option value="Tea">Tea / Coffee Cart</option>
-                      <option value="Juice">Juice / Milkshake Cart</option>
-                      <option value="FastFood">Fast Food / Chinese Stall</option>
-                      <option value="Snacks">Snacks / Chaat Cart</option>
-                      <option value="Empty">Empty / General Cart</option>
-                      <option value="Other">Other Cart Variant</option>
-                    </>
-                  )}
-                </select>
-              </div>
-
-              {/* Field 4: Cart Condition Dropdown */}
-              <div className="flex flex-col">
-                <label htmlFor="condition" className="text-sm font-semibold mb-1 block">
-                  <Text en="Cart Condition *" ta="வண்டியின் நிலை *" />
-                </label>
-                <select
-                  id="condition"
-                  value={publishFormData.condition}
-                  onChange={handlePublishInputChange}
-                  className="w-full h-12 border border-[#e5e0d8] focus:border-primary focus:ring-2 focus:ring-primary/40 rounded-xl px-4 bg-white text-sm outline-none transition cursor-pointer"
-                >
-                  {lang === "ta" ? (
-                    <>
-                      <option value="new">புதிய வண்டி</option>
-                      <option value="excellent">மிக நன்று (1 வருடத்திற்குள்)</option>
-                      <option value="good">நன்று (1-2 வருடங்கள்)</option>
-                      <option value="fair">பயன்படுத்தப்பட்டது (2 வருடங்களுக்கு மேல்)</option>
-                    </>
-                  ) : (
-                    <>
-                      <option value="new">Brand New</option>
-                      <option value="excellent">Excellent (Under 1 year)</option>
-                      <option value="good">Good (1-2 years old)</option>
-                      <option value="fair">Fair (2+ years old)</option>
-                    </>
-                  )}
-                </select>
-              </div>
-
-              {/* Field 5: Expected Rent */}
-              <div className="flex flex-col">
-                <label htmlFor="expectedRent" className="text-sm font-semibold mb-1 block">
-                  <Text en="Expected Monthly Rent (₹) *" ta="எதிர்பார்க்கும் மாத வாடகை (₹) *" />
-                </label>
-                <input
-                  type="number"
-                  id="expectedRent"
-                  required
-                  value={publishFormData.expectedRent}
-                  onChange={handlePublishInputChange}
-                  placeholder={lang === "ta" ? "எ.கா: 3000" : "e.g. 3000"}
-                  className="w-full h-12 border border-[#e5e0d8] focus:border-primary focus:ring-2 focus:ring-primary/40 rounded-xl px-4 bg-white text-base outline-none transition"
-                />
-              </div>
-
-              {/* Field 6: Location (just Location) */}
-              <div className="flex flex-col">
-                <label htmlFor="location" className="text-sm font-semibold mb-1 block">
-                  <Text en="Location *" ta="இடம் *" />
-                </label>
-                <input
-                  type="text"
-                  id="location"
-                  required
-                  value={publishFormData.location}
-                  onChange={handlePublishInputChange}
-                  placeholder={lang === "ta" ? "எ.கா: ஒண்டிப்புதூர், காந்திபுரம்" : "e.g. Ondipudur, Gandhipuram"}
-                  className="w-full h-12 border border-[#e5e0d8] focus:border-primary focus:ring-2 focus:ring-primary/40 rounded-xl px-4 bg-white text-base outline-none transition"
-                />
-              </div>
-
-              {/* Field 7: Equipment / details */}
-              <div className="flex flex-col">
-                <label htmlFor="details" className="text-sm font-semibold mb-1 block">
-                  <Text en="Equipment Included / Details (Optional)" ta="வண்டியில் உள்ள உபகரணங்கள் மற்றும் விவரங்கள் (விருப்பம்)" />
+                <label htmlFor="details" className="text-xs font-bold uppercase tracking-wider mb-1 block">
+                  <Text en="Equipment Included / Details (Optional)" ta="வண்டி விவரங்கள் (விருப்பம்)" />
                 </label>
                 <textarea
                   id="details"
-                  rows={4}
+                  rows={3}
                   value={publishFormData.details}
                   onChange={handlePublishInputChange}
-                  placeholder={lang === "ta" ? "வண்டியின் அளவு, அடுப்பு, அலமாரி அல்லது பிற வசதிகள்..." : "Cart size, stove type, shelves, or other features..."}
+                  placeholder="Shelves description, burner details..."
                   className="w-full border border-[#e5e0d8] focus:border-primary focus:ring-2 focus:ring-primary/40 rounded-xl p-4 bg-white text-base outline-none transition resize-none"
                 />
-              </div>
-
-              <div className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-error/20 bg-error/5 rounded-xl mt-6 mb-4">
-                <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm text-primary mb-2">
-                  <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
-                </div>
-                <p className="font-bold text-error text-sm">Tap to upload photos</p>
-                <p className="text-xs text-muted mt-1">Add 1 to 5 photos - JPG or PNG</p>
               </div>
 
               {/* Submit button */}
@@ -348,7 +442,7 @@ Equipment & Description: ${extraDetails}`;
                   !isPublishFormValid ? "opacity-40 cursor-not-allowed" : ""
                 }`}
               >
-                <Text en="Submit My Listing" ta="எனது வண்டியை பதிவு செய்" />
+                <Text en="Submit Listing Request" ta="வண்டியை பதிவு செய்" />
               </Button>
 
             </form>
@@ -360,7 +454,7 @@ Equipment & Description: ${extraDetails}`;
         <div className="site-container">
           <div className="rounded-2xl border border-black/10 bg-white p-6 md:p-8">
             <h2 className="font-display text-5xl uppercase leading-none text-ink">
-              <Text en="Why publish?" ta="ஏன் பதிவு செய்ய வேண்டும்?" />
+              <Text en="Why list on V2 platform?" ta="ஏன் வி2 தளத்தில் பதிவு செய்ய வேண்டும்?" />
             </h2>
             <div className="mt-8 grid gap-4 md:grid-cols-2 md:gap-6">
               {benefits.map(([benefit, tamil]) => (
@@ -373,87 +467,6 @@ Equipment & Description: ${extraDetails}`;
           </div>
         </div>
       </section>
-
-      {/* FAQ Section */}
-      <section className="pb-24">
-        <div className="site-container max-w-4xl">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-primary text-center">
-            <Text en="FAQ" ta="கேள்வி பதில்" />
-          </p>
-          <h2 className="mt-3 font-display text-4xl uppercase leading-none text-ink text-center md:text-5xl">
-            <Text en="Publishing Carts FAQ" ta="வண்டிகள் பதிவு கேள்வி பதில்" />
-          </h2>
-
-          <div className="mt-12 space-y-4">
-            {publishFaqs.map(([question, tamilQuestion, answer, tamilAnswer]) => (
-              <details
-                key={question}
-                className="group rounded-2xl border border-black/10 bg-white p-6 [&_summary::-webkit-details-marker]:hidden"
-              >
-                <summary className="flex cursor-pointer items-center justify-between gap-1.5 text-ink font-bold">
-                  <h3 className="font-display text-xl uppercase tracking-wide leading-tight">
-                    <Text en={question} ta={tamilQuestion} />
-                  </h3>
-                  <span className="shrink-0 rounded-full bg-orange-50 border border-orange-200/50 p-1.5 text-primary group-open:-rotate-180 transition duration-300">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-4 w-4"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth="3"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M19 9l-7 7-7-7"
-                      />
-                    </svg>
-                  </span>
-                </summary>
-                <p className="mt-3 text-[0.95rem] leading-7 text-muted border-t border-black/5 pt-3">
-                  <Text en={answer} ta={tamilAnswer} />
-                </p>
-              </details>
-            ))}
-          </div>
-        </div>
-      </section>
-      {/* Visually minimal but crawlable SEO text section */}
-      <section className="py-6 border-t border-black/5">
-        <div className="site-container">
-          <p className="text-xs text-muted-foreground text-center max-w-4xl mx-auto leading-relaxed">
-            Namma Thalluvandi accepts thallu vandi listings from all Tamil Nadu districts. List your food cart in Chennai, Madurai, Salem, Trichy, Tiruppur, Coimbatore, Erode, Vellore, Tirunelveli, Dindigul, Karur, Namakkal, Dharmapuri, Krishnagiri, Cuddalore, Villupuram, Thanjavur, Kumbakonam, Nagapattinam, Ramanathapuram, Virudhunagar and all other districts. வண்டி பதிவு தமிழ்நாடு முழுவதும்.
-          </p>
-        </div>
-      </section>
     </main>
   );
 }
-
-const publishFaqs = [
-  [
-    "How can I publish my cart on Thalluvandi?",
-    "என் வண்டியை தள்ளுவண்டி தளத்தில் எப்படி சேர்ப்பது?",
-    "Simply fill out the interactive 'Publish & List Cart' form on this page to instantly contact our network team on WhatsApp. Share your name, phone, location, expected rent, and cart type. Verification and listing are completed in 24 hours.",
-    "இப்பக்கத்திலுள்ள 'வண்டி வாடகைக்கு விட' படிவத்தை நிரப்பினால் வாட்ஸ்அப் மூலம் உடனடியாக எங்கள் குழுவினரைத் தொடர்பு கொள்ளலாம். உங்கள் பெயர், போன், இடம், எதிர்பார்க்கும் வாடகை விலை மற்றும் வண்டி வகையை அனுப்புங்கள். 24 மணி நேரத்திற்குள் பதிவு செய்யப்படும்.",
-  ],
-  [
-    "What is the commission/platform fee?",
-    "தள்ளுவண்டி தளத்தின் கமிஷன் / சேவை கட்டணம் எவ்வளவு?",
-    "Listing your cart is completely free. We only charge a small platform fee or commission when a customer successfully books your cart through our marketplace. The exact fee is discussed and agreed upon before listing.",
-    "வண்டியைப் பதிவு செய்வது முற்றிலும் இலவசம். உங்கள் வண்டியை வாடிக்கையாளர்கள் எங்கள் தளம் வழியாக புக் செய்யும் போது மட்டுமே ஒரு சிறிய சேவை கட்டணம் (Platform fee) வசூலிக்கப்படும். இதன் விவரங்களை முன்பே பேசி உறுதி செய்துகொள்ளலாம்.",
-  ],
-  [
-    "Who handles the delivery and return of published carts?",
-    "வண்டியை டெலிவரி செய்வதும் திரும்பப் பெறுவதும் யார் பொறுப்பு?",
-    "Logistics and transport are typically handled by the renter. However, as the vendor/owner, you must ensure the cart is in a clean, fully functional condition at your specified location for pickup.",
-    "போக்குவரத்து மற்றும் டெலிவரி பொதுவாக வாடகைக்கு எடுக்கும் நபரின் பொறுப்பாகும். ஆனால் வண்டி நல்ல முறையில் இயங்கும் நிலையிலும், சுத்தமாகவும் இருப்பதை வண்டியின் உரிமையாளரான நீங்கள் உறுதி செய்ய வேண்டும்.",
-  ],
-  [
-    "How do I get paid for rentals?",
-    "என் வண்டிக்கான வாடகை எனக்கு எப்படி கிடைக்கும்?",
-    "Rental payouts are transferred directly to you via UPI or Cash weekly, or as per the custom payout frequency we establish with you upon listing.",
-    "வண்டிக்கான வாடகை வாராந்திர அடிப்படையில் UPI அல்லது ரொக்கமாக (Cash) நேரடியாக உங்களிடம் ஒப்படைக்கப்படும். அல்லது பதிவு செய்யும் போது பேசப்படும் ஒப்பந்தத்தின்படி வழங்கப்படும்.",
-  ],
-];

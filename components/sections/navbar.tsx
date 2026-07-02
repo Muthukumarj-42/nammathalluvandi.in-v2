@@ -96,7 +96,7 @@ export function Navbar() {
                 </span>
               )}
             </Link>
-            <Button asChild size="default" className="bg-[#f97316] text-[#0a0a08] hover:bg-[#f97316]/95 border-none rounded-none font-display text-sm tracking-[0.12em] uppercase shrink-0">
+            <Button asChild size="default" className="bg-[#f97316] text-[#0a0a08] hover:bg-[#f97316]/95 border-none rounded-xl font-display text-sm tracking-[0.12em] uppercase shrink-0">
               <Link href="/contact#enquiry-form" className="flex items-center gap-1.5 whitespace-nowrap">
                 <MessageCircle size={18} className="shrink-0" />
                 <span className="en">💬 Chat</span>

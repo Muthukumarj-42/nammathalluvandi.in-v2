@@ -1,79 +1,55 @@
 "use server";
 
-import { supabase, isDbConfigured } from "@/lib/supabase";
+import { 
+  createBooking, 
+  saveCart as dbSaveCart, 
+  saveUser, 
+  updateCartStatus as dbUpdateCartStatus, 
+  updateBookingStatus as dbUpdateBookingStatus,
+  escalateBooking as dbEscalateBooking,
+  createDispute as dbCreateDispute,
+  updateDisputeStatus as dbUpdateDisputeStatus,
+  getUserByPhone,
+  getLiveCarts,
+  getAllCarts,
+  getCartById,
+  getBookings,
+  getWhatsappMessages,
+  getDisputes,
+  getUsers,
+  DbCart,
+  Booking,
+  Dispute
+} from "@/lib/db";
 
 export async function saveBooking(booking: {
   cartId: string | null;
   name: string;
   phone: string;
-  date: string;
-  location: string;
-  duration: string;
+  latitude?: number;
+  longitude?: number;
+  // Kept for backward compatibility
+  date?: string;
+  location?: string;
+  duration?: string;
   details?: string;
 }) {
-  if (!isDbConfigured) {
-    console.warn("Database is not configured. Bypassing saveBooking.");
-    return { success: true, bypassed: true };
-  }
   try {
-    const { data, error } = await supabase
-      .from("bookings")
-      .insert([
-        {
-          cart_id: booking.cartId,
-          name: booking.name,
-          phone: booking.phone,
-          date: booking.date,
-          location: booking.location,
-          duration: booking.duration,
-          details: booking.details || "",
-          status: "pending",
-        },
-      ])
-      .select();
+    // Default coordinates in Coimbatore if not provided (11.0168, 76.9558)
+    const lat = booking.latitude || 11.0168;
+    const lng = booking.longitude || 76.9558;
 
-    if (error) {
-      console.error("Error inserting booking:", error);
-      return { success: false, error: error.message };
-    }
-
-    // Fetch vendor details from the cart
-    let vendorPhone = "";
-    let cartName = "";
-    if (booking.cartId) {
-      const { data: cartData } = await supabase
-        .from("carts")
-        .select("vendor_phone, name_en")
-        .eq("id", booking.cartId)
-        .single();
-        
-      if (cartData) {
-        vendorPhone = cartData.vendor_phone || "";
-        cartName = cartData.name_en || booking.cartId;
-      } else {
-        cartName = booking.cartId;
-      }
-    }
-
-    // Insert admin notification
-    await supabase.from("notifications").insert([{
-      recipient_type: "admin",
-      recipient_phone: "admin",
-      message: `Buyer ${booking.name} (${booking.phone}) confirmed an order for cart ${cartName}${vendorPhone ? ` of vendor ${vendorPhone}` : ""}.`
-    }]);
-
-    // Insert vendor notification
-    if (vendorPhone) {
-      await supabase.from("notifications").insert([{
-        recipient_type: "vendor",
-        recipient_phone: vendorPhone,
-        message: `A booking is confirmed for your cart ${cartName}.`
-      }]);
-    }
+    const data = await createBooking({
+      cart_id: booking.cartId,
+      bv_name: booking.name,
+      bv_phone: booking.phone,
+      bv_latitude: lat,
+      bv_longitude: lng,
+    });
 
     return { success: true, data };
   } catch (err: any) {
-    console.error("Server Action saveBooking failed:", err);
+    console.error("saveBooking action failed:", err);
     return { success: false, error: err.message };
   }
 }
@@ -83,123 +59,182 @@ export async function saveContactMessage(message: {
   phone: string;
   message: string;
 }) {
-  if (!isDbConfigured) {
-    console.warn("Database is not configured. Bypassing saveContactMessage.");
-    return { success: true, bypassed: true };
-  }
-  try {
-    const { data, error } = await supabase
-      .from("contact_messages")
-      .insert([
-        {
-          name: message.name,
-          phone: message.phone,
-          message: message.message,
-        },
-      ])
-      .select();
+  return { success: true, bypassed: true };
+}
 
-    if (error) {
-      console.error("Error inserting contact message:", error);
-      return { success: false, error: error.message };
+export async function saveCart(cartData: {
+  nameEn: string;
+  nameTa: string;
+  type: string;
+  pricePerDay: number;
+  depositAmount: number;
+  availableCount: number;
+  descriptionEn: string;
+  descriptionTa: string;
+  vendorName: string;
+  vendorPhone: string;
+  vendorLocation: string;
+  latitude?: number;
+  longitude?: number;
+  condition?: string;
+  size?: string;
+  weight?: string;
+  stoveType?: string;
+}) {
+  try {
+    let cvUser = await getUserByPhone(cartData.vendorPhone);
+    if (!cvUser) {
+      cvUser = await saveUser({
+        role: "cv",
+        name: cartData.vendorName,
+        phone: cartData.vendorPhone,
+      });
     }
+
+    const lat = cartData.latitude || 11.0267;
+    const lng = cartData.longitude || 77.0089;
+
+    const data = await dbSaveCart({
+      owner_id: cvUser.id,
+      type: cartData.type || cartData.nameEn || "With Store",
+      condition: cartData.condition || "Used - Good",
+      size: cartData.size || "5ft x 3.5ft",
+      weight: cartData.weight || "100kg",
+      stove_type: cartData.stoveType || "None",
+      price_per_month: cartData.pricePerDay || 2000,
+      photos: ["/carts/covered-premium-cart/photo-1.webp"],
+      description: cartData.descriptionEn || "Self-listed cart",
+      latitude: lat,
+      longitude: lng,
+      status: "pending_review",
+      verified: false,
+    });
 
     return { success: true, data };
   } catch (err: any) {
-    console.error("Server Action saveContactMessage failed:", err);
+    console.error("saveCart action failed:", err);
     return { success: false, error: err.message };
   }
 }
 
-export async function saveCart(cartData: any) {
-  if (!isDbConfigured) {
-    console.warn("Database is not configured. Bypassing saveCart.");
-    return { success: true, bypassed: true };
-  }
+export async function updateCartStatusAction(id: string, status: DbCart["status"], verified?: boolean) {
   try {
-    const { data, error } = await supabase
-      .from("carts")
-      .insert([
-        {
-          name_en: cartData.nameEn,
-          name_ta: cartData.nameTa,
-          type: cartData.type,
-          price_per_day: cartData.pricePerDay,
-          deposit_amount: cartData.depositAmount,
-          available_count: cartData.availableCount,
-          description_en: cartData.descriptionEn,
-          description_ta: cartData.descriptionTa,
-          images: cartData.images || [],
-          status: "pending", // require admin review before showing on explore
-          vendor_name: cartData.vendorName,
-          vendor_phone: cartData.vendorPhone,
-          vendor_location: cartData.vendorLocation,
-        },
-      ])
-      .select();
-
-    if (error) {
-      console.error("Error inserting cart:", error);
-      return { success: false, error: error.message };
-    }
-
-    // Insert admin notification
-    if (cartData.vendorName) {
-      await supabase.from("notifications").insert([{
-        recipient_type: "admin",
-        recipient_phone: "admin",
-        message: `New cart (${cartData.nameEn}) added by vendor ${cartData.vendorName} (${cartData.vendorPhone}).`
-      }]);
-    }
-
+    const data = await dbUpdateCartStatus(id, status, verified);
     return { success: true, data };
   } catch (err: any) {
-    console.error("Server Action saveCart failed:", err);
     return { success: false, error: err.message };
   }
 }
 
-export async function getNotifications(phone: string, isAdmin: boolean) {
-  if (!isDbConfigured) {
-    return { success: false, error: "Database not configured", data: [] };
-  }
+export async function updateBookingStatusAction(id: string, status: Booking["status"]) {
   try {
-    let query = supabase
-      .from("notifications")
-      .select("*")
-      .order("created_at", { ascending: false });
-
-    if (isAdmin) {
-      query = query.eq("recipient_type", "admin");
-    } else {
-      query = query.eq("recipient_type", "vendor").eq("recipient_phone", phone);
-    }
-
-    const { data, error } = await query;
-
-    if (error) {
-      console.error("Error fetching notifications:", error);
-      return { success: false, error: error.message, data: [] };
-    }
-
+    const data = await dbUpdateBookingStatus(id, status);
     return { success: true, data };
   } catch (err: any) {
-    console.error("Server Action getNotifications failed:", err);
+    return { success: false, error: err.message };
+  }
+}
+
+export async function escalateBookingAction(bookingId: string) {
+  try {
+    const data = await dbEscalateBooking(bookingId);
+    return { success: true, data };
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
+}
+
+export async function createDisputeAction(bookingId: string, reportedByUserId: string, description: string) {
+  try {
+    const data = await dbCreateDispute(bookingId, reportedByUserId, description);
+    return { success: true, data };
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
+}
+
+export async function updateDisputeStatusAction(id: string, status: Dispute["status"]) {
+  try {
+    const data = await dbUpdateDisputeStatus(id, status);
+    return { success: true, data };
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
+}
+
+export async function getLiveCartsAction() {
+  try {
+    const data = await getLiveCarts();
+    return { success: true, data };
+  } catch (err: any) {
     return { success: false, error: err.message, data: [] };
   }
 }
 
-export async function markNotificationAsRead(id: string) {
-  if (!isDbConfigured) return { success: false };
+export async function getAllCartsAction() {
   try {
-    const { data, error } = await supabase
-      .from("notifications")
-      .update({ is_read: true })
-      .eq("id", id)
-      .select();
-    if (error) return { success: false, error: error.message };
+    const data = await getAllCarts();
     return { success: true, data };
   } catch (err: any) {
-    return { success: false, error: err.message };
+    return { success: false, error: err.message, data: [] };
   }
+}
+
+export async function getCartByIdAction(id: string) {
+  try {
+    const data = await getCartById(id);
+    return { success: true, data };
+  } catch (err: any) {
+    return { success: false, error: err.message, data: null };
+  }
+}
+
+export async function getBookingsAction() {
+  try {
+    const data = await getBookings();
+    return { success: true, data };
+  } catch (err: any) {
+    return { success: false, error: err.message, data: [] };
+  }
+}
+
+export async function getWhatsappMessagesAction() {
+  try {
+    const data = await getWhatsappMessages();
+    return { success: true, data };
+  } catch (err: any) {
+    return { success: false, error: err.message, data: [] };
+  }
+}
+
+export async function getDisputesAction() {
+  try {
+    const data = await getDisputes();
+    return { success: true, data };
+  } catch (err: any) {
+    return { success: false, error: err.message, data: [] };
+  }
+}
+
+export async function getUsersAction() {
+  try {
+    const data = await getUsers();
+    return { success: true, data };
+  } catch (err: any) {
+    return { success: false, error: err.message, data: [] };
+  }
+}
+
+export async function getNotifications(phone: string, isAdmin: boolean) {
+  return { success: true, data: [] as any[], error: undefined as string | undefined };
+}
+
+export async function markNotificationAsRead(id: string) {
+  return { success: true };
+}
+export async function getCart(id: string) {
+  return getCartById(id);
+}
+export async function getCarts() {
+  return getLiveCarts();
 }

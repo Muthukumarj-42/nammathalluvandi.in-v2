@@ -534,7 +534,7 @@ export default function ContactPage() {
       {/* Hero Section */}
       <section className="relative min-h-[50vh] flex flex-col justify-center items-center text-center px-6 py-20 border-b border-[#ffb690]/10 overflow-hidden bg-[#160c06]">
         <div className="absolute inset-0 opacity-10 map-grid"></div>
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#0a0a08] to-[#0a0a08]"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background to-background"></div>
         <div className="relative z-10 max-w-4xl site-container">
           <p className="font-sans text-xs font-bold uppercase tracking-[0.2em] text-[#ffb690] mb-3">
             <Text en="GET IN TOUCH" ta="தொடர்பு கொள்ள" />

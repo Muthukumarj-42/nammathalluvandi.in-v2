@@ -56,7 +56,7 @@ export function Footer() {
                 href="https://wa.me/918838292849"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="grid h-11 w-11 place-items-center rounded-none border border-outline-variant/30 text-on-surface-variant hover:bg-surface-variant transition"
+                className="grid h-11 w-11 place-items-center rounded-xl border border-outline-variant/30 text-on-surface-variant hover:bg-surface-variant transition"
               >
                 <span className="sr-only">WhatsApp</span>
                 <svg className="h-5 w-5 fill-current" viewBox="0 0 24 24">
@@ -66,7 +66,7 @@ export function Footer() {
               {/* Phone Icon Link */}
               <a
                 href="tel:+919442763940"
-                className="grid h-11 w-11 place-items-center rounded-none border border-outline-variant/30 text-on-surface-variant hover:bg-surface-variant transition"
+                className="grid h-11 w-11 place-items-center rounded-xl border border-outline-variant/30 text-on-surface-variant hover:bg-surface-variant transition"
               >
                 <span className="sr-only">Phone</span>
                 <Phone size={18} />
@@ -76,7 +76,7 @@ export function Footer() {
                 href="https://www.instagram.com/nammathalluvandi.in"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="grid h-11 w-11 place-items-center rounded-none border border-outline-variant/30 text-on-surface-variant hover:bg-surface-variant transition"
+                className="grid h-11 w-11 place-items-center rounded-xl border border-outline-variant/30 text-on-surface-variant hover:bg-surface-variant transition"
               >
                 <span className="sr-only">Instagram</span>
                 <Instagram size={18} />

@@ -127,10 +127,10 @@ export default function HowItWorksPage() {
             <div className="absolute left-7 top-8 h-[calc(100%-64px)] w-px bg-[#f97316]/20" />
             {steps.map(([step, tamilStep], index) => (
               <Reveal key={step} className="relative grid grid-cols-[72px_1fr] gap-4 py-4 md:grid-cols-[92px_1fr] md:gap-6 md:py-6">
-                <div className="relative z-10 grid h-14 w-14 place-items-center rounded-none bg-[#f97316] font-display text-3xl text-[#0a0a08] font-bold">
+                <div className="relative z-10 grid h-14 w-14 place-items-center rounded-2xl bg-[#f97316] font-display text-3xl text-[#0a0a08] font-bold shadow-premium">
                   {String(index + 1).padStart(2, "0")}
                 </div>
-                <div className="rounded-none border border-outline-variant/20 bg-surface p-6">
+                <div className="rounded-3xl border border-outline-variant/20 bg-surface p-6 shadow-premium">
                   <h2 className="font-display text-2xl uppercase leading-none text-on-surface md:text-3xl">
                     <Text en={step} ta={tamilStep} />
                   </h2>
@@ -139,9 +139,9 @@ export default function HowItWorksPage() {
             ))}
           </div>
 
-          <div className="mt-10 grid gap-4 rounded-none border border-outline-variant/20 bg-surface p-6 md:grid-cols-2 md:gap-6">
-            <div className="relative pl-6">
-              <div className="absolute left-0 top-0 w-1 h-full bg-[#f97316]" />
+          <div className="mt-10 grid gap-4 rounded-3xl border border-outline-variant/20 bg-surface p-6 md:grid-cols-2 md:gap-6 shadow-premium">
+            <div className="relative pl-6 py-2 rounded-2xl overflow-hidden">
+              <div className="absolute left-0 top-0 w-1.5 h-full bg-[#f97316]" />
               <MessageCircle className="text-[#f97316] mb-2" />
               <h3 className="font-display text-xl uppercase text-on-surface tracking-wider">
                 <Text en="Pre-filled inquiry" ta="விரைவான தகவல்" />
@@ -150,8 +150,8 @@ export default function HowItWorksPage() {
                 <Text en="Each cart opens WhatsApp with that cart name." ta="ஒவ்வொரு தள்ளுவண்டிக்கும் தனிப்பட்ட வாட்ஸ்அப் மெசேஜ் தயாராக இருக்கும்." />
               </p>
             </div>
-            <div className="relative pl-6">
-              <div className="absolute left-0 top-0 w-1 h-full bg-[#f97316]" />
+            <div className="relative pl-6 py-2 rounded-2xl overflow-hidden">
+              <div className="absolute left-0 top-0 w-1.5 h-full bg-[#f97316]" />
               <WalletCards className="text-[#f97316] mb-2" />
               <h3 className="font-display text-xl uppercase text-on-surface tracking-wider">
                 <Text en="Clear deposit" ta="தெளிவான முன்பணம்" />
@@ -170,7 +170,7 @@ export default function HowItWorksPage() {
           <h2 className="mt-3 font-display text-4xl uppercase leading-none text-on-surface">
             <Text en="Frequently Asked Questions" ta="அடிக்கடி கேட்கப்படும் கேள்விகள்" />
           </h2>
-          <div className="mt-8 divide-y divide-outline-variant/20 rounded-none border border-outline-variant/20 bg-surface">
+          <div className="mt-8 divide-y divide-outline-variant/20 rounded-3xl border border-outline-variant/20 bg-surface overflow-hidden shadow-premium">
             {faqs.map(([question, tamilQuestion, answer, tamilAnswer]) => (
               <details key={question} className="group p-6 open:bg-[#251913] transition-colors duration-300">
                 <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-bold text-on-surface">
