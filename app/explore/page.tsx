@@ -7,6 +7,7 @@ import { Search, ChevronDown, SlidersHorizontal, ArrowLeft, Navigation, MapPin }
 import { Button } from "@/components/ui/button";
 import { getLiveCartsAction } from "@/app/actions";
 import { calculateHaversineDistance } from "@/lib/routing";
+import { mapDbCartToCart } from "@/lib/carts";
 import { IconSearchStove, IconTent, IconIceCream, IconCoffee } from "@/components/ui/icons";
 
 const SUGGESTIONS = [
@@ -73,7 +74,8 @@ function BrowseCartsPageContent() {
       try {
         const res = await getLiveCartsAction();
         if (res.success && res.data) {
-          setDbCarts(res.data);
+          const mapped = res.data.map(mapDbCartToCart);
+          setDbCarts(mapped);
         }
       } catch (err) {
         console.error("Failed to load live carts:", err);
@@ -129,13 +131,31 @@ function BrowseCartsPageContent() {
   const filteredCarts = useMemo(() => {
     const qLocation = searchParams.get("location");
     const list = dbCarts.filter(cart => {
+      const cartTypeStr = Array.isArray(cart.type) ? cart.type.join(", ") : (cart.type || "");
       const matchesSearch = 
-        cart.type.toLowerCase().includes(search.toLowerCase()) || 
-        (cart.description && cart.description.toLowerCase().includes(search.toLowerCase()));
+        cartTypeStr.toLowerCase().includes(search.toLowerCase()) || 
+        (cart.nameEn && cart.nameEn.toLowerCase().includes(search.toLowerCase())) ||
+        (cart.descriptionEn && cart.descriptionEn.toLowerCase().includes(search.toLowerCase())) ||
+        (cart.descriptionTa && cart.descriptionTa.toLowerCase().includes(search.toLowerCase()));
       
-      const matchesType = selectedTypes.length === 0 || selectedTypes.includes(cart.type);
-      const matchesCondition = selectedConditions.length === 0 || selectedConditions.includes(cart.condition);
-      const matchesPrice = cart.price_per_month <= maxPrice;
+      const matchesType = selectedTypes.length === 0 || selectedTypes.some(selected => {
+        const keyword = 
+          selected === "With Store" ? "stove" :
+          selected === "With Roof" ? "roof" :
+          selected === "Ice Cream" ? "ice cream" :
+          selected === "Tea Stall" ? "tea" : selected.toLowerCase();
+
+        return cartTypeStr.toLowerCase().includes(keyword.toLowerCase()) || 
+               (cart.nameEn && cart.nameEn.toLowerCase().includes(keyword.toLowerCase()));
+      });
+
+      const matchesCondition = selectedConditions.length === 0 || selectedConditions.some(cond => 
+        (cart.condition || "").toLowerCase().includes(cond.toLowerCase())
+      );
+      
+      const matchesPrice = cart.pricePerMonth !== undefined
+        ? cart.pricePerMonth <= maxPrice
+        : (cart.pricePerDay * 30) <= maxPrice;
 
       // Handle location query filter
       let matchesLocation = true;
@@ -144,9 +164,9 @@ function BrowseCartsPageContent() {
         const queryLoc = qLocation.toLowerCase();
         
         if (queryLoc === "coimbatore") {
-          matchesLocation = cart.latitude < 11.08;
+          matchesLocation = (cart.latitude || 0) < 11.08;
         } else if (queryLoc === "tiruppur") {
-          matchesLocation = cart.latitude >= 11.08;
+          matchesLocation = (cart.latitude || 0) >= 11.08;
         } else {
           matchesLocation = cartLoc.includes(queryLoc);
         }
@@ -159,11 +179,11 @@ function BrowseCartsPageContent() {
     if (userCoords) {
       return list.map(cart => {
         const dist = calculateHaversineDistance(userCoords, {
-          latitude: cart.latitude,
-          longitude: cart.longitude
+          latitude: cart.latitude || 11.0168,
+          longitude: cart.longitude || 76.9558
         });
         return { ...cart, distanceKm: Number(dist.toFixed(2)) };
-      }).sort((a, b) => a.distanceKm - b.distanceKm);
+      }).sort((a, b) => (a.distanceKm || 0) - (b.distanceKm || 0));
     }
 
     return list;
@@ -397,20 +417,20 @@ function BrowseCartsPageContent() {
                   <div className="flex flex-col flex-grow">
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-[9px] uppercase tracking-widest bg-[#0a0a08] text-[#ffb690] px-2 py-0.5 border border-[#ffb690]/20 rounded-md">
-                        {cart.type.toUpperCase()}
+                        {(cart.nameEn || "").toUpperCase()}
                       </span>
                       {cart.verified && (
                         <span className="text-[9px] text-[#25D366] font-bold uppercase tracking-wider">✓ Verified</span>
                       )}
                     </div>
 
-                    <h3 className="font-display text-xl text-[#fffdf7] tracking-wider uppercase mb-1 line-clamp-1 mt-1">{cart.type}</h3>
-                    <p className="text-xs text-[#f6ded3]/70 mb-4 line-clamp-2 leading-relaxed h-10">{cart.description || "Premium rental food cart option."}</p>
+                    <h3 className="font-display text-xl text-[#fffdf7] tracking-wider uppercase mb-1 line-clamp-1 mt-1">{cart.nameEn}</h3>
+                    <p className="text-xs text-[#f6ded3]/70 mb-4 line-clamp-2 leading-relaxed h-10">{cart.descriptionEn || "Premium rental food cart option."}</p>
                     
                     <div className="mt-auto pt-4 border-t border-[#ffb690]/10 flex justify-between items-end">
                       <div>
                         <span className="text-[9px] uppercase tracking-wider text-[#f6ded3]/40 block">Monthly Rent</span>
-                        <span className="font-display text-2xl text-[#ffca45] block">₹{cart.price_per_month.toLocaleString()}</span>
+                        <span className="font-display text-2xl text-[#ffca45] block">₹{(cart.pricePerMonth || cart.pricePerDay * 30).toLocaleString()}</span>
                       </div>
                       <Button asChild className="bg-[#f97316] text-[#0a0a08] hover:bg-[#f97316]/95 border-none rounded-lg font-display uppercase tracking-widest text-xs py-2 px-6">
                         <Link href={`/carts/${cart.id}`}>Details</Link>

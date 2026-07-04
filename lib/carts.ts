@@ -16,6 +16,11 @@ export interface Cart {
   whatsappMessageTa: string;
   descriptionEn?: string;
   descriptionTa?: string;
+  condition?: string;
+  pricePerMonth?: number;
+  latitude?: number;
+  longitude?: number;
+  verified?: boolean;
 }
 
 export const filters = [
@@ -26,42 +31,84 @@ export const filters = [
   { en: "Tea Stall", ta: "டீ கடை" },
 ];
 
-function mapDbCartToCart(item: any): Cart {
-  const nameTa = 
-    item.type === "With Store" ? "அடுப்புடன் கூடிய வண்டி" :
-    item.type === "With Roof" ? "அலுமினியம் வண்டி" :
-    item.type === "Ice Cream" ? "ஐஸ் கிரீம் வண்டி" : "தேநீர் வண்டி";
+export function mapDbCartToCart(item: any): Cart {
+  let typeArray: string[] = [];
+  if (Array.isArray(item.type)) {
+    typeArray = item.type;
+  } else if (typeof item.type === "string") {
+    typeArray = [item.type];
+  }
 
-  const size = item.size || "5ft x 3ft";
+  const typeStr = typeArray.join(", ").toLowerCase();
+  const hasStove = typeStr.includes("stove") || typeStr.includes("store");
+  const hasRoof = typeStr.includes("roof") || typeStr.includes("cover");
+  const isIceCream = typeStr.includes("ice cream") || typeStr.includes("icecream");
+  const isTea = typeStr.includes("tea") || typeStr.includes("coffee");
+
+  let categoryEn = "Tea Stall";
+  let nameTa = "தேநீர் வண்டி";
+
+  if (hasStove) {
+    categoryEn = "With Store";
+    nameTa = "அடுப்புடன் கூடிய வண்டி";
+  } else if (hasRoof) {
+    categoryEn = "With Roof";
+    nameTa = "அலுமினியம் வண்டி";
+  } else if (isIceCream) {
+    categoryEn = "Ice Cream";
+    nameTa = "ஐஸ் கிரீம் வண்டி";
+  } else if (isTea) {
+    categoryEn = "Tea Stall";
+    nameTa = "தேநீர் வண்டி";
+  } else if (typeArray.length > 0) {
+    categoryEn = typeArray[0];
+    nameTa = item.name_ta || item.nameTa || "உணவு வண்டி";
+  }
+
+  const nameEn = item.name_en || item.nameEn || categoryEn;
+  const nameTaFinal = item.name_ta || item.nameTa || nameTa;
+
+  const size = item.size || "5ft x 3.5ft";
   const weight = item.weight || "100kg";
   const stove = item.stove_type || "None";
+  const condition = item.condition || "Used - Good";
+
+  const pricePerDay = item.price_per_day 
+    ? Number(item.price_per_day) 
+    : (Math.round(Number(item.price_per_month) / 30) || 80);
 
   return {
     id: item.id,
-    nameEn: item.type,
-    nameTa: nameTa,
-    type: [item.type],
-    pricePerDay: Math.round(Number(item.price_per_month) / 30) || 80,
-    depositAmount: 2000,
-    available: item.status === "live",
-    availableCount: item.status === "live" ? 1 : 0,
-    city: ["Coimbatore"],
-    featuresEn: [
+    nameEn: nameEn,
+    nameTa: nameTaFinal,
+    type: typeArray,
+    pricePerDay: pricePerDay,
+    depositAmount: Number(item.deposit_amount) || Number(item.depositAmount) || 2000,
+    available: item.status === "live" || item.available === true,
+    availableCount: Number(item.available_count) || Number(item.availableCount) || 1,
+    city: Array.isArray(item.city) ? item.city : [item.city || "Coimbatore"],
+    featuresEn: Array.isArray(item.features_en) ? item.features_en : (Array.isArray(item.featuresEn) ? item.featuresEn : [
       `Size: ${size}`,
       `Weight: ${weight}`,
       `Stove Type: ${stove}`,
-      item.condition ? `Condition: ${item.condition}` : "Sturdy metal build"
-    ],
-    featuresTa: [
+      `Condition: ${condition}`
+    ]),
+    featuresTa: Array.isArray(item.features_ta) ? item.features_ta : (Array.isArray(item.featuresTa) ? item.featuresTa : [
       `அளவு: ${size}`,
       `எடை: ${weight}`,
       `அடுப்பு: ${stove}`,
-      item.condition ? `வண்டியின் நிலை: ${item.condition}` : "உறுதியான கட்டமைப்பு"
-    ],
-    images: item.photos && item.photos.length > 0 ? item.photos : ["/carts/covered-premium-cart/photo-1.webp"],
-    whatsappMessageTa: `வணக்கம், நான் ${nameTa} வாடகைக்கு எடுக்க விரும்புகிறேன்.`,
-    descriptionEn: item.description || "",
-    descriptionTa: item.description || ""
+      `வண்டியின் நிலை: ${condition}`
+    ]),
+    images: Array.isArray(item.photos) && item.photos.length > 0 ? item.photos : 
+            (Array.isArray(item.images) && item.images.length > 0 ? item.images : ["/carts/covered-premium-cart/photo-1.webp"]),
+    whatsappMessageTa: item.whatsapp_message_ta || item.whatsappMessageTa || `வணக்கம், நான் ${nameTaFinal} வாடகைக்கு எடுக்க விரும்புகிறேன்.`,
+    descriptionEn: item.description_en || item.descriptionEn || item.description || "",
+    descriptionTa: item.description_ta || item.descriptionTa || item.description || "",
+    condition: condition,
+    pricePerMonth: pricePerDay * 30,
+    latitude: Number(item.latitude) || 11.0168,
+    longitude: Number(item.longitude) || 76.9558,
+    verified: item.verified || false
   };
 }
 
