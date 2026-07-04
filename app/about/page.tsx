@@ -106,13 +106,8 @@ export default function AboutPage() {
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
               <Button asChild size="lg" className="bg-[#25D366] hover:bg-[#20ba5a] text-white">
-                <Link href="/contact" className="en">
-                  Contact Us
-                </Link>
-              </Button>
-              <Button asChild size="lg" className="bg-[#25D366] hover:bg-[#20ba5a] text-white ta tamil-text">
                 <Link href="/contact">
-                  தொடர்பு கொள்ள
+                  <Text en="Contact Us" ta="தொடர்பு கொள்ள" />
                 </Link>
               </Button>
             </div>

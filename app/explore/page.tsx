@@ -44,6 +44,15 @@ function getCartLocationName(cart: any): string {
   return lat >= 11.08 ? "Tiruppur" : "Coimbatore";
 }
 
+function Text({ en, ta }: { en: string; ta: string }) {
+  return (
+    <>
+      <span className="en">{en}</span>
+      <span className="ta tamil-text">{ta}</span>
+    </>
+  );
+}
+
 function BrowseCartsPageContent() {
   const searchParams = useSearchParams();
   const [search, setSearch] = useState("");
@@ -52,6 +61,26 @@ function BrowseCartsPageContent() {
   const [maxPrice, setMaxPrice] = useState(200); // daily rent (up to ₹200/day)
   const [dbCarts, setDbCarts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [lang, setLang] = useState<"en" | "ta">("en");
+
+  // Sync language toggle dynamically
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const currentLang = document.documentElement.dataset.lang === "ta" ? "ta" : "en";
+    setLang(currentLang);
+
+    const observer = new MutationObserver(() => {
+      const updatedLang = document.documentElement.dataset.lang === "ta" ? "ta" : "en";
+      setLang(updatedLang);
+    });
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["data-lang"],
+    });
+
+    return () => observer.disconnect();
+  }, []);
   
   // Geolocation sorting state
   const [userCoords, setUserCoords] = useState<{ latitude: number; longitude: number } | null>(null);
@@ -199,8 +228,12 @@ function BrowseCartsPageContent() {
       <section className="relative overflow-hidden border-b border-[#ffb690]/10 pt-3 pb-6 md:py-8 px-4 md:px-8">
         <div className="site-container max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
           <div>
-            <span className="font-display text-xs tracking-widest text-[#f97316] uppercase">Fleet Directory</span>
-            <h1 className="font-display text-4xl md:text-6xl text-[#fffdf7] mt-1 uppercase">BROWSE THE FLEET</h1>
+            <span className="font-display text-xs tracking-widest text-[#f97316] uppercase">
+              <Text en="Fleet Directory" ta="வண்டிகளின் பட்டியல்" />
+            </span>
+            <h1 className="font-display text-4xl md:text-6xl text-[#fffdf7] mt-1 uppercase">
+              <Text en="BROWSE THE FLEET" ta="வண்டிகளைத் தேடுங்கள்" />
+            </h1>
           </div>
           
           <div className="w-full md:w-96 relative flex items-center">
@@ -217,22 +250,34 @@ function BrowseCartsPageContent() {
             {/* Animated suggestion placeholder */}
             {!search && !isFocused && (
               <div className="absolute left-9 pointer-events-none text-xs text-[#f6ded3]/40 flex items-center gap-1 select-none z-10">
-                <span>Search by</span>
+                <span>
+                  <Text en="Search by" ta="தேடுக: " />
+                </span>
                 <span className="relative overflow-hidden inline-block h-4 w-28">
-                  {SUGGESTIONS.map((sug, idx) => (
-                    <span
-                      key={sug}
-                      className={`absolute left-0 top-0 transition-all duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] ${
-                        idx === suggestionIndex 
-                          ? "opacity-100 translate-y-0" 
-                          : idx === (suggestionIndex - 1 + SUGGESTIONS.length) % SUGGESTIONS.length
-                            ? "opacity-0 -translate-y-4"
-                            : "opacity-0 translate-y-4"
-                      }`}
-                    >
-                      &quot;{sug}&quot;...
-                    </span>
-                  ))}
+                  {SUGGESTIONS.map((sug, idx) => {
+                    const sugTa = 
+                      sug === "stove" ? "அடுப்பு" :
+                      sug === "roof" ? "மேற்கூரை" :
+                      sug === "ice cream" ? "ஐஸ் கிரீம்" :
+                      sug === "tea stall" ? "டீ கடை" :
+                      sug === "coimbatore" ? "கோவை" :
+                      sug === "tiruppur" ? "திருப்பூர்" :
+                      sug === "double burner" ? "இரட்டை அடுப்பு" : sug;
+                    return (
+                      <span
+                        key={sug}
+                        className={`absolute left-0 top-0 transition-all duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] ${
+                          idx === suggestionIndex 
+                            ? "opacity-100 translate-y-0" 
+                            : idx === (suggestionIndex - 1 + SUGGESTIONS.length) % SUGGESTIONS.length
+                              ? "opacity-0 -translate-y-4"
+                              : "opacity-0 translate-y-4"
+                        }`}
+                      >
+                        &quot;<Text en={sug} ta={sugTa} />&quot;...
+                      </span>
+                    );
+                  })}
                 </span>
               </div>
             )}
@@ -245,7 +290,9 @@ function BrowseCartsPageContent() {
               }`}
             >
               <SlidersHorizontal className="w-3 h-3" />
-              <span>Filter</span>
+              <span>
+                <Text en="Filter" ta="வடிகட்டி" />
+              </span>
             </button>
           </div>
         </div>
@@ -259,7 +306,7 @@ function BrowseCartsPageContent() {
           <aside className="bg-[#160c06] border border-[#ffb690]/15 p-6 self-start rounded-xl">
             <div className="flex justify-between items-center pb-4 border-b border-[#ffb690]/10 mb-6">
               <h2 className="font-display text-lg tracking-wider text-[#fffdf7] uppercase flex items-center gap-2">
-                <SlidersHorizontal className="w-4 h-4 text-[#f97316]" /> Filters
+                <SlidersHorizontal className="w-4 h-4 text-[#f97316]" /> <Text en="Filters" ta="வடிகட்டிகள்" />
               </h2>
               <div className="flex items-center gap-3">
                 <button 
@@ -272,24 +319,28 @@ function BrowseCartsPageContent() {
                   }}
                   className="text-xs font-display text-[#f97316] uppercase tracking-wider hover:underline"
                 >
-                  Reset
+                  <Text en="Reset" ta="மீட்டமை" />
                 </button>
                 <button
                   onClick={() => setShowFilterPanel(false)}
                   className="lg:hidden text-xs font-display text-[#f6ded3]/60 uppercase tracking-wider hover:underline"
                 >
-                  Close
+                  <Text en="Close" ta="மூடு" />
                 </button>
               </div>
             </div>
 
             {/* Location Sorting */}
             <div className="mb-6 border-b border-[#ffb690]/10 pb-4">
-              <label className="font-display text-xs tracking-widest text-[#f97316] uppercase block mb-2">Distance Sort</label>
+              <label className="font-display text-xs tracking-widest text-[#f97316] uppercase block mb-2">
+                <Text en="Distance Sort" ta="தொலைவு வாரியாக" />
+              </label>
               {userCoords ? (
                 <div className="flex items-center gap-2 text-xs text-green-500 font-bold">
                   <MapPin className="w-4 h-4 shrink-0" />
-                  <span>Nearest Carts Shown First</span>
+                  <span>
+                    <Text en="Nearest Carts Shown First" ta="அருகிலுள்ள வண்டிகள் முதலில்" />
+                  </span>
                 </div>
               ) : (
                 <Button 
@@ -298,20 +349,26 @@ function BrowseCartsPageContent() {
                   className="w-full h-10 bg-transparent hover:bg-[#ffb690]/5 border border-[#ffb690]/35 text-[#ffb690] text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 rounded-xl"
                 >
                   <Navigation className="w-3.5 h-3.5" />
-                  {geoSorting ? "Finding GPS..." : "Show Carts Near Me"}
+                  {geoSorting ? (
+                    <Text en="Finding GPS..." ta="GPS தேடப்படுகிறது..." />
+                  ) : (
+                    <Text en="Show Carts Near Me" ta="எனக்கு அருகிலுள்ள வண்டிகள்" />
+                  )}
                 </Button>
               )}
             </div>
 
             {/* Cart Type Filter */}
             <div className="mb-6">
-              <label className="font-display text-xs tracking-widest text-[#f6ded3]/70 uppercase block mb-3">Cart Type</label>
+              <label className="font-display text-xs tracking-widest text-[#f6ded3]/70 uppercase block mb-3">
+                <Text en="Cart Type" ta="வண்டி வகை" />
+              </label>
               <div className="space-y-2">
                 {[
-                  { id: "With Store", label: "With Store / Stove" },
-                  { id: "With Roof", label: "With Roof / Covered" },
-                  { id: "Ice Cream", label: "Ice Cream Cart" },
-                  { id: "Tea Stall", label: "Tea Stall Station" }
+                  { id: "With Store", label: "With Store / Stove", labelTa: "அடுப்புடன் கூடிய வண்டி" },
+                  { id: "With Roof", label: "With Roof / Covered", labelTa: "மேற்கூரையுடன் கூடிய வண்டி" },
+                  { id: "Ice Cream", label: "Ice Cream Cart", labelTa: "ஐஸ் கிரீம் வண்டி" },
+                  { id: "Tea Stall", label: "Tea Stall Station", labelTa: "தேநீர் கடை வண்டி" }
                 ].map(item => (
                   <label key={item.id} className="flex items-center gap-3 cursor-pointer group">
                     <input 
@@ -320,7 +377,9 @@ function BrowseCartsPageContent() {
                       onChange={() => toggleType(item.id)}
                       className="w-4 h-4 bg-[#0a0a08] border border-[#ffb690]/30 checked:bg-[#f97316] text-[#f97316] rounded"
                     />
-                    <span className="text-sm text-[#f6ded3] group-hover:text-[#f97316] transition-colors">{item.label}</span>
+                    <span className="text-sm text-[#f6ded3] group-hover:text-[#f97316] transition-colors">
+                      <Text en={item.label} ta={item.labelTa} />
+                    </span>
                   </label>
                 ))}
               </div>
@@ -328,12 +387,14 @@ function BrowseCartsPageContent() {
 
             {/* Condition Filter */}
             <div className="mb-6">
-              <label className="font-display text-xs tracking-widest text-[#f6ded3]/70 uppercase block mb-3">Condition</label>
+              <label className="font-display text-xs tracking-widest text-[#f6ded3]/70 uppercase block mb-3">
+                <Text en="Condition" ta="வண்டியின் நிலை" />
+              </label>
               <div className="space-y-2">
                 {[
-                  { id: "New", label: "Brand New" },
-                  { id: "Used - Very Good", label: "Used - Very Good" },
-                  { id: "Used - Good", label: "Used - Good" }
+                  { id: "New", label: "Brand New", labelTa: "புதிய வண்டி" },
+                  { id: "Used - Very Good", label: "Used - Very Good", labelTa: "மிகவும் நல்ல நிலை" },
+                  { id: "Used - Good", label: "Used - Good", labelTa: "நல்ல நிலை" }
                 ].map(item => (
                   <label key={item.id} className="flex items-center gap-3 cursor-pointer group">
                     <input 
@@ -342,7 +403,9 @@ function BrowseCartsPageContent() {
                       onChange={() => toggleCondition(item.id)}
                       className="w-4 h-4 bg-[#0a0a08] border border-[#ffb690]/30 checked:bg-[#f97316] text-[#f97316] rounded"
                     />
-                    <span className="text-sm text-[#f6ded3] group-hover:text-[#f97316] transition-colors">{item.label}</span>
+                    <span className="text-sm text-[#f6ded3] group-hover:text-[#f97316] transition-colors">
+                      <Text en={item.label} ta={item.labelTa} />
+                    </span>
                   </label>
                 ))}
               </div>
@@ -350,7 +413,9 @@ function BrowseCartsPageContent() {
 
             {/* Price Range Filter */}
             <div>
-              <label className="font-display text-xs tracking-widest text-[#f6ded3]/70 uppercase block mb-2">Max Daily Rent (₹{maxPrice}/day)</label>
+              <label className="font-display text-xs tracking-widest text-[#f6ded3]/70 uppercase block mb-2">
+                <Text en={`Max Daily Rent (₹${maxPrice}/day)`} ta={`அதிகபட்ச ஒரு நாள் வாடகை (₹${maxPrice}/நாள்)`} />
+              </label>
               <input 
                 type="range"
                 min="50"
@@ -361,8 +426,12 @@ function BrowseCartsPageContent() {
                 className="w-full accent-[#f97316] bg-[#0a0a08] h-1"
               />
               <div className="flex justify-between text-[10px] text-[#f6ded3]/40 mt-1">
-                <span>₹50/day</span>
-                <span>₹200/day</span>
+                <span>
+                  <Text en="₹50/day" ta="₹50/நாள்" />
+                </span>
+                <span>
+                  <Text en="₹200/day" ta="₹200/நாள்" />
+                </span>
               </div>
             </div>
           </aside>
@@ -372,18 +441,25 @@ function BrowseCartsPageContent() {
         <section>
           <div className="flex justify-between items-center mb-6">
             <span className="font-display text-xs tracking-wider text-[#f6ded3]/60 uppercase">
-              {filteredCarts.length} carts matching your query
+              <Text 
+                en={`${filteredCarts.length} carts matching your query`} 
+                ta={`உங்கள் தேடலுக்கு ${filteredCarts.length} வண்டிகள் உள்ளன`} 
+              />
             </span>
           </div>
 
           {loading ? (
             <div className="py-20 text-center">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#f97316] mx-auto mb-4"></div>
-              <p className="text-sm text-[#f6ded3]/70">Loading fleet directory...</p>
+              <p className="text-sm text-[#f6ded3]/70">
+                <Text en="Loading fleet directory..." ta="பட்டியல் ஏற்றப்படுகிறது..." />
+              </p>
             </div>
           ) : filteredCarts.length === 0 ? (
             <div className="bg-[#160c06] border border-[#ffb690]/15 py-20 text-center rounded-xl">
-              <p className="text-base">No food carts found matching your filter criteria.</p>
+              <p className="text-base">
+                <Text en="No food carts found matching your filter criteria." ta="உங்கள் தேடலுக்கு தகுந்த தள்ளுவண்டிகள் எதுவும் இல்லை." />
+              </p>
               <button 
                 onClick={() => {
                   setSelectedTypes([]);
@@ -394,7 +470,7 @@ function BrowseCartsPageContent() {
                 }}
                 className="font-display text-xs text-[#f97316] tracking-wider uppercase mt-4 hover:underline"
               >
-                Clear all filters
+                <Text en="Clear all filters" ta="வடிகட்டிகளை நீக்கு" />
               </button>
             </div>
           ) : (
@@ -435,19 +511,16 @@ function BrowseCartsPageContent() {
                     </div>
 
                     <h3 className="font-display text-sm md:text-xl text-[#fffdf7] tracking-wider uppercase mb-1 line-clamp-1 mt-1">
-                      <span className="en">{cart.nameEn}</span>
-                      <span className="ta tamil-text">{cart.nameTa}</span>
+                      {cart.nameEn}
                     </h3>
                     <p className="text-[10px] md:text-xs text-[#f6ded3]/70 mb-2 md:mb-4 line-clamp-2 leading-relaxed h-8 md:h-10">
-                      <span className="en">{cart.descriptionEn}</span>
-                      <span className="ta tamil-text">{cart.descriptionTa}</span>
+                      {cart.descriptionEn}
                     </p>
                     
                     <div className="mt-auto pt-2 md:pt-4 border-t border-[#ffb690]/10 flex flex-col xs:flex-row justify-between items-stretch xs:items-end gap-2">
                       <div>
                         <span className="text-[8px] md:text-[9px] uppercase tracking-wider text-[#f6ded3]/40 block">
-                          <span className="en">Daily Rent</span>
-                          <span className="ta tamil-text">ஒரு நாள் வாடகை</span>
+                          Daily Rent
                         </span>
                         <span className="font-display text-sm md:text-2xl text-[#ffca45] block">
                           ₹{cart.pricePerDay || (cart.pricePerMonth ? Math.round(cart.pricePerMonth / 30) : 0)}/day
@@ -465,15 +538,19 @@ function BrowseCartsPageContent() {
 
           {/* Browse by Cart Type Section */}
           <div className="border-t border-[#ffb690]/10 mt-16 pt-8">
-            <span className="font-display text-xs tracking-widest text-[#f97316] uppercase">Categories</span>
-            <h2 className="font-display text-2xl md:text-3xl text-[#fffdf7] mt-1 mb-6 uppercase">Browse by Cart Type</h2>
+            <span className="font-display text-xs tracking-widest text-[#f97316] uppercase">
+              <Text en="Categories" ta="வகைகள்" />
+            </span>
+            <h2 className="font-display text-2xl md:text-3xl text-[#fffdf7] mt-1 mb-6 uppercase">
+              <Text en="Browse by Cart Type" ta="வண்டி வகை வாரியாக" />
+            </h2>
             {/* Mobile layout: 1 x 4 swipeable cards. Desktop layout: responsive */}
             <div className="flex md:grid md:grid-cols-4 gap-4 overflow-x-auto md:overflow-x-visible snap-x snap-mandatory scrollbar-none pb-4 md:pb-0">
               {[
-                { id: "With Store", label: "With Store / Stove", icon: <IconSearchStove className="w-8 h-8 text-[#f97316]" />, desc: "Integrated burners & shelves" },
-                { id: "With Roof", label: "With Roof / Covered", icon: <IconTent className="w-8 h-8 text-[#f97316]" />, desc: "Heavy-duty metal canopy" },
-                { id: "Ice Cream", label: "Ice Cream Cart", icon: <IconIceCream className="w-8 h-8 text-[#f97316]" />, desc: "Insulated cold box & dome" },
-                { id: "Tea Stall", label: "Tea Stall Station", icon: <IconCoffee className="w-8 h-8 text-[#f97316]" />, desc: "Full stainless steel setup" }
+                { id: "With Store", label: "With Store / Stove", labelTa: "அடுப்புடன் கூடிய வண்டி", icon: <IconSearchStove className="w-8 h-8 text-[#f97316]" />, desc: "Integrated burners & shelves", descTa: "அடுப்புகள் & அலமாரிகளுடன்" },
+                { id: "With Roof", label: "With Roof / Covered", labelTa: "மேற்கூரையுடன் கூடிய வண்டி", icon: <IconTent className="w-8 h-8 text-[#f97316]" />, desc: "Heavy-duty metal canopy", descTa: "உறுதியான உலோக மேற்கூரையுடன்" },
+                { id: "Ice Cream", label: "Ice Cream Cart", labelTa: "ஐஸ் கிரீம் வண்டி", icon: <IconIceCream className="w-8 h-8 text-[#f97316]" />, desc: "Insulated cold box & dome", descTa: "குளிரூட்டப்பட்ட பெட்டியுடன்" },
+                { id: "Tea Stall", label: "Tea Stall Station", labelTa: "தேநீர் கடை வண்டி", icon: <IconCoffee className="w-8 h-8 text-[#f97316]" />, desc: "Full stainless steel setup", descTa: "முழு எஃகு அமைப்பில்" }
               ].map(item => {
                 const isSelected = selectedTypes.includes(item.id);
                 return (
@@ -486,9 +563,13 @@ function BrowseCartsPageContent() {
                   >
                     <div>
                       <div className="mb-2">{item.icon}</div>
-                      <h3 className="font-display text-sm md:text-base text-[#fffdf7] tracking-wider uppercase">{item.label}</h3>
+                      <h3 className="font-display text-sm md:text-base text-[#fffdf7] tracking-wider uppercase">
+                        <Text en={item.label} ta={item.labelTa} />
+                      </h3>
                     </div>
-                    <p className="text-[11px] text-[#f6ded3]/60 font-sans">{item.desc}</p>
+                    <p className="text-[11px] text-[#f6ded3]/60 font-sans">
+                      <Text en={item.desc} ta={item.descTa} />
+                    </p>
                   </button>
                 );
               })}
@@ -506,7 +587,9 @@ export default function BrowseCartsPage() {
       <main className="bg-[#0a0a08] min-h-screen pt-20 text-[#f6ded3] flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#f97316] mx-auto mb-4"></div>
-          <p className="font-semibold text-sm">Loading fleet directory...</p>
+          <p className="font-semibold text-sm">
+            <Text en="Loading fleet directory..." ta="பட்டியல் ஏற்றப்படுகிறது..." />
+          </p>
         </div>
       </main>
     }>

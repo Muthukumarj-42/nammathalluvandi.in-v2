@@ -244,6 +244,15 @@ function translateSentenceToTamil(text: string): string {
   return translatedTokens.join("");
 }
 
+function Text({ en, ta }: { en: string; ta: string }) {
+  return (
+    <>
+      <span className="en">{en}</span>
+      <span className="ta tamil-text">{ta}</span>
+    </>
+  );
+}
+
 export function BookingFlow() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -343,7 +352,9 @@ export function BookingFlow() {
       <main className="bg-[#fffdf7] min-h-screen py-16 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted text-sm font-semibold">Loading booking details...</p>
+          <p className="text-muted text-sm font-semibold">
+            <Text en="Loading booking details..." ta="முன்பதிவு விவரங்கள் ஏற்றப்படுகின்றன..." />
+          </p>
         </div>
       </main>
     );
@@ -464,10 +475,7 @@ export function BookingFlow() {
                   </span>
                 </h1>
                 <p className="mt-1 text-sm font-bold text-[#f97316] uppercase tracking-widest">
-                  <span className="en">{cart.nameEn}</span>
-                  <span className="ta tamil-text text-xs tracking-normal normal-case">
-                    {cart.nameTa}
-                  </span>
+                  {cart.nameEn}
                 </p>
               </div>
             </div>
@@ -517,17 +525,13 @@ export function BookingFlow() {
 
               <div className="flex flex-col gap-1">
                 <h3 className="font-display text-2xl uppercase leading-tight text-ink">
-                  <span className="en">{cart.nameEn}</span>
-                  <span className="ta tamil-text leading-tight">
-                    {cart.nameTa}
-                  </span>
+                  {cart.nameEn}
                 </h3>
 
                 <div className="grid grid-cols-2 gap-4 mt-2 border-t border-[#e5e0d8] pt-3">
                   <div>
                     <p className="text-[10px] font-bold uppercase tracking-widest text-[#78716c]">
-                      <span className="en">DAILY PRICE</span>
-                      <span className="ta tamil-text">ஒரு நாள் வாடகை</span>
+                      DAILY PRICE
                     </p>
                     <p className="font-display text-2xl font-bold text-[#f97316] mt-0.5">
                       ₹{cart.pricePerDay}/day
@@ -535,13 +539,12 @@ export function BookingFlow() {
                   </div>
                   <div>
                     <p className="text-[10px] font-bold uppercase tracking-widest text-[#78716c]">
-                      <span className="en">DEPOSIT AMOUNT</span>
-                      <span className="ta tamil-text">முன்பணம்</span>
+                      DEPOSIT AMOUNT
                     </p>
                     <p className="font-display text-2xl font-bold text-ink mt-0.5">
                       ₹{cart.depositAmount}{" "}
                       <span className="text-[10px] font-sans font-semibold text-[#78716c] uppercase tracking-normal">
-                        ({lang === "ta" ? "திரும்பப் பெறலாம்" : "Refundable"})
+                        (Refundable)
                       </span>
                     </p>
                   </div>
@@ -703,13 +706,19 @@ export function BookingFlow() {
                 </div>
 
                 {geoStatus === "loading" && (
-                  <p className="text-[10px] text-amber-600 animate-pulse">Detecting GPS coordinates...</p>
+                  <p className="text-[10px] text-amber-600 animate-pulse">
+                    <Text en="Detecting GPS coordinates..." ta="ஜிபிஎஸ் ஆயத்தொலைவுகள் கண்டறியப்படுகின்றன..." />
+                  </p>
                 )}
                 {geoStatus === "success" && (
-                  <p className="text-[10px] text-green-600 font-bold">Successfully populated GPS coordinates!</p>
+                  <p className="text-[10px] text-green-600 font-bold">
+                    <Text en="Successfully populated GPS coordinates!" ta="ஜிபிஎஸ் ஆயத்தொலைவுகள் வெற்றிகரமாக பெறப்பட்டன!" />
+                  </p>
                 )}
                 {geoStatus === "error" && (
-                  <p className="text-[10px] text-red-500">Could not retrieve GPS automatically. Please input manually.</p>
+                  <p className="text-[10px] text-red-500">
+                    <Text en="Could not retrieve GPS automatically. Please input manually." ta="ஜிபிஎஸ் தானாகப் பெற முடியவில்லை. தயவுசெய்து கைமுறையாக உள்ளிடவும்." />
+                  </p>
                 )}
               </div>
 

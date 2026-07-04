@@ -424,8 +424,7 @@ export function CartExplorer({
                           className="border-black/20 text-ink text-xs h-10"
                         >
                           <Link href={`/carts/${cart.id}`} className="after:absolute after:inset-0 after:z-10">
-                            <span className="en">DETAILS</span>
-                            <span className="ta tamil-text">விவரம்</span>
+                            DETAILS
                           </Link>
                         </Button>
                         <Button
@@ -433,8 +432,7 @@ export function CartExplorer({
                           className="bg-[#25D366] hover:bg-[#20ba5a] text-white text-xs h-10 relative z-20"
                         >
                           <Link href={`/book?cart=${cart.id}`}>
-                            <span className="en">BOOK CART</span>
-                            <span className="ta tamil-text">புக் செய்ய</span>
+                            BOOK CART
                           </Link>
                         </Button>
                       </div>
@@ -514,30 +512,17 @@ export function CartExplorer({
                     {/* Count text absolute positioned below badge - z-10 top-9 */}
                     <span className="absolute top-9 left-2 z-10 bg-white/95 px-2 py-0.5 rounded-full shadow-sm text-[10px] font-bold text-ink">
                       {cart.availableCount >= 2 ? (
-                        <>
-                          <span className="en">
-                            {cart.availableCount} Carts
-                          </span>
-                          <span className="ta tamil-text">
-                            {cart.availableCount} வண்டிகள் உள்ளன
-                          </span>
-                        </>
+                        `${cart.availableCount} Carts`
                       ) : cart.availableCount === 1 ? (
-                        <>
-                          <span className="en">Last 1 Cart</span>
-                          <span className="ta tamil-text">கடைசி 1 வண்டி</span>
-                        </>
+                        "Last 1 Cart"
                       ) : (
-                        <>
-                          <span className="en">Sold Out</span>
-                          <span className="ta tamil-text">தற்போது இல்லை</span>
-                        </>
+                        "Sold Out"
                       )}
                     </span>
 
                     {/* Location badge bottom-2 left-2 - z-10 */}
                     <span className="absolute bottom-2 left-2 z-10 flex items-center gap-1 rounded-full bg-white/95 px-3 py-1 text-xs font-bold text-ink shadow-sm">
-                      <MapPin size={13} /> <Text en="Coimbatore" ta="கோவை" />
+                      <MapPin size={13} /> Coimbatore
                     </span>
                   </Link>
 
@@ -545,17 +530,10 @@ export function CartExplorer({
                     <div className="flex items-start justify-between gap-4">
                       <div>
                         <h3 className="font-display text-3xl uppercase leading-tight text-ink">
-                          <span className="en">{cart.nameEn}</span>
-                          <span
-                            className="ta tamil-text line-clamp-2 overflow-hidden text-ellipsis normal-case whitespace-normal leading-tight"
-                            title={cart.nameTa}
-                          >
-                            {cart.nameTa}
-                          </span>
+                          {cart.nameEn}
                         </h3>
                         <p className="mt-1 text-sm text-muted">
-                          <span className="en">Rent Carts</span>
-                          <span className="ta tamil-text">வாடகை வண்டி</span>
+                          Rent Carts
                         </p>
                       </div>
                       <Sparkles className="shrink-0 text-primary" size={20} />
@@ -578,8 +556,7 @@ export function CartExplorer({
                     <div className="mt-5 rounded-lg border border-black/10 bg-[#F8F6F2] p-4 grid grid-cols-2 gap-2">
                       <div>
                         <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted">
-                          <span className="en">Daily Price</span>
-                          <span className="ta tamil-text">ஒரு நாள் வாடகை</span>
+                          Daily Price
                         </p>
                         <p className="mt-1 font-display text-3xl text-ink">
                           ₹{cart.pricePerDay}
@@ -587,8 +564,7 @@ export function CartExplorer({
                       </div>
                       <div>
                         <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted">
-                          <span className="en">Deposit</span>
-                          <span className="ta tamil-text">முன்பணம்</span>
+                          Deposit
                         </p>
                         <p className="mt-1 font-display text-3xl text-ink">
                           ₹{cart.depositAmount}
@@ -597,12 +573,12 @@ export function CartExplorer({
                     </div>
 
                     <ul className="mt-5 space-y-2 text-sm text-muted flex-1">
-                      {(lang === "ta" ? cart.featuresTa : cart.featuresEn)
+                      {cart.featuresEn
                         .slice(0, 3)
                         .map((feature: string, idx: number) => (
                           <li key={idx} className="flex gap-2">
                             <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
-                            <span className={lang === "ta" ? "tamil-text" : ""}>
+                            <span>
                               {feature}
                             </span>
                           </li>
@@ -612,8 +588,7 @@ export function CartExplorer({
                     <div className="mt-6 grid grid-cols-2 gap-3 pt-4 border-t border-black/5">
                       <Button asChild variant="dark">
                         <Link href={`/carts/${cart.id}`} className="after:absolute after:inset-0 after:z-10">
-                          <span className="en">Details</span>
-                          <span className="ta tamil-text">விவரம்</span>
+                          Details
                         </Link>
                       </Button>
                       <Button
@@ -622,8 +597,7 @@ export function CartExplorer({
                       >
                         <Link href={`/book?cart=${cart.id}`}>
                           <MessageCircle size={16} />{" "}
-                          <span className="en">Book</span>
-                          <span className="ta tamil-text">முன்பதிவு</span>
+                          Book
                         </Link>
                       </Button>
                     </div>

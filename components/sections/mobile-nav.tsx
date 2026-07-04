@@ -3,6 +3,15 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+function Text({ en, ta }: { en: string; ta: string }) {
+  return (
+    <>
+      <span className="en">{en}</span>
+      <span className="ta tamil-text">{ta}</span>
+    </>
+  );
+}
+
 export default function MobileNav() {
   const pathname = usePathname();
 
@@ -20,7 +29,9 @@ export default function MobileNav() {
             <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
             <polyline points="9 22 9 12 15 12 15 22" />
           </svg>
-          <span>Home</span>
+          <span>
+            <Text en="Home" ta="முகப்பு" />
+          </span>
         </Link>
 
         <Link
@@ -33,7 +44,9 @@ export default function MobileNav() {
             <rect x="14" y="14" width="7" height="7" rx="1" />
             <rect x="3" y="14" width="7" height="7" rx="1" />
           </svg>
-          <span>Browse</span>
+          <span>
+            <Text en="Browse" ta="வண்டிகள்" />
+          </span>
         </Link>
 
         {/* Sell/List Button - Elevated Circular */}
@@ -49,7 +62,7 @@ export default function MobileNav() {
               </svg>
             </div>
             <span className={`text-[10px] font-bold mt-1 ${pathname === "/publish" ? "text-primary" : "text-on-surface-variant/60"}`}>
-              List
+              <Text en="List" ta="பதிவிட" />
             </span>
           </Link>
         </div>
@@ -61,7 +74,9 @@ export default function MobileNav() {
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
           </svg>
-          <span>Contact</span>
+          <span>
+            <Text en="Contact" ta="தொடர்பு" />
+          </span>
         </Link>
 
         <Link
@@ -72,7 +87,9 @@ export default function MobileNav() {
             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
             <circle cx="12" cy="7" r="4" />
           </svg>
-          <span>Profile</span>
+          <span>
+            <Text en="Profile" ta="சுயவிவரம்" />
+          </span>
         </Link>
       </div>
     </nav>

@@ -87,7 +87,22 @@ export function Footer() {
             {Object.entries(groups).map(([title, links]) => (
               <div key={title}>
                 <h3 className="font-display text-sm uppercase tracking-[0.18em] text-primary-container">
-                  {title}
+                  {title === "Navigation" ? (
+                    <>
+                      <span className="en">Navigation</span>
+                      <span className="ta tamil-text">வழிசெலுத்தல்</span>
+                    </>
+                  ) : title === "Branch" ? (
+                    <>
+                      <span className="en">Branch</span>
+                      <span className="ta tamil-text">கிளைகள்</span>
+                    </>
+                  ) : title === "Contact" ? (
+                    <>
+                      <span className="en">Contact</span>
+                      <span className="ta tamil-text">தொடர்பு</span>
+                    </>
+                  ) : title}
                 </h3>
                 <ul className="mt-5 space-y-3 text-sm text-on-surface-variant">
                   {links.map(([label, tamil, href]) => (
@@ -109,8 +124,14 @@ export function Footer() {
         <div className="mt-14 flex flex-col gap-3 border-t border-outline-variant/20 pt-6 text-xs uppercase tracking-[0.14em] text-on-surface-variant md:flex-row md:justify-between">
           <div className="flex flex-col gap-1 normal-case tracking-normal">
             <span className="font-display uppercase tracking-[0.14em] text-sm text-primary-container">© 2026 Namma Thalluvandi</span>
-            <span>D. Nagaraj Thallu Vandi — 30+ Years of Trust</span>
-            <span>Ondipudur, Coimbatore</span>
+            <span>
+              <span className="en">D. Nagaraj Thallu Vandi — 30+ Years of Trust</span>
+              <span className="ta tamil-text">டி. நாகராஜ் தள்ளு வண்டி — 30 ஆண்டுகளுக்கும் மேலான நம்பிக்கை</span>
+            </span>
+            <span>
+              <span className="en">Ondipudur, Coimbatore</span>
+              <span className="ta tamil-text">ஒண்டிப்புதூர், கோவை</span>
+            </span>
           </div>
         </div>
       </div>

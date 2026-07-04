@@ -41,6 +41,15 @@ function getCartLocationName(cart: any): string {
   return lat >= 11.08 ? "Tiruppur" : "Coimbatore";
 }
 
+function Text({ en, ta }: { en: string; ta: string }) {
+  return (
+    <>
+      <span className="en">{en}</span>
+      <span className="ta tamil-text">{ta}</span>
+    </>
+  );
+}
+
 export default function HomePage() {
   const [searchValue, setSearchValue] = useState("");
   const [isFocused, setIsFocused] = useState(false);
@@ -48,6 +57,26 @@ export default function HomePage() {
 
   // Dynamic carts data from db
   const [dbCarts, setDbCarts] = useState<any[]>([]);
+  const [lang, setLang] = useState<"en" | "ta">("en");
+
+  // Sync language toggle dynamically
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const currentLang = document.documentElement.dataset.lang === "ta" ? "ta" : "en";
+    setLang(currentLang);
+
+    const observer = new MutationObserver(() => {
+      const updatedLang = document.documentElement.dataset.lang === "ta" ? "ta" : "en";
+      setLang(updatedLang);
+    });
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["data-lang"],
+    });
+
+    return () => observer.disconnect();
+  }, []);
 
   // Autocomplete Location states
   const [locationSearch, setLocationSearch] = useState("All Locations");
@@ -90,30 +119,42 @@ export default function HomePage() {
       locSet.add("Tiruppur");
     }
     
-    const list = Array.from(locSet).map(name => ({
-      id: name.toLowerCase(),
-      label: name
-    }));
+    const list = Array.from(locSet).map(name => {
+      let labelTa = name
+        .replace("Ondipudur", "ஒண்டிப்புதூர்")
+        .replace("Coimbatore", "கோவை")
+        .replace("Gandhipuram", "காந்திபுரம்")
+        .replace("Peelamedu", "பீளமேடு")
+        .replace("Tiruppur Junction", "திருப்பூர் சந்திப்பு")
+        .replace("Singanallur", "சிங்காநல்லூர்")
+        .replace("Tiruppur", "திருப்பூர்");
+      return {
+        id: name.toLowerCase(),
+        label: name,
+        labelTa: labelTa
+      };
+    });
     
-    return [{ id: "all", label: "All Locations" }, ...list];
+    return [{ id: "all", label: "All Locations", labelTa: "அனைத்து இடங்களும்" }, ...list];
   }, [dbCarts]);
 
   // Sync input values when selected location or available list changes
   useEffect(() => {
     const found = availableLocations.find(l => l.id === selectedLocation);
     if (found) {
-      setLocationSearch(found.label);
+      setLocationSearch(lang === "ta" ? (found.labelTa || found.label) : found.label);
     } else {
-      setLocationSearch("All Locations");
+      setLocationSearch(lang === "ta" ? "அனைத்து இடங்களும்" : "All Locations");
     }
-  }, [selectedLocation, availableLocations]);
+  }, [selectedLocation, availableLocations, lang]);
 
   const filteredLocations = useMemo(() => {
-    if (!locationSearch || locationSearch === "All Locations") {
+    if (!locationSearch || locationSearch === "All Locations" || locationSearch === "அனைத்து இடங்களும்") {
       return availableLocations;
     }
     return availableLocations.filter(l => 
-      l.label.toLowerCase().includes(locationSearch.toLowerCase())
+      l.label.toLowerCase().includes(locationSearch.toLowerCase()) ||
+      (l.labelTa && l.labelTa.toLowerCase().includes(locationSearch.toLowerCase()))
     );
   }, [locationSearch, availableLocations]);
 
@@ -129,16 +170,25 @@ export default function HomePage() {
           <div className="lg:col-span-7 flex flex-col items-start text-left">
             {/* Saffron tag */}
             <span className="font-display text-xs tracking-[0.2em] text-[#f97316] bg-[#f97316]/10 px-4 py-1.5 uppercase mb-4 border border-[#f97316]/20 rounded-full">
-              ★ FOOD CART MARKETPLACE ★
+              ★ <Text en="FOOD CART MARKETPLACE" ta="உணவு வண்டி சந்தை" /> ★
             </span>
 
             <h1 className="font-display text-4xl md:text-6xl text-[#fffdf7] uppercase tracking-wider leading-[1.1] mb-4">
-              RENT PREMIUM <br className="hidden md:inline" />
-              <span className="text-[#f97316]">FOOD CARTS</span>
+              <span className="en">
+                RENT PREMIUM <br className="hidden md:inline" />
+                <span className="text-[#f97316]">FOOD CARTS</span>
+              </span>
+              <span className="ta tamil-text text-3xl md:text-5xl leading-tight">
+                பிரீமியம் <br className="hidden md:inline" />
+                <span className="text-[#f97316]">உணவு வண்டிகள் வாடகைக்கு</span>
+              </span>
             </h1>
             
             <p className="font-sans text-sm md:text-base text-[#f6ded3]/70 mb-8 max-w-xl leading-relaxed">
-              Tamil Nadu&apos;s first verified rental network for street food vendors. Find fully-equipped tea kiosks, juice stalls, and fast food carts in Coimbatore & Tiruppur today.
+              <Text
+                en="Tamil Nadu's first verified rental network for street food vendors. Find fully-equipped tea kiosks, juice stalls, and fast food carts in Coimbatore & Tiruppur today."
+                ta="தெரு உணவு வியாபாரிகளுக்கான தமிழ்நாட்டின் முதல் சரிபார்க்கப்பட்ட வாடகை நெெட்டிவார்க். கோயம்புத்தூர் & திருப்பூரில் முழுமையாக பொருத்தப்பட்ட டீ கடைகள், ஜூஸ் வண்டிகள் மற்றும் ஃபாஸ்ட் ஃபுட் வண்டிகளை இன்றே கண்டறியுங்கள்."
+              />
             </p>
 
             {/* Search bar & Location bar in editorial style */}
@@ -157,22 +207,34 @@ export default function HomePage() {
                 {/* Animated suggestion placeholder */}
                 {!searchValue && !isFocused && (
                   <div className="absolute left-10 right-3 top-1/2 -translate-y-1/2 pointer-events-none text-sm text-on-surface-variant/40 flex items-center gap-1 select-none z-10 overflow-hidden max-w-[calc(100%-3.5rem)]">
-                    <span className="shrink-0">Search by</span>
+                    <span className="shrink-0">
+                      <Text en="Search by" ta="தேடுக: " />
+                    </span>
                     <span className="relative overflow-hidden inline-block h-5 w-36 shrink-0">
-                      {SUGGESTIONS.map((sug, idx) => (
-                        <span
-                          key={sug}
-                          className={`absolute left-0 top-0 transition-all duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] ${
-                            idx === suggestionIndex 
-                              ? "opacity-100 translate-y-0" 
-                              : idx === (suggestionIndex - 1 + SUGGESTIONS.length) % SUGGESTIONS.length
-                                ? "opacity-0 -translate-y-4"
-                                : "opacity-0 translate-y-4"
-                          }`}
-                        >
-                          &quot;{sug}&quot;...
-                        </span>
-                      ))}
+                      {SUGGESTIONS.map((sug, idx) => {
+                        const sugTa = 
+                          sug === "stove" ? "அடுப்பு" :
+                          sug === "roof" ? "மேற்கூரை" :
+                          sug === "ice cream" ? "ஐஸ் கிரீம்" :
+                          sug === "tea stall" ? "டீ கடை" :
+                          sug === "coimbatore" ? "கோவை" :
+                          sug === "tiruppur" ? "திருப்பூர்" :
+                          sug === "double burner" ? "இரட்டை அடுப்பு" : sug;
+                        return (
+                          <span
+                            key={sug}
+                            className={`absolute left-0 top-0 transition-all duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] ${
+                              idx === suggestionIndex 
+                                ? "opacity-100 translate-y-0" 
+                                : idx === (suggestionIndex - 1 + SUGGESTIONS.length) % SUGGESTIONS.length
+                                  ? "opacity-0 -translate-y-4"
+                                  : "opacity-0 translate-y-4"
+                            }`}
+                          >
+                            &quot;<Text en={sug} ta={sugTa} />&quot;...
+                          </span>
+                        );
+                      })}
                     </span>
                   </div>
                 )}
@@ -183,7 +245,7 @@ export default function HomePage() {
                 <div className="flex flex-col text-left flex-grow relative">
                   <input 
                     type="text" 
-                    placeholder="Type city..."
+                    placeholder={lang === "ta" ? "நகரத்தை உள்ளிடவும்..." : "Type city..."}
                     value={locationSearch}
                     onChange={e => {
                       setLocationSearch(e.target.value);
@@ -199,9 +261,9 @@ export default function HomePage() {
                         setShowLocationDropdown(false);
                         const found = availableLocations.find(l => l.id === selectedLocation);
                         if (found) {
-                          setLocationSearch(found.label);
+                          setLocationSearch(lang === "ta" ? (found.labelTa || found.label) : found.label);
                         } else {
-                          setLocationSearch("All Locations");
+                          setLocationSearch(lang === "ta" ? "அனைத்து இடங்களும்" : "All Locations");
                         }
                       }, 200);
                     }}
@@ -221,12 +283,12 @@ export default function HomePage() {
                           }}
                           className="w-full text-left px-4 py-2.5 text-[11px] uppercase font-display tracking-wider hover:bg-[#ffb690]/10 text-[#f6ded3] transition-colors"
                         >
-                          {loc.label}
+                          {lang === "ta" ? (loc.labelTa || loc.label) : loc.label}
                         </button>
                       ))}
                       {filteredLocations.length === 0 && (
                         <div className="px-4 py-2.5 text-[10px] text-[#f6ded3]/40 uppercase tracking-wider">
-                          No locations found
+                          <Text en="No locations found" ta="இருப்பிடங்கள் இல்லை" />
                         </div>
                       )}
                     </div>
@@ -235,7 +297,7 @@ export default function HomePage() {
               </div>
 
               <Button type="submit" className="bg-[#f97316] text-[#0a0a08] hover:bg-[#f97316]/95 border-none rounded-2xl font-display uppercase tracking-wider text-sm py-3 px-8">
-                Search
+                <Text en="Search" ta="தேடு" />
               </Button>
             </form>
           </div>
@@ -253,8 +315,12 @@ export default function HomePage() {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a08]/90 via-transparent to-transparent"></div>
               <div className="absolute bottom-4 left-4 right-4">
-                <span className="text-[10px] font-display font-bold tracking-widest text-[#f97316] uppercase block mb-1">Featured Model</span>
-                <span className="font-display text-lg text-[#fffdf7] uppercase tracking-wider block">Elite Fast Food Cart with Stove</span>
+                <span className="text-[10px] font-display font-bold tracking-widest text-[#f97316] uppercase block mb-1">
+                  <Text en="Featured Model" ta="சிறப்பு மாடல்" />
+                </span>
+                <span className="font-display text-lg text-[#fffdf7] uppercase tracking-wider block">
+                  <Text en="Elite Fast Food Cart with Stove" ta="அடுப்புடன் கூடிய எலைட் ஃபாஸ்ட் ஃபுட் வண்டி" />
+                </span>
               </div>
             </div>
           </div>
@@ -265,23 +331,27 @@ export default function HomePage() {
         {/* Browse by Category */}
         <div className="flex justify-between items-end mb-6 border-b border-outline-variant/20 pb-4">
           <div>
-            <span className="font-display text-xs tracking-widest text-[#f97316] uppercase">Categories</span>
-            <h3 className="font-display text-3xl text-on-surface mt-1">BROWSE BY CATEGORY</h3>
+            <span className="font-display text-xs tracking-widest text-[#f97316] uppercase">
+              <Text en="Categories" ta="வகைகள்" />
+            </span>
+            <h3 className="font-display text-3xl text-on-surface mt-1">
+              <Text en="BROWSE BY CATEGORY" ta="வகை வாரியாகப் பாருங்கள்" />
+            </h3>
           </div>
           <Link href="/explore" className="font-display text-sm text-[#f97316] hover:underline flex items-center tracking-widest uppercase">
-            See all <ChevronRight className="w-4 h-4 ml-1" />
+            <Text en="See all" ta="அனைத்தும் பார்க்க" /> <ChevronRight className="w-4 h-4 ml-1" />
           </Link>
         </div>
         
         {/* Compact, horizontally scrollable category cards in a single row */}
         <div className="flex gap-3 overflow-x-auto scrollbar-none pb-4 snap-x snap-mandatory w-full">
           {[
-            { href: "/explore?type=stove", label: "With Stove", icon: <IconSearchStove className="w-5 h-5 text-[#f97316]" /> },
-            { href: "/explore?type=roof", label: "With Roof", icon: <IconTent className="w-5 h-5 text-[#f97316]" /> },
-            { href: "/explore?type=icecream", label: "Ice Cream", icon: <IconIceCream className="w-5 h-5 text-[#f97316]" /> },
-            { href: "/explore?type=coffee", label: "Tea / Coffee", icon: <IconCoffee className="w-5 h-5 text-[#f97316]" /> },
-            { href: "/explore?type=erickshaw", label: "E-Rickshaw", icon: <IconRickshaw className="w-5 h-5 text-[#f97316]" /> },
-            { href: "/explore", label: "Others", icon: <MoreHorizontal className="w-5 h-5 text-on-surface-variant/60" /> }
+            { href: "/explore?type=stove", label: "With Stove", tamilLabel: "அடுப்புடன்", icon: <IconSearchStove className="w-5 h-5 text-[#f97316]" /> },
+            { href: "/explore?type=roof", label: "With Roof", tamilLabel: "மேற்கூரையுடன்", icon: <IconTent className="w-5 h-5 text-[#f97316]" /> },
+            { href: "/explore?type=icecream", label: "Ice Cream", tamilLabel: "ஐஸ் கிரீம்", icon: <IconIceCream className="w-5 h-5 text-[#f97316]" /> },
+            { href: "/explore?type=coffee", label: "Tea / Coffee", tamilLabel: "டீ / காபி", icon: <IconCoffee className="w-5 h-5 text-[#f97316]" /> },
+            { href: "/explore?type=erickshaw", label: "E-Rickshaw", tamilLabel: "இ-ரிக்ஷா", icon: <IconRickshaw className="w-5 h-5 text-[#f97316]" /> },
+            { href: "/explore", label: "Others", tamilLabel: "மற்றவை", icon: <MoreHorizontal className="w-5 h-5 text-on-surface-variant/60" /> }
           ].map((item, idx) => (
             <Link 
               key={idx}
@@ -289,7 +359,9 @@ export default function HomePage() {
               className="flex-shrink-0 w-28 md:w-32 snap-start bg-surface border border-outline-variant/30 hover:border-[#f97316]/50 transition-all duration-300 py-3 px-2 flex flex-col items-center justify-center gap-2 rounded-xl text-center"
             >
               {item.icon}
-              <span className="font-display text-[10px] tracking-wider text-on-surface uppercase whitespace-nowrap">{item.label}</span>
+              <span className="font-display text-[10px] tracking-wider text-on-surface uppercase whitespace-nowrap">
+                <Text en={item.label} ta={item.tamilLabel} />
+              </span>
             </Link>
           ))}
         </div>
@@ -298,17 +370,21 @@ export default function HomePage() {
         <div className="mt-10 md:mt-12">
           <div className="flex justify-between items-end mb-6 border-b border-outline-variant/20 pb-4">
             <div>
-              <span className="font-display text-xs tracking-widest text-[#f97316] uppercase">Exclusive Fleet</span>
-              <h3 className="font-display text-3xl text-on-surface mt-1">POPULAR CARTS</h3>
+              <span className="font-display text-xs tracking-widest text-[#f97316] uppercase">
+                <Text en="Exclusive Fleet" ta="பிரதியேக வண்டிகள்" />
+              </span>
+              <h3 className="font-display text-3xl text-on-surface mt-1">
+                <Text en="POPULAR CARTS" ta="பிரபலமான வண்டிகள்" />
+              </h3>
             </div>
             <Link href="/explore" className="font-display text-sm text-[#f97316] hover:underline flex items-center tracking-widest uppercase">
-              See all <ChevronRight className="w-4 h-4 ml-1" />
+              <Text en="See all" ta="அனைத்தும் பார்க்க" /> <ChevronRight className="w-4 h-4 ml-1" />
             </Link>
           </div>
 
           {dbCarts.length === 0 ? (
             <div className="py-12 text-center text-[#f6ded3]/40 text-sm font-display uppercase tracking-widest">
-              No carts available yet — check back soon.
+              <Text en="No carts available yet — check back soon." ta="வண்டிகள் ஏதும் இல்லை — விரைவில் எதிர்பார்க்கலாம்." />
             </div>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-2 gap-3 md:gap-6">
@@ -370,17 +446,21 @@ export default function HomePage() {
         <div className="mt-10 md:mt-12 mb-16">
           <div className="flex justify-between items-end mb-6 border-b border-outline-variant/20 pb-4">
             <div>
-              <span className="font-display text-xs tracking-widest text-[#f97316] uppercase">Used &amp; Affordable Fleet</span>
-              <h3 className="font-display text-3xl text-on-surface mt-1">LIVE SALE</h3>
+              <span className="font-display text-xs tracking-widest text-[#f97316] uppercase">
+                <Text en="Used & Affordable Fleet" ta="பயன்படுத்திய & குறைந்த விலை வண்டிகள்" />
+              </span>
+              <h3 className="font-display text-3xl text-on-surface mt-1">
+                <Text en="LIVE SALE" ta="விற்பனைக்கு உள்ளவை" />
+              </h3>
             </div>
             <Link href="/explore" className="font-display text-sm text-[#f97316] hover:underline flex items-center tracking-widest uppercase">
-              See all <ChevronRight className="w-4 h-4 ml-1" />
+              <Text en="See all" ta="அனைத்தும் பார்க்க" /> <ChevronRight className="w-4 h-4 ml-1" />
             </Link>
           </div>
 
           {dbCarts.length === 0 ? (
             <div className="py-12 text-center text-[#f6ded3]/40 text-sm font-display uppercase tracking-widest">
-              No sale listings at this time.
+              <Text en="No sale listings at this time." ta="விற்பனைக்கு வண்டிகள் ஏதும் இல்லை." />
             </div>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-2 gap-3 md:gap-6">

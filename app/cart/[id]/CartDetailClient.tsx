@@ -133,7 +133,9 @@ export default function CartDetailClient({ cart }: CartDetailClientProps) {
                 ) : (
                   <div className="text-[#ffb690] flex flex-col items-center gap-2">
                     <ShoppingBag size={48} className="opacity-50" />
-                    <span className="text-sm font-bold uppercase tracking-wider">No Image Available</span>
+                    <span className="text-sm font-bold uppercase tracking-wider">
+                      <Text en="No Image Available" ta="படம் இல்லை" />
+                    </span>
                   </div>
                 )}
               </div>
@@ -170,7 +172,9 @@ export default function CartDetailClient({ cart }: CartDetailClientProps) {
               ) : (
                 <div className="relative w-full aspect-[4/3] bg-[#251913] border border-[#ffb690]/15 rounded-2xl flex flex-col items-center justify-center p-8">
                   <ShoppingBag size={48} className="opacity-50 text-[#ffb690]" />
-                  <span className="text-sm font-bold uppercase tracking-wider text-[#ffb690]">No Image Available</span>
+                  <span className="text-sm font-bold uppercase tracking-wider text-[#ffb690]">
+                    <Text en="No Image Available" ta="படம் இல்லை" />
+                  </span>
                 </div>
               )}
             </div>
@@ -229,18 +233,53 @@ export default function CartDetailClient({ cart }: CartDetailClientProps) {
             <div className="grid grid-cols-3 gap-4 border-y border-[#ffb690]/15 py-4 lg:py-6">
               <div className="text-center space-y-1">
                 <Ruler className="w-6 h-6 mx-auto text-[#ffb690]" />
-                <p className="text-xs font-bold text-ink uppercase tracking-wider">{specs.length}</p>
-                <p className="text-[10px] text-[#e0c0b1]/70 uppercase">Length</p>
+                <p className="text-xs font-bold text-ink uppercase tracking-wider">
+                  <Text 
+                    en={specs.length} 
+                    ta={
+                      specs.length === "3 Feet" ? "3 அடி" : 
+                      specs.length === "4 Feet" ? "4 அடி" : 
+                      specs.length === "5 Feet" ? "5 அடி" : 
+                      "சாதாரண அளவு"
+                    } 
+                  />
+                </p>
+                <p className="text-[10px] text-[#e0c0b1]/70 uppercase">
+                  <Text en="Length" ta="நீளம்" />
+                </p>
               </div>
               <div className="text-center space-y-1 border-x border-[#ffb690]/10">
                 <ShieldCheck className="w-6 h-6 mx-auto text-[#ffb690]" />
-                <p className="text-xs font-bold text-ink uppercase tracking-wider">{specs.material}</p>
-                <p className="text-[10px] text-[#e0c0b1]/70 uppercase">Structure</p>
+                <p className="text-xs font-bold text-ink uppercase tracking-wider">
+                  <Text 
+                    en={specs.material} 
+                    ta={
+                      specs.material === "Stainless Steel" ? "துருப்பிடிக்காத எஃகு" : 
+                      specs.material === "Mild Steel" ? "இரும்பு (Mild Steel)" : 
+                      specs.material === "Wood Frame" ? "மரச்சட்டம்" : 
+                      specs.material === "Aluminium" ? "அலுமினியம்" : 
+                      specs.material
+                    } 
+                  />
+                </p>
+                <p className="text-[10px] text-[#e0c0b1]/70 uppercase">
+                  <Text en="Structure" ta="வடிவமைப்பு" />
+                </p>
               </div>
               <div className="text-center space-y-1">
                 <Flame className="w-6 h-6 mx-auto text-[#ffb690]" />
-                <p className="text-xs font-bold text-ink uppercase tracking-wider">{specs.stove}</p>
-                <p className="text-[10px] text-[#e0c0b1]/70 uppercase">Stove</p>
+                <p className="text-xs font-bold text-ink uppercase tracking-wider">
+                  <Text 
+                    en={specs.stove} 
+                    ta={
+                      specs.stove === "Built-in Stove" ? "அடுப்புடன்" : 
+                      "அடுப்பு இல்லை"
+                    } 
+                  />
+                </p>
+                <p className="text-[10px] text-[#e0c0b1]/70 uppercase">
+                  <Text en="Stove" ta="அடுப்பு" />
+                </p>
               </div>
             </div>
 

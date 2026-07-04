@@ -176,14 +176,14 @@ export default function CartPage() {
                 <div className="flex flex-col flex-grow justify-between py-1">
                   <div>
                     <h3 className="font-display text-2xl uppercase leading-tight text-ink">
-                      <Text en={item.nameEn} ta={item.nameTa} />
+                      {item.nameEn}
                     </h3>
                     <div className="flex flex-wrap gap-2 mt-2">
                       <span className="text-[9px] font-bold border border-[#ffb690]/20 px-2 py-0.5 text-[#ffb690] uppercase tracking-wider">
-                        <Text en={`₹${item.pricePerDay}/day`} ta={`₹${item.pricePerDay}/நாள்`} />
+                        ₹{item.pricePerDay}/day
                       </span>
                       <span className="text-[9px] font-bold border border-[#ffb690]/20 px-2 py-0.5 text-[#ffb690] uppercase tracking-wider">
-                        <Text en={`Deposit: ₹${item.depositAmount}`} ta={`முன்பணம்: ₹${item.depositAmount}`} />
+                        Deposit: ₹{item.depositAmount}
                       </span>
                     </div>
                   </div>
