@@ -531,9 +531,9 @@ export default function ContactPage() {
   };
 
   return (
-    <main className="bg-[#0a0a08] pt-20">
+    <main className="bg-[#0a0a08] pt-14 md:pt-20">
       {/* Hero Section */}
-      <section className="relative min-h-[50vh] flex items-center border-b border-[#ffb690]/10 overflow-hidden bg-[#160c06] py-16 md:py-24 px-6">
+      <section className="relative min-h-[50vh] flex items-center border-b border-[#ffb690]/10 overflow-hidden bg-[#160c06] pt-8 pb-16 md:py-24 px-6">
         <div className="absolute inset-0 opacity-10 map-grid"></div>
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background to-background"></div>
         
