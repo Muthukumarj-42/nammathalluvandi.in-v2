@@ -401,20 +401,28 @@ function BrowseCartsPageContent() {
           ) : (
             <div className={`grid grid-cols-1 md:grid-cols-2 ${showFilterPanel ? "xl:grid-cols-2" : "lg:grid-cols-3 xl:grid-cols-4"} gap-6`}>
               {filteredCarts.map(cart => (
-                <div key={cart.id} className="bg-[#160c06] border border-[#ffb690]/15 hover:border-[#f97316]/50 transition-all duration-300 flex flex-col p-4 rounded-xl relative">
+                <div key={cart.id} className="group bg-[#160c06] border border-[#ffb690]/15 hover:border-[#f97316]/50 transition-all duration-300 flex flex-col p-4 rounded-xl relative">
                   {cart.distanceKm !== undefined && (
                     <div className="absolute top-2 left-2 z-20 bg-[#f97316] text-[#0a0a08] font-bold text-[9px] px-2 py-0.5 rounded-full flex items-center gap-0.5 shadow-md">
                       📍 {cart.distanceKm} km away
                     </div>
                   )}
                   
-                  <div className="aspect-[16/10] bg-[#251913] relative shrink-0 p-4 flex items-center justify-center mb-4 rounded-lg overflow-hidden">
-                    <span className={`absolute top-2 right-2 text-[8px] font-display tracking-widest px-2 py-0.5 font-bold rounded-full ${cart.condition === "New" ? "bg-[#f97316] text-[#0a0a08]" : "bg-[#ffca45] text-[#0a0a08]"}`}>
-                      {cart.condition.toUpperCase()}
+                  <div className="aspect-[16/10] bg-[#251913] relative shrink-0 flex items-center justify-center mb-4 rounded-lg overflow-hidden">
+                    <span className={`absolute top-2 right-2 z-10 text-[8px] font-display tracking-widest px-2 py-0.5 font-bold rounded-full ${cart.condition === "New" ? "bg-[#f97316] text-[#0a0a08]" : "bg-[#ffca45] text-[#0a0a08]"}`}>
+                      {(cart.condition || "Used - Good").toUpperCase()}
                     </span>
-                    <svg viewBox="0 0 100 80" className="w-20 h-20 text-[#ffb690]/10" fill="currentColor">
-                      <path d="M20 20 h60 v40 h-60 z M30 60 v10 M70 60 v10 M25 70 h50 M35 70 v5 M65 70 v5"/>
-                    </svg>
+                    {cart.images && cart.images[0] ? (
+                      <img 
+                        src={cart.images[0]} 
+                        alt={cart.nameEn}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                    ) : (
+                      <svg viewBox="0 0 100 80" className="w-20 h-20 text-[#ffb690]/10" fill="currentColor">
+                        <path d="M20 20 h60 v40 h-60 z M30 60 v10 M70 60 v10 M25 70 h50 M35 70 v5 M65 70 v5"/>
+                      </svg>
+                    )}
                   </div>
                   
                   <div className="flex flex-col flex-grow">

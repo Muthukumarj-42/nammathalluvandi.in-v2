@@ -276,18 +276,26 @@ export default function HomePage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {[
-              { tag: "BESTSELLER", tagColor: "bg-[#f97316] text-[#0a0a08]", title: "ELITE STAINLESS PRO V2", desc: "Dual integrated high-power burners, premium food-grade steel & display shelf.", price: "₹24,500" },
-              { tag: "NEW ARRIVAL", tagColor: "bg-[#ffca45] text-[#0a0a08]", title: "CLASSIC TEAX STATION V1", desc: "Equipped with wide partition counters, utility lock-box, and waste sink.", price: "₹16,000" }
+              { tag: "BESTSELLER", tagColor: "bg-[#f97316] text-[#0a0a08]", title: "ELITE STAINLESS PRO V2", desc: "Dual integrated high-power burners, premium food-grade steel & display shelf.", price: "₹24,500", image: "/carts/premium-fast-food-cart-with-stove/photo-1.webp" },
+              { tag: "NEW ARRIVAL", tagColor: "bg-[#ffca45] text-[#0a0a08]", title: "CLASSIC TEAX STATION V1", desc: "Equipped with wide partition counters, utility lock-box, and waste sink.", price: "₹16,000", image: "/carts/covered-premium-cart/photo-1.webp" }
             ].map((item, i) => (
-              <div key={i} className="bg-surface border border-[#f97316]/25 hover:border-[#f97316]/60 transition-all duration-300 flex flex-col rounded-3xl overflow-hidden shadow-premium">
-                <div className="aspect-[16/9] bg-[#251913] relative shrink-0 p-6 flex items-center justify-center">
-                  <span className={`absolute top-4 left-4 text-[10px] font-display font-bold px-3 py-1 ${item.tagColor} tracking-wider rounded-full`}>
+              <div key={i} className="group bg-surface border border-[#f97316]/25 hover:border-[#f97316]/60 transition-all duration-300 flex flex-col rounded-3xl overflow-hidden shadow-premium">
+                <div className="aspect-[16/9] bg-[#251913] relative shrink-0 flex items-center justify-center overflow-hidden">
+                  <span className={`absolute top-4 left-4 z-10 text-[10px] font-display font-bold px-3 py-1 ${item.tagColor} tracking-wider rounded-full`}>
                     {item.tag}
                   </span>
                   
-                  <svg viewBox="0 0 100 80" className="w-24 h-24 text-on-surface-variant/20" fill="currentColor">
-                    <path d="M20 20 h60 v40 h-60 z M30 60 v10 M70 60 v10 M25 70 h50 M35 70 v5 M65 70 v5"/>
-                  </svg>
+                  {item.image ? (
+                    <img 
+                      src={item.image} 
+                      alt={item.title}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                  ) : (
+                    <svg viewBox="0 0 100 80" className="w-24 h-24 text-on-surface-variant/20" fill="currentColor">
+                      <path d="M20 20 h60 v40 h-60 z M30 60 v10 M70 60 v10 M25 70 h50 M35 70 v5 M65 70 v5"/>
+                    </svg>
+                  )}
                 </div>
                 <div className="p-6 flex flex-col flex-grow border-t border-outline-variant/20">
                   <h4 className="font-display text-xl text-on-surface tracking-wider">{item.title}</h4>
