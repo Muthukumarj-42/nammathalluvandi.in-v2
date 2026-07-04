@@ -172,8 +172,8 @@ export default function AdminDashboard() {
                 id="passcode"
                 value={passcode}
                 onChange={e => setPasscode(e.target.value)}
-                placeholder="••••••••••••"
-                className="w-full h-12 bg-[#0a0a08] border border-[#ffb690]/25 rounded-xl px-4 text-center text-lg outline-none focus:border-[#f97316] text-[#116D03] placeholder:text-[#116D03] tracking-widest"
+                placeholder="Enter Admin Key"
+                className="w-full h-12 bg-[#0a0a08] border border-[#ffb690]/25 rounded-xl px-4 text-center text-lg outline-none focus:border-[#f97316] text-[#116D03] placeholder:text-[#ffb690]/30 tracking-widest placeholder:tracking-normal placeholder:text-sm"
               />
             </div>
             {passcodeError && (
