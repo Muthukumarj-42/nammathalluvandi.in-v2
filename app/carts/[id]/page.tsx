@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { getCart } from "@/lib/carts";
-import CartDetailClient from "../../cart/[id]/CartDetailClient";
+import CartDetailClient from "@/app/cart/[id]/CartDetailClient";
 
 interface PageProps {
   params: Promise<{ id: string }>;

@@ -7,6 +7,8 @@ import { Search, ChevronDown, SlidersHorizontal, ArrowLeft, Navigation, MapPin }
 import { Button } from "@/components/ui/button";
 import { getLiveCartsAction } from "@/app/actions";
 import { calculateHaversineDistance } from "@/lib/routing";
+import { mapDbCartToCart } from "@/lib/carts";
+import { isDbConfigured } from "@/lib/supabase";
 import { IconSearchStove, IconTent, IconIceCream, IconCoffee } from "@/components/ui/icons";
 
 const SUGGESTIONS = [
@@ -71,9 +73,12 @@ function BrowseCartsPageContent() {
   useEffect(() => {
     async function loadData() {
       try {
+        console.log("[DIAGNOSTIC] isDbConfigured:", isDbConfigured);
         const res = await getLiveCartsAction();
+        console.log("[DIAGNOSTIC] getLiveCartsAction response:", res);
         if (res.success && res.data) {
-          setDbCarts(res.data);
+          const mapped = res.data.map(mapDbCartToCart);
+          setDbCarts(mapped);
         }
       } catch (err) {
         console.error("Failed to load live carts:", err);
@@ -129,13 +134,29 @@ function BrowseCartsPageContent() {
   const filteredCarts = useMemo(() => {
     const qLocation = searchParams.get("location");
     const list = dbCarts.filter(cart => {
+      const cartTypeStr = Array.isArray(cart.type) ? cart.type.join(", ") : (cart.type || "");
       const matchesSearch = 
-        cart.type.toLowerCase().includes(search.toLowerCase()) || 
-        (cart.description && cart.description.toLowerCase().includes(search.toLowerCase()));
+        cartTypeStr.toLowerCase().includes(search.toLowerCase()) || 
+        (cart.nameEn && cart.nameEn.toLowerCase().includes(search.toLowerCase())) ||
+        (cart.descriptionEn && cart.descriptionEn.toLowerCase().includes(search.toLowerCase())) ||
+        (cart.descriptionTa && cart.descriptionTa.toLowerCase().includes(search.toLowerCase()));
       
-      const matchesType = selectedTypes.length === 0 || selectedTypes.includes(cart.type);
-      const matchesCondition = selectedConditions.length === 0 || selectedConditions.includes(cart.condition);
-      const dailyPrice = Math.round(cart.price_per_month / 30);
+      const matchesType = selectedTypes.length === 0 || selectedTypes.some(selected => {
+        const keyword = 
+          selected === "With Store" ? "stove" :
+          selected === "With Roof" ? "roof" :
+          selected === "Ice Cream" ? "ice cream" :
+          selected === "Tea Stall" ? "tea" : selected.toLowerCase();
+
+        return cartTypeStr.toLowerCase().includes(keyword.toLowerCase()) || 
+               (cart.nameEn && cart.nameEn.toLowerCase().includes(keyword.toLowerCase()));
+      });
+
+      const matchesCondition = selectedConditions.length === 0 || selectedConditions.some(cond => 
+        (cart.condition || "").toLowerCase().includes(cond.toLowerCase())
+      );
+      
+      const dailyPrice = cart.pricePerDay || (cart.pricePerMonth ? Math.round(cart.pricePerMonth / 30) : 0);
       const matchesPrice = dailyPrice <= maxPrice;
 
       // Handle location query filter
@@ -145,9 +166,9 @@ function BrowseCartsPageContent() {
         const queryLoc = qLocation.toLowerCase();
         
         if (queryLoc === "coimbatore") {
-          matchesLocation = cart.latitude < 11.08;
+          matchesLocation = (cart.latitude || 0) < 11.08;
         } else if (queryLoc === "tiruppur") {
-          matchesLocation = cart.latitude >= 11.08;
+          matchesLocation = (cart.latitude || 0) >= 11.08;
         } else {
           matchesLocation = cartLoc.includes(queryLoc);
         }
@@ -160,11 +181,11 @@ function BrowseCartsPageContent() {
     if (userCoords) {
       return list.map(cart => {
         const dist = calculateHaversineDistance(userCoords, {
-          latitude: cart.latitude,
-          longitude: cart.longitude
+          latitude: cart.latitude || 11.0168,
+          longitude: cart.longitude || 76.9558
         });
         return { ...cart, distanceKm: Number(dist.toFixed(2)) };
-      }).sort((a, b) => a.distanceKm - b.distanceKm);
+      }).sort((a, b) => (a.distanceKm || 0) - (b.distanceKm || 0));
     }
 
     return list;
@@ -379,39 +400,58 @@ function BrowseCartsPageContent() {
           ) : (
             <div className={`grid grid-cols-2 md:grid-cols-2 ${showFilterPanel ? "xl:grid-cols-2" : "lg:grid-cols-3 xl:grid-cols-4"} gap-3 md:gap-6`}>
               {filteredCarts.map(cart => (
-                <div key={cart.id} className="bg-[#160c06] border border-[#ffb690]/15 hover:border-[#f97316]/50 transition-all duration-300 flex flex-col p-2.5 md:p-4 rounded-xl relative">
+                <div key={cart.id} className="group bg-[#160c06] border border-[#ffb690]/15 hover:border-[#f97316]/50 transition-all duration-300 flex flex-col p-2.5 md:p-4 rounded-xl relative">
                   {cart.distanceKm !== undefined && (
                     <div className="absolute top-2 left-2 z-20 bg-[#f97316] text-[#0a0a08] font-bold text-[8px] md:text-[9px] px-1.5 py-0.5 rounded-full flex items-center gap-0.5 shadow-md">
                       📍 {cart.distanceKm} km
                     </div>
                   )}
                   
-                  <div className="aspect-[16/10] bg-[#251913] relative shrink-0 p-2 md:p-4 flex items-center justify-center mb-2 md:mb-4 rounded-lg overflow-hidden">
-                    <span className={`absolute top-2 right-2 text-[7px] md:text-[8px] font-display tracking-widest px-1.5 py-0.5 font-bold rounded-full ${cart.condition === "New" ? "bg-[#f97316] text-[#0a0a08]" : "bg-[#ffca45] text-[#0a0a08]"}`}>
-                      {cart.condition.toUpperCase()}
+                  <div className="aspect-[16/10] bg-[#251913] relative shrink-0 flex items-center justify-center mb-2 md:mb-4 rounded-lg overflow-hidden">
+                    <span className={`absolute top-2 right-2 z-10 text-[8px] font-display tracking-widest px-2 py-0.5 font-bold rounded-full ${cart.condition === "New" ? "bg-[#f97316] text-[#0a0a08]" : "bg-[#ffca45] text-[#0a0a08]"}`}>
+                      {(cart.condition || "Used - Good").toUpperCase()}
                     </span>
-                    <svg viewBox="0 0 100 80" className="w-12 h-12 md:w-20 md:h-20 text-[#ffb690]/10" fill="currentColor">
-                      <path d="M20 20 h60 v40 h-60 z M30 60 v10 M70 60 v10 M25 70 h50 M35 70 v5 M65 70 v5"/>
-                    </svg>
+                    {cart.images && cart.images[0] ? (
+                      <img 
+                        src={cart.images[0]} 
+                        alt={cart.nameEn}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                    ) : (
+                      <svg viewBox="0 0 100 80" className="w-12 h-12 md:w-20 md:h-20 text-[#ffb690]/10" fill="currentColor">
+                        <path d="M20 20 h60 v40 h-60 z M30 60 v10 M70 60 v10 M25 70 h50 M35 70 v5 M65 70 v5"/>
+                      </svg>
+                    )}
                   </div>
                   
                   <div className="flex flex-col flex-grow">
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-[8px] md:text-[9px] uppercase tracking-widest bg-[#0a0a08] text-[#ffb690] px-1.5 py-0.5 border border-[#ffb690]/20 rounded-md">
-                        {cart.type.toUpperCase()}
+                        {((Array.isArray(cart.type) ? cart.type[0] : cart.type) || "CART").toUpperCase()}
                       </span>
                       {cart.verified && (
                         <span className="text-[8px] md:text-[9px] text-[#25D366] font-bold uppercase tracking-wider">✓ Verified</span>
                       )}
                     </div>
 
-                    <h3 className="font-display text-sm md:text-xl text-[#fffdf7] tracking-wider uppercase mb-1 line-clamp-1 mt-1">{cart.type}</h3>
-                    <p className="text-[10px] md:text-xs text-[#f6ded3]/70 mb-2 md:mb-4 line-clamp-2 leading-relaxed h-8 md:h-10">{cart.description || "Premium rental food cart option."}</p>
+                    <h3 className="font-display text-sm md:text-xl text-[#fffdf7] tracking-wider uppercase mb-1 line-clamp-1 mt-1">
+                      <span className="en">{cart.nameEn}</span>
+                      <span className="ta tamil-text">{cart.nameTa}</span>
+                    </h3>
+                    <p className="text-[10px] md:text-xs text-[#f6ded3]/70 mb-2 md:mb-4 line-clamp-2 leading-relaxed h-8 md:h-10">
+                      <span className="en">{cart.descriptionEn}</span>
+                      <span className="ta tamil-text">{cart.descriptionTa}</span>
+                    </p>
                     
                     <div className="mt-auto pt-2 md:pt-4 border-t border-[#ffb690]/10 flex flex-col xs:flex-row justify-between items-stretch xs:items-end gap-2">
                       <div>
-                        <span className="text-[8px] md:text-[9px] uppercase tracking-wider text-[#f6ded3]/40 block">Daily Rent</span>
-                        <span className="font-display text-sm md:text-2xl text-[#ffca45] block">₹{Math.round(cart.price_per_month / 30)}/day</span>
+                        <span className="text-[8px] md:text-[9px] uppercase tracking-wider text-[#f6ded3]/40 block">
+                          <span className="en">Daily Rent</span>
+                          <span className="ta tamil-text">ஒரு நாள் வாடகை</span>
+                        </span>
+                        <span className="font-display text-sm md:text-2xl text-[#ffca45] block">
+                          ₹{cart.pricePerDay || (cart.pricePerMonth ? Math.round(cart.pricePerMonth / 30) : 0)}/day
+                        </span>
                       </div>
                       <Button asChild className="bg-[#f97316] text-[#0a0a08] hover:bg-[#f97316]/95 border-none rounded-lg font-display uppercase tracking-widest text-[9px] md:text-xs py-1 px-3 md:py-2 md:px-6 h-7 md:h-9">
                         <Link href={`/carts/${cart.id}`}>Details</Link>

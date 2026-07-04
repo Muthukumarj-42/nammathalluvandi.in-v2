@@ -308,18 +308,26 @@ export default function HomePage() {
 
           <div className="grid grid-cols-2 md:grid-cols-2 gap-3 md:gap-6">
             {[
-              { tag: "BESTSELLER", tagColor: "bg-[#f97316] text-[#0a0a08]", title: "ELITE STAINLESS PRO V2", desc: "Dual integrated high-power burners, premium food-grade steel & display shelf.", price: "₹24,500" },
-              { tag: "NEW ARRIVAL", tagColor: "bg-[#ffca45] text-[#0a0a08]", title: "CLASSIC TEAX STATION V1", desc: "Equipped with wide partition counters, utility lock-box, and waste sink.", price: "₹16,000" }
+              { tag: "BESTSELLER", tagColor: "bg-[#f97316] text-[#0a0a08]", title: "ELITE STAINLESS PRO V2", desc: "Dual integrated high-power burners, premium food-grade steel & display shelf.", price: "₹24,500", image: "/carts/premium-fast-food-cart-with-stove/photo-1.webp" },
+              { tag: "NEW ARRIVAL", tagColor: "bg-[#ffca45] text-[#0a0a08]", title: "CLASSIC TEAX STATION V1", desc: "Equipped with wide partition counters, utility lock-box, and waste sink.", price: "₹16,000", image: "/carts/covered-premium-cart/photo-1.webp" }
             ].map((item, i) => (
-              <div key={i} className="bg-surface border border-[#f97316]/25 hover:border-[#f97316]/60 transition-all duration-300 flex flex-col rounded-3xl overflow-hidden shadow-premium p-3 md:p-6">
-                <div className="aspect-[16/9] bg-[#251913] relative shrink-0 p-4 md:p-6 flex items-center justify-center rounded-2xl">
-                  <span className={`absolute top-2 left-2 md:top-4 md:left-4 text-[8px] md:text-[10px] font-display font-bold px-2 py-0.5 md:px-3 md:py-1 ${item.tagColor} tracking-wider rounded-full`}>
+              <div key={i} className="group bg-surface border border-[#f97316]/25 hover:border-[#f97316]/60 transition-all duration-300 flex flex-col rounded-3xl overflow-hidden shadow-premium p-3 md:p-6">
+                <div className="aspect-[16/9] bg-[#251913] relative shrink-0 p-4 md:p-6 flex items-center justify-center rounded-2xl overflow-hidden">
+                  <span className={`absolute top-2 left-2 md:top-4 md:left-4 z-10 text-[8px] md:text-[10px] font-display font-bold px-2 py-0.5 md:px-3 md:py-1 ${item.tagColor} tracking-wider rounded-full`}>
                     {item.tag}
                   </span>
                   
-                  <svg viewBox="0 0 100 80" className="w-12 h-12 md:w-24 md:h-24 text-on-surface-variant/20" fill="currentColor">
-                    <path d="M20 20 h60 v40 h-60 z M30 60 v10 M70 60 v10 M25 70 h50 M35 70 v5 M65 70 v5"/>
-                  </svg>
+                  {item.image ? (
+                    <img 
+                      src={item.image} 
+                      alt={item.title}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 rounded-xl"
+                    />
+                  ) : (
+                    <svg viewBox="0 0 100 80" className="w-12 h-12 md:w-24 md:h-24 text-on-surface-variant/20" fill="currentColor">
+                      <path d="M20 20 h60 v40 h-60 z M30 60 v10 M70 60 v10 M25 70 h50 M35 70 v5 M65 70 v5"/>
+                    </svg>
+                  )}
                 </div>
                 <div className="pt-4 flex flex-col flex-grow border-t border-outline-variant/20 mt-3 md:mt-4">
                   <h4 className="font-display text-xs md:text-xl text-on-surface tracking-wider line-clamp-1">{item.title}</h4>
