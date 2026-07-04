@@ -8,6 +8,7 @@ import MobileNav from "@/components/sections/mobile-nav";
 import { Navbar } from "@/components/sections/navbar";
 import { WhatsAppFloat } from "@/components/sections/whatsapp-float";
 import { Outfit, Plus_Jakarta_Sans, Noto_Sans_Tamil } from "next/font/google";
+import { AuthProvider } from "@/context/auth-context";
 
 const outfit = Outfit({
   subsets: ["latin"],
@@ -120,11 +121,13 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
             gtag('config', 'G-ZKJMPC7793');
           `}
         </Script>
-        <Navbar />
-        {children}
-        <Footer />
-        <WhatsAppFloat />
-        <MobileNav />
+        <AuthProvider>
+          <Navbar />
+          {children}
+          <Footer />
+          <WhatsAppFloat />
+          <MobileNav />
+        </AuthProvider>
       </body>
     </html>
   );

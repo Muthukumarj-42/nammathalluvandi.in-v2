@@ -42,7 +42,7 @@ export default function AdminDashboard() {
   const [disputes, setDisputes] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"pending" | "live" | "bookings" | "disputes" | "vendors" | "messages">("pending");
+  const [activeTab, setActiveTab] = useState<"pending" | "live" | "bookings" | "disputes" | "vendors" | "messages" | "users">("pending");
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   // Authenticate Muthu
@@ -268,7 +268,8 @@ export default function AdminDashboard() {
             { id: "bookings", label: "Bookings Monitor", count: bookings.length, icon: CalendarDays },
             { id: "disputes", label: "Complaints/Queries", count: openDisputes.length, icon: AlertTriangle },
             { id: "vendors", label: "Cart Vendors", count: users.filter(u => u.role === "cv").length, icon: Users },
-            { id: "messages", label: "WhatsApp Log", count: messages.length, icon: MessageSquare }
+            { id: "messages", label: "WhatsApp Log", count: messages.length, icon: MessageSquare },
+            { id: "users", label: "Users & Roles", count: users.length, icon: Users }
           ].map(tab => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -631,6 +632,93 @@ export default function AdminDashboard() {
                       </table>
                     </div>
                   )}
+                </div>
+              )}
+              {/* USERS & ROLES MODULE */}
+              {activeTab === "users" && (
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-display text-xl uppercase tracking-wider text-[#fffdf7]">Users & Role Management</h3>
+                    <span className="text-xs text-[#f6ded3]/50">{users.length} registered users</span>
+                  </div>
+                  {users.length === 0 ? (
+                    <div className="py-12 text-center text-[#f6ded3]/50 text-sm">
+                      No users found. Users appear here after they sign in via Google or Email Magic Link.
+                    </div>
+                  ) : (
+                    <div className="overflow-x-auto border border-[#ffb690]/10 rounded-xl bg-[#0a0a08]">
+                      <table className="w-full text-left text-xs border-collapse">
+                        <thead>
+                          <tr className="border-b border-[#ffb690]/15 bg-[#160c06] uppercase tracking-wider text-[#ffb690] text-[10px] font-bold">
+                            <th className="p-4">User</th>
+                            <th className="p-4">Email</th>
+                            <th className="p-4">Roles</th>
+                            <th className="p-4">Status</th>
+                            <th className="p-4">Joined</th>
+                            <th className="p-4">Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-[#ffb690]/5">
+                          {users.map((u: any) => (
+                            <tr key={u.id} className="hover:bg-[#ffb690]/5">
+                              <td className="p-4">
+                                <div className="flex items-center gap-2">
+                                  {u.avatar ? (
+                                    <img src={u.avatar} alt={u.name} className="w-7 h-7 rounded-full object-cover" />
+                                  ) : (
+                                    <div className="w-7 h-7 rounded-full bg-[#f97316]/20 text-[#f97316] flex items-center justify-center text-[10px] font-bold">
+                                      {(u.name ?? "U")[0].toUpperCase()}
+                                    </div>
+                                  )}
+                                  <span className="font-semibold text-[#f6ded3]">{u.name ?? "Unknown"}</span>
+                                </div>
+                              </td>
+                              <td className="p-4 text-[#f6ded3]/70 font-mono">{u.email}</td>
+                              <td className="p-4">
+                                <div className="flex flex-wrap gap-1">
+                                  {(u.roles ?? ["BUYER"]).map((r: string) => (
+                                    <span key={r} className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase ${
+                                      r === "SUPER_ADMIN" ? "bg-red-900/40 text-red-300" :
+                                      r === "ADMIN" ? "bg-purple-900/40 text-purple-300" :
+                                      r === "VENDOR" ? "bg-amber-900/40 text-amber-300" :
+                                      "bg-blue-900/40 text-blue-300"
+                                    }`}>{r}</span>
+                                  ))}
+                                </div>
+                              </td>
+                              <td className="p-4">
+                                <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase ${u.status === "active" ? "text-green-400" : "text-red-400"}`}>
+                                  {u.status ?? "active"}
+                                </span>
+                              </td>
+                              <td className="p-4 text-[#f6ded3]/50 font-mono text-[10px]">
+                                {u.created_at ? new Date(u.created_at).toLocaleDateString() : "—"}
+                              </td>
+                              <td className="p-4">
+                                <div className="flex gap-1.5">
+                                  <button
+                                    onClick={() => alert(`View user: ${u.id}\nRole management via Supabase dashboard.`)}
+                                    className="px-2.5 py-1 rounded text-[9px] font-bold bg-[#ffb690]/10 text-[#ffb690] hover:bg-[#ffb690]/20 transition uppercase tracking-wider"
+                                  >
+                                    Manage
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+
+                  {/* Vendor Applications sub-section */}
+                  <div className="mt-8">
+                    <h4 className="font-display text-base uppercase tracking-wider text-[#ffb690] mb-4">Vendor Applications</h4>
+                    <p className="text-xs text-[#f6ded3]/50 bg-[#0a0a08] border border-[#ffb690]/10 rounded-xl px-4 py-3">
+                      Vendor approvals are managed via the Supabase dashboard → vendor_profiles table → set status to <code className="text-[#f97316]">&apos;approved&apos;</code> or <code className="text-[#f97316]">&apos;rejected&apos;</code>.
+                      Full in-panel approval UI coming in Phase 5.
+                    </p>
+                  </div>
                 </div>
               )}
             </>

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useAuth } from "@/context/auth-context";
 
 function Text({ en, ta }: { en: string; ta: string }) {
   return (
@@ -14,6 +15,14 @@ function Text({ en, ta }: { en: string; ta: string }) {
 
 export default function MobileNav() {
   const pathname = usePathname();
+  const { user, profile } = useAuth();
+
+  const initials = (profile?.name ?? "U")
+    .split(" ")
+    .map((w: string) => w[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
 
   return (
     <nav
@@ -84,12 +93,20 @@ export default function MobileNav() {
           href="/profile"
           className={`flex flex-col items-center justify-center gap-1 text-[10px] font-bold w-16 transition-colors ${pathname === "/profile" ? "text-primary" : "text-on-surface-variant/60 hover:text-primary"}`}
         >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-            <circle cx="12" cy="7" r="4" />
-          </svg>
+          {user && profile?.avatar ? (
+            <img src={profile.avatar} alt={profile.name} className="w-5 h-5 rounded-full object-cover border border-white/20" />
+          ) : user ? (
+            <div className="w-5 h-5 rounded-full bg-gradient-to-br from-[#f97316] to-[#dc2626] flex items-center justify-center text-white text-[8px] font-bold">
+              {initials}
+            </div>
+          ) : (
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+              <circle cx="12" cy="7" r="4" />
+            </svg>
+          )}
           <span>
-            <Text en="Profile" ta="சுயவிவரம்" />
+            <Text en={user ? "Profile" : "Login"} ta={user ? "சுயவிவரம்" : "உள்நுழை"} />
           </span>
         </Link>
       </div>
