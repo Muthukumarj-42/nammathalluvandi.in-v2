@@ -99,7 +99,7 @@ export default function HowItWorksPage() {
   };
 
   return (
-    <main className="bg-[#0a0a08] pt-20 pb-16">
+    <main className="bg-[#0a0a08] pt-14 md:pt-20 pb-16">
       <div className="noise-overlay"></div>
       
       <script
