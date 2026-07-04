@@ -7,6 +7,7 @@ import { Search, ChevronRight, MoreHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { IconTent, IconIceCream, IconCoffee, IconRickshaw, IconMapPinRed, IconSearchStove } from "@/components/ui/icons";
 import { getLiveCartsAction } from "@/app/actions";
+import { getLocalFallbackLocationName } from "@/lib/geocoding";
 
 const SUGGESTIONS = [
   "stove",
@@ -19,26 +20,7 @@ const SUGGESTIONS = [
 ];
 
 function getCartLocationName(cart: any): string {
-  const lat = cart.latitude;
-  const lng = cart.longitude;
-  
-  if (Math.abs(lat - 11.0028) < 0.005 && Math.abs(lng - 77.0347) < 0.005) {
-    return "Ondipudur, Coimbatore";
-  }
-  if (Math.abs(lat - 11.0183) < 0.005 && Math.abs(lng - 76.9693) < 0.005) {
-    return "Gandhipuram, Coimbatore";
-  }
-  if (Math.abs(lat - 11.0267) < 0.005 && Math.abs(lng - 77.0089) < 0.005) {
-    return "Peelamedu, Coimbatore";
-  }
-  if (Math.abs(lat - 11.1085) < 0.005 && Math.abs(lng - 77.3411) < 0.005) {
-    return "Tiruppur Junction";
-  }
-  if (Math.abs(lat - 11.0006) < 0.005 && Math.abs(lng - 77.0222) < 0.005) {
-    return "Singanallur, Coimbatore";
-  }
-
-  return lat >= 11.08 ? "Tiruppur" : "Coimbatore";
+  return getLocalFallbackLocationName(cart.latitude || 11.0168, cart.longitude || 76.9558);
 }
 
 function Text({ en, ta }: { en: string; ta: string }) {
@@ -303,7 +285,7 @@ export default function HomePage() {
           </div>
 
           {/* Right Column: Hero Showcase Image */}
-          <div className="hidden lg:block lg:col-span-5 relative">
+          <div className="hidden lg:flex flex-col gap-3 lg:col-span-5 relative">
             <div className="relative aspect-[4/3] w-full rounded-2xl overflow-hidden border border-[#ffb690]/20 shadow-2xl bg-[#160c06]">
               <Image 
                 src="/carts/premium-fast-food-cart-with-stove/photo-2.webp"
@@ -313,15 +295,14 @@ export default function HomePage() {
                 className="object-cover hover:scale-105 transition-transform duration-500"
                 priority
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a08]/90 via-transparent to-transparent"></div>
-              <div className="absolute bottom-4 left-4 right-4">
-                <span className="text-[10px] font-display font-bold tracking-widest text-[#f97316] uppercase block mb-1">
-                  <Text en="Featured Model" ta="சிறப்பு மாடல்" />
-                </span>
-                <span className="font-display text-lg text-[#fffdf7] uppercase tracking-wider block">
-                  <Text en="Elite Fast Food Cart with Stove" ta="அடுப்புடன் கூடிய எலைட் ஃபாஸ்ட் ஃபுட் வண்டி" />
-                </span>
-              </div>
+            </div>
+            <div className="text-left px-2">
+              <span className="text-[10px] font-display font-bold tracking-widest text-[#f97316] uppercase block mb-1">
+                <Text en="Featured Model" ta="சிறப்பு மாடல்" />
+              </span>
+              <span className="font-display text-lg text-[#fffdf7] uppercase tracking-wider block">
+                <Text en="Elite Fast Food Cart with Stove" ta="அடுப்புடன் கூடிய எலைட் ஃபாஸ்ட் ஃபுட் வண்டி" />
+              </span>
             </div>
           </div>
         </div>
@@ -397,8 +378,8 @@ export default function HomePage() {
                   ? Number(cart.price_per_day)
                   : Math.round(Number(cart.price_per_month) / 30) || 80;
                 return (
-                  <div key={cart.id} className="group bg-surface border border-[#f97316]/25 hover:border-[#f97316]/60 transition-all duration-300 flex flex-col rounded-3xl overflow-hidden shadow-premium p-3 md:p-6">
-                    <div className="aspect-[16/9] bg-[#251913] relative shrink-0 p-4 md:p-6 flex items-center justify-center rounded-2xl overflow-hidden">
+                  <div key={cart.id} className="group bg-surface border border-[#f97316]/25 hover:border-[#f97316]/60 transition-all duration-300 flex flex-col rounded-3xl overflow-hidden shadow-premium p-3 md:p-6 relative">
+                    <div className="aspect-[16/9] bg-[#251913] relative shrink-0 flex items-center justify-center rounded-2xl overflow-hidden">
                       <span className={`absolute top-2 left-2 md:top-4 md:left-4 z-10 text-[8px] md:text-[10px] font-display font-bold px-2 py-0.5 md:px-3 md:py-1 ${tagColor} tracking-wider rounded-full`}>
                         {tagLabel}
                       </span>
@@ -406,7 +387,7 @@ export default function HomePage() {
                         <img
                           src={image}
                           alt={cart.type}
-                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 rounded-xl"
+                          className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105 rounded-xl"
                         />
                       ) : (
                         <svg viewBox="0 0 100 80" className="w-12 h-12 md:w-24 md:h-24 text-on-surface-variant/20" fill="currentColor">
@@ -430,8 +411,8 @@ export default function HomePage() {
                             {getCartLocationName(cart)}
                           </span>
                         </div>
-                        <Button asChild className="bg-transparent border border-[#f97316] text-[#f97316] hover:bg-[#f97316]/10 rounded-xl px-2 py-1 md:px-6 md:py-2 h-7 md:h-auto font-display tracking-wider text-[9px] md:text-xs">
-                          <Link href={`/cart/${cart.id}`}>Details</Link>
+                        <Button asChild className="bg-transparent border border-[#f97316] text-[#f97316] hover:bg-[#f97316]/10 rounded-xl px-2 py-1 md:px-6 md:py-2 h-7 md:h-auto font-display tracking-wider text-[9px] md:text-xs shrink-0 whitespace-nowrap">
+                          <Link href={`/cart/${cart.id}`} className="after:absolute after:inset-0 after:z-10 whitespace-nowrap">Details</Link>
                         </Button>
                       </div>
                     </div>
@@ -470,13 +451,13 @@ export default function HomePage() {
                   ? Number(cart.price_per_day)
                   : Math.round(Number(cart.price_per_month) / 30) || 80;
                 return (
-                  <div key={cart.id} className="bg-surface border border-outline-variant/30 flex flex-col p-3 md:p-4 rounded-3xl shadow-premium">
-                    <div className="aspect-[16/10] bg-[#251913] relative shrink-0 p-2 md:p-4 flex items-center justify-center mb-2 md:mb-4 rounded-2xl overflow-hidden">
+                  <div key={cart.id} className="bg-surface border border-outline-variant/30 flex flex-col p-3 md:p-4 rounded-3xl shadow-premium relative">
+                    <div className="aspect-[16/10] bg-[#251913] relative shrink-0 flex items-center justify-center mb-2 md:mb-4 rounded-2xl overflow-hidden">
                       <span className="absolute top-1.5 left-1.5 text-[7px] md:text-[8px] font-display tracking-widest bg-[#ffca45] text-[#0a0a08] px-2 py-0.5 font-bold rounded-full z-10">
                         {cart.condition?.includes("New") ? "NEW" : "PRE-OWNED"}
                       </span>
                       {image ? (
-                        <img src={image} alt={cart.type} className="w-full h-full object-cover rounded-xl" />
+                        <img src={image} alt={cart.type} className="w-full h-full object-contain rounded-xl" />
                       ) : (
                         <svg viewBox="0 0 100 80" className="w-12 h-12 md:w-20 md:h-20 text-on-surface-variant/10" fill="currentColor">
                           <path d="M20 20 h60 v40 h-60 z M30 60 v10 M70 60 v10 M25 70 h50 M35 70 v5 M65 70 v5"/>
@@ -491,7 +472,7 @@ export default function HomePage() {
                       </p>
 
                       <Button asChild className="w-full bg-[#f97316] hover:bg-[#e2640e] text-[#0a0a08] border-none rounded-xl font-display uppercase tracking-widest text-[9px] md:text-xs py-1.5 md:py-2 h-8 md:h-10">
-                        <Link href={`/contact?cart=${cart.id}&name=${encodeURIComponent(cart.name_en || cart.type)}&ref=sale#enquiry-form`}>
+                        <Link href={`/contact?cart=${cart.id}&name=${encodeURIComponent(cart.name_en || cart.type)}&ref=sale#enquiry-form`} scroll={false} className="after:absolute after:inset-0 after:z-10">
                           Enquire Now
                         </Link>
                       </Button>

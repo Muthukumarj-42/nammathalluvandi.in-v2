@@ -218,7 +218,7 @@ function phoneticTransliteration(word: string): string {
   t = t.replace(/raj/g, "ராஜ்");
   t = t.replace(/kumar/g, "குமார்");
   t = t.replace(/selva/g, "செல்வ");
-  
+
   t = t.replace(/an$/g, "ன்");
   t = t.replace(/am$/g, "ம்");
   t = t.replace(/ar$/g, "ர்");
@@ -428,6 +428,33 @@ export default function ContactPage() {
     return () => observer.disconnect();
   }, []);
 
+  // Scroll to enquiry form if hash is #enquiry-form
+  useEffect(() => {
+    const scrollToForm = () => {
+      if (typeof window === "undefined") return;
+      if (window.location.hash === "#enquiry-form") {
+        const element = document.getElementById("enquiry-form");
+        if (element) {
+          element.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      }
+    };
+
+    // Scroll immediately
+    scrollToForm();
+
+    // Scroll after multiple delays for Next.js router rendering and layout settling
+    const timer1 = setTimeout(scrollToForm, 100);
+    const timer2 = setTimeout(scrollToForm, 450);
+
+    window.addEventListener("hashchange", scrollToForm);
+    return () => {
+      clearTimeout(timer1);
+      clearTimeout(timer2);
+      window.removeEventListener("hashchange", scrollToForm);
+    };
+  }, []);
+
   // Rent Form State
   const [rentFormData, setRentFormData] = useState({
     name: "",
@@ -473,16 +500,16 @@ export default function ContactPage() {
     const translatedDetails = rawDetails !== "இல்லை" ? translateTextToTamil(rawDetails) : "இல்லை";
     const translatedLocation = translateLocationToTamil(rentFormData.location);
     const translatedName = transliterateNameToTamil(rentFormData.name);
-    
-    const needText = 
+
+    const needText =
       rentFormData.need === "rent" ? "வண்டி வாடகைக்கு எடுக்க" :
-      rentFormData.need === "custom" ? "பிரத்யேக வண்டி தயாரிக்க/வாங்க" : "பொதுவான கேள்விகள்";
-      
+        rentFormData.need === "custom" ? "பிரத்யேக வண்டி தயாரிக்க/வாங்க" : "பொதுவான கேள்விகள்";
+
     const businessText =
       rentFormData.businessType === "Tea" ? "டீ / காபி கடை" :
-      rentFormData.businessType === "Juice" ? "ஜூஸ் / மில்க்ஷேக் வண்டி" :
-      rentFormData.businessType === "FastFood" ? "ஃபாஸ்ட் ஃபுட் / காரசார கடை" :
-      rentFormData.businessType === "Snacks" ? "ஸ்நாக்ஸ் / சாட் வண்டி" : "மற்ற உணவு தொழில்";
+        rentFormData.businessType === "Juice" ? "ஜூஸ் / மில்க்ஷேக் வண்டி" :
+          rentFormData.businessType === "FastFood" ? "ஃபாஸ்ட் ஃபுட் / காரசார கடை" :
+            rentFormData.businessType === "Snacks" ? "ஸ்நாக்ஸ் / சாட் வண்டி" : "மற்ற உணவு தொழில்";
 
     // Show dual clarity for name, location and details
     const nameDisplay = translatedName.toLowerCase() !== rentFormData.name.toLowerCase()
@@ -512,7 +539,7 @@ export default function ContactPage() {
   const handleRentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isRentFormValid) return;
-    
+
     // Save contact message in Supabase
     try {
       await saveContactMessage({
@@ -523,7 +550,7 @@ export default function ContactPage() {
     } catch (err) {
       console.error("Failed to save contact message to database:", err);
     }
-    
+
     const waUrl = buildWAUrl(WA_NUMBER, rentCompiledMessage);
     if (typeof window !== "undefined") {
       window.open(waUrl, "_blank");
@@ -531,12 +558,12 @@ export default function ContactPage() {
   };
 
   return (
-    <main className="bg-[#0a0a08] pt-14 md:pt-20">
+    <main className="bg-[#0a0a08] pt-14 md:pt-20 pb-24 md:pb-16">
       {/* Hero Section */}
       <section className="relative md:min-h-[50vh] md:flex md:items-center border-b border-[#ffb690]/10 overflow-hidden bg-[#160c06] pt-4 pb-16 md:py-24 px-6">
         <div className="absolute inset-0 opacity-10 map-grid"></div>
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background to-background"></div>
-        
+
         <div className="relative z-10 site-container max-w-6xl mx-auto w-full grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
           {/* Left Side: Hero Content */}
           <div className="text-left flex flex-col items-start">
@@ -548,14 +575,17 @@ export default function ContactPage() {
               <span className="text-[#f97316]"><Text en="PREMIUM RENTAL" ta="பிரீமியம் வாடகை" /></span>
             </h1>
             <p className="font-sans text-lg md:text-xl text-[#f6ded3]/80 leading-relaxed mb-8">
-              <Text 
-                en="Find the right cart for your street business. High quality, premium models, and verified vendors — active in Coimbatore and Tiruppur." 
-                ta="உங்கள் தெரு வணிகத்திற்கு சரியான வண்டியைத் தேர்ந்தெடுங்கள். சிறந்த தரம், பிரீமியம் மாடல்கள் மற்றும் சரிபார்க்கப்பட்ட விற்பனையாளர்கள் — கோயம்புத்தூர் மற்றும் திருப்பூரில்." 
+              <Text
+                en="Find the right cart for your street business. High quality, premium models, and verified vendors — active in Coimbatore and Tiruppur."
+                ta="உங்கள் தெரு வணிகத்திற்கு சரியான வண்டியைத் தேர்ந்தெடுங்கள். சிறந்த தரம், பிரீமியம் மாடல்கள் மற்றும் சரிபார்க்கப்பட்ட விற்பனையாளர்கள் — கோயம்புத்தூர் மற்றும் திருப்பூரில்."
               />
             </p>
-            <a 
-              href={`https://wa.me/${WA_NUMBER}`}
-              target="_blank"
+            <a
+              href="#enquiry-form"
+              onClick={(e) => {
+                e.preventDefault();
+                document.getElementById("enquiry-form")?.scrollIntoView({ behavior: "smooth" });
+              }}
               className="inline-flex items-center gap-3 bg-[#1c110b] text-[#ffb690] hover:text-[#f6ded3] px-8 py-4 font-display text-xl hover:bg-[#45362f] transition-all active:scale-95 border border-[#ffb690]/20 rounded-2xl"
             >
               <MessageCircle size={20} className="shrink-0" />
@@ -567,11 +597,11 @@ export default function ContactPage() {
           <div className="flex justify-center md:justify-end items-center">
             <div className="relative w-64 h-64 md:w-80 md:h-80 flex items-center justify-center bg-[#251913]/30 rounded-3xl border border-[#ffb690]/15 shadow-premium overflow-hidden group">
               <div className="absolute inset-0 bg-gradient-to-tr from-[#f97316]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-              <Image 
-                src="/brand/full-logo.webp" 
-                alt="Thalluvandi Logo" 
-                width={280} 
-                height={280} 
+              <Image
+                src="/brand/full-logo.webp"
+                alt="Thalluvandi Logo"
+                width={280}
+                height={280}
                 className="object-contain max-w-[85%] max-h-[85%] transition-transform duration-500 group-hover:scale-105"
                 onError={(e) => {
                   e.currentTarget.style.display = 'none';
@@ -616,7 +646,7 @@ export default function ContactPage() {
             <p className="font-sans text-sm text-[#e0c0b1] mb-6">
               <Text en="Immediate assistance for bookings and order inquiries." ta="முன்பதிவுகள் மற்றும் ஆர்டர் விசாரணைகளுக்கு உடனடியாக அழைக்கவும்." />
             </p>
-            <a 
+            <a
               href={`tel:${CALL_PHONE}`}
               className="font-display text-3xl text-secondary hover:text-[#ffdd75] transition-colors"
             >
@@ -640,7 +670,7 @@ export default function ContactPage() {
             <p className="font-sans text-sm text-[#e0c0b1] mb-6">
               <Text en="Share locations, send photos, and get instant updates." ta="இருப்பிடத்தை பகிர, புகைப்படங்கள் அனுப்ப மற்றும் உடனடி விவரங்கள் பெற." />
             </p>
-            <a 
+            <a
               href={`https://wa.me/${WA_NUMBER}`}
               target="_blank"
               className="font-display text-3xl text-secondary hover:text-[#ffdd75] transition-colors font-mono"
@@ -668,7 +698,7 @@ export default function ContactPage() {
                 6 A, அருள்ஜோதிபுரம் ஜல்லிமேடு, ஒண்டிப்புதூர், கோயம்புத்தூர், தமிழ்நாடு — 641016
               </div>
             </div>
-            <a 
+            <a
               href="https://maps.app.goo.gl/mdeWyjcpqBQRVzR46"
               target="_blank"
               className="font-display text-sm tracking-wider text-secondary hover:text-[#ffdd75] border-b border-secondary/30 pb-1 transition-all"
@@ -680,7 +710,7 @@ export default function ContactPage() {
       </section>
 
       {/* Message and Map Section */}
-      <section className="site-container py-16 grid grid-cols-1 lg:grid-cols-2 gap-12 items-stretch border-t border-[#ffb690]/10">
+      <section id="enquiry-form" className="site-container scroll-mt-[30px] md:scroll-mt-[30px] pt-6 lg:pt-16 pb-16 grid grid-cols-1 lg:grid-cols-2 gap-12 items-stretch border-t border-[#ffb690]/10">
         {/* Form Column */}
         <div className="flex flex-col justify-between">
           <div>
@@ -688,12 +718,12 @@ export default function ContactPage() {
               <Text en="SEND US A MESSAGE" ta="விவரங்களை அனுப்பவும்" />
             </h2>
             <p className="font-sans text-sm text-[#e0c0b1] mb-8">
-              <Text 
-                en="For business inquiries, vendor partnerships, or rentals, please fill out the form below. Our team will reach out within 24 hours." 
-                ta="தொழில் விசாரணைகள், கூட்டாண்மை அல்லது தள்ளுவண்டி வாடகைகளுக்கு, கீழே உள்ள படிவத்தை நிரப்பவும். எங்கள் குழு 24 மணி நேரத்திற்குள் உங்களைத் தொடர்பு கொள்ளும்." 
+              <Text
+                en="For business inquiries, vendor partnerships, or rentals, please fill out the form below. Our team will reach out within 24 hours."
+                ta="தொழில் விசாரணைகள், கூட்டாண்மை அல்லது தள்ளுவண்டி வாடகைகளுக்கு, கீழே உள்ள படிவத்தை நிரப்பவும். எங்கள் குழு 24 மணி நேரத்திற்குள் உங்களைத் தொடர்பு கொள்ளும்."
               />
             </p>
-            
+
             <form onSubmit={handleRentSubmit} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Field 1: Name */}
@@ -724,11 +754,10 @@ export default function ContactPage() {
                     value={rentFormData.phone}
                     onChange={handleRentInputChange}
                     placeholder={lang === "ta" ? "கைபேசி எண் (10 இலக்கங்கள்)" : "+91 00000 00000"}
-                    className={`w-full bg-[#251913] border py-3 px-4 text-[#f6ded3] placeholder-[#e0c0b1]/40 focus:ring-0 focus:outline-none transition-colors rounded-xl ${
-                      phoneError
+                    className={`w-full bg-[#251913] border py-3 px-4 text-[#f6ded3] placeholder-[#e0c0b1]/40 focus:ring-0 focus:outline-none transition-colors rounded-xl ${phoneError
                         ? "border-red-500 focus:border-red-500"
                         : "border-[#ffb690]/15 focus:border-[#f97316]"
-                    }`}
+                      }`}
                   />
                   {phoneError && (
                     <span className="text-xs text-red-400 mt-1 block font-semibold">
@@ -833,9 +862,8 @@ export default function ContactPage() {
               <button
                 type="submit"
                 disabled={!isRentFormValid}
-                className={`w-full md:w-auto bg-[#f97316] hover:bg-[#e2640e] text-white px-12 py-4 font-display text-2xl tracking-wider uppercase active:scale-95 transition-all rounded-2xl ${
-                  !isRentFormValid ? "opacity-40 cursor-not-allowed" : ""
-                }`}
+                className={`w-full md:w-auto bg-[#f97316] hover:bg-[#e2640e] text-white px-12 py-4 font-display text-2xl tracking-wider uppercase active:scale-95 transition-all rounded-2xl ${!isRentFormValid ? "opacity-40 cursor-not-allowed" : ""
+                  }`}
               >
                 <Text en="SUBMIT TO WHATSAPP →" ta="வாட்ஸ்அப்பிற்கு அனுப்பவும் →" />
               </button>

@@ -13,6 +13,7 @@ import {
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { filters, type Cart } from "@/lib/carts";
+import { getLocalFallbackLocationName } from "@/lib/geocoding";
 
 function Text({ en, ta }: { en: string; ta: string }) {
   return (
@@ -59,7 +60,7 @@ function CartImage({
       sizes={sizes}
       priority={priority}
       loading={priority ? undefined : "lazy"}
-      className="object-cover transition duration-500 group-hover:scale-[1.04] z-0"
+      className="object-contain transition duration-500 group-hover:scale-[1.04] z-0"
       onError={() => {
         setError(true);
       }}
@@ -522,7 +523,7 @@ export function CartExplorer({
 
                     {/* Location badge bottom-2 left-2 - z-10 */}
                     <span className="absolute bottom-2 left-2 z-10 flex items-center gap-1 rounded-full bg-white/95 px-3 py-1 text-xs font-bold text-ink shadow-sm">
-                      <MapPin size={13} /> Coimbatore
+                      <MapPin size={13} /> {getLocalFallbackLocationName(cart.latitude || 11.0168, cart.longitude || 76.9558)}
                     </span>
                   </Link>
 
@@ -532,9 +533,6 @@ export function CartExplorer({
                         <h3 className="font-display text-3xl uppercase leading-tight text-ink">
                           {cart.nameEn}
                         </h3>
-                        <p className="mt-1 text-sm text-muted">
-                          Rent Carts
-                        </p>
                       </div>
                       <Sparkles className="shrink-0 text-primary" size={20} />
                     </div>

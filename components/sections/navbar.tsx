@@ -11,7 +11,7 @@ const nav = [
   ["Home", "முகப்பு", "/"],
   ["Explore", "வண்டிகள்", "/explore"],
   ["List", "என் வண்டி சேர்க்க", "/publish"],
-  ["Contact", "தொடர்பு", "/contact"]
+  ["Contact", "தொடர்பு", "/contact#enquiry-form"]
 ];
 
 export function Navbar() {
@@ -56,7 +56,7 @@ export function Navbar() {
 
           <nav className="hidden items-center gap-3 lg:gap-5 xl:gap-8 md:flex shrink-0">
             {nav.map(([label, tamil, href]) => (
-              <Link key={href} href={href} className={`font-display text-xs lg:text-sm tracking-[0.08em] lg:tracking-[0.12em] uppercase transition hover:text-primary-container whitespace-nowrap ${pathname === href ? "text-primary-container" : "text-on-surface-variant"}`}>
+              <Link key={href} href={href} scroll={!href.includes("#")} className={`font-display text-xs lg:text-sm tracking-[0.08em] lg:tracking-[0.12em] uppercase transition hover:text-primary-container whitespace-nowrap ${pathname === href ? "text-primary-container" : "text-on-surface-variant"}`}>
                 <span className="en">{label}</span>
                 <span className="ta tamil-text">{tamil}</span>
               </Link>
@@ -69,10 +69,10 @@ export function Navbar() {
             </Link>
             <LanguageToggle />
             <Button asChild className="bg-[#f97316] text-[#0a0a08] hover:bg-[#f97316]/95 border-none rounded-xl font-display text-xs lg:text-sm tracking-[0.08em] lg:tracking-[0.12em] uppercase shrink-0 h-9 lg:h-11 px-3 lg:px-6">
-              <Link href="/contact#enquiry-form" className="flex items-center gap-1 lg:gap-1.5 whitespace-nowrap">
+              <Link href="/contact#enquiry-form" scroll={false} className="flex items-center gap-1 lg:gap-1.5 whitespace-nowrap">
                 <MessageCircle className="w-3.5 h-3.5 lg:w-4 lg:h-4 shrink-0" />
                 <span className="en">Chat</span>
-                <span className="ta tamil-text">💬 WhatsApp</span>
+                <span className="ta tamil-text">CHAT</span>
               </Link>
             </Button>
           </div>

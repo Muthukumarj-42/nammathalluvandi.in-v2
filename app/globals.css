@@ -211,7 +211,7 @@ html[data-lang="ta"] body {
 }
 
 .ta, .tamil-text, [lang="ta"] *, html[data-lang="ta"] * {
-  font-family: var(--font-jakarta), system-ui, "Nirmala UI", sans-serif;
+  font-family: var(--font-noto-tamil), var(--font-jakarta), system-ui, sans-serif !important;
   line-height: 1.4 !important;
   letter-spacing: 0 !important;
   word-break: break-word !important;
@@ -226,8 +226,6 @@ html[data-lang="ta"] h3,
 html[data-lang="ta"] h4,
 html[data-lang="ta"] h5,
 html[data-lang="ta"] h6,
-html[data-lang="ta"] .font-display,
-html[data-lang="ta"] .font-bold,
 .font-display.ta,
 .font-display.tamil-text,
 .font-bold.ta,

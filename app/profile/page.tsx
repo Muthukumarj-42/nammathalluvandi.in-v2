@@ -65,7 +65,7 @@ export default function ProfilePage() {
       <section className="px-4 mt-8 max-w-xl mx-auto">
         <h3 className="text-sm font-bold text-on-surface-variant uppercase tracking-wider mb-3">Support</h3>
         <div className="bg-surface-container rounded-2xl shadow-sm border border-outline-variant/20 overflow-hidden">
-          <Link href="/contact" className="flex items-center justify-between p-4 border-b border-outline-variant/20 hover:bg-surface-dim/40 transition">
+          <Link href="/contact#enquiry-form" scroll={false} className="flex items-center justify-between p-4 border-b border-outline-variant/20 hover:bg-surface-dim/40 transition">
             <div className="flex items-center gap-3 text-on-surface">
               <span className="font-semibold text-sm">Help & Contact Us</span>
             </div>

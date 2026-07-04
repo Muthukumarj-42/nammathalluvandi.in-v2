@@ -10,6 +10,7 @@ import { calculateHaversineDistance } from "@/lib/routing";
 import { mapDbCartToCart } from "@/lib/carts";
 import { isDbConfigured } from "@/lib/supabase";
 import { IconSearchStove, IconTent, IconIceCream, IconCoffee } from "@/components/ui/icons";
+import { reverseGeocode, getLocalFallbackLocationName } from "@/lib/geocoding";
 
 const SUGGESTIONS = [
   "stove",
@@ -22,26 +23,7 @@ const SUGGESTIONS = [
 ];
 
 function getCartLocationName(cart: any): string {
-  const lat = cart.latitude;
-  const lng = cart.longitude;
-  
-  if (Math.abs(lat - 11.0028) < 0.005 && Math.abs(lng - 77.0347) < 0.005) {
-    return "Ondipudur, Coimbatore";
-  }
-  if (Math.abs(lat - 11.0183) < 0.005 && Math.abs(lng - 76.9693) < 0.005) {
-    return "Gandhipuram, Coimbatore";
-  }
-  if (Math.abs(lat - 11.0267) < 0.005 && Math.abs(lng - 77.0089) < 0.005) {
-    return "Peelamedu, Coimbatore";
-  }
-  if (Math.abs(lat - 11.1085) < 0.005 && Math.abs(lng - 77.3411) < 0.005) {
-    return "Tiruppur Junction";
-  }
-  if (Math.abs(lat - 11.0006) < 0.005 && Math.abs(lng - 77.0222) < 0.005) {
-    return "Singanallur, Coimbatore";
-  }
-
-  return lat >= 11.08 ? "Tiruppur" : "Coimbatore";
+  return getLocalFallbackLocationName(cart.latitude || 11.0168, cart.longitude || 76.9558);
 }
 
 function Text({ en, ta }: { en: string; ta: string }) {
@@ -85,6 +67,8 @@ function BrowseCartsPageContent() {
   // Geolocation sorting state
   const [userCoords, setUserCoords] = useState<{ latitude: number; longitude: number } | null>(null);
   const [geoSorting, setGeoSorting] = useState(false);
+  const [detectedLocationName, setDetectedLocationName] = useState<string | null>(null);
+  const [locationErrorMsg, setLocationErrorMsg] = useState<string | null>(null);
 
   // Search filter and suggestion states
   const [showFilterPanel, setShowFilterPanel] = useState(false);
@@ -130,21 +114,61 @@ function BrowseCartsPageContent() {
 
   // Request browser geolocation to sort carts by closest distance
   const handleEnableLocationSort = () => {
-    if (!navigator.geolocation) return;
+    if (!navigator.geolocation) {
+      setLocationErrorMsg("Geolocation is not supported by your browser.");
+      return;
+    }
     setGeoSorting(true);
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setUserCoords({
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
+    setLocationErrorMsg(null);
+    setDetectedLocationName(null);
+
+    const onSuccess = (position: GeolocationPosition) => {
+      const lat = position.coords.latitude;
+      const lng = position.coords.longitude;
+      setUserCoords({
+        latitude: lat,
+        longitude: lng,
+      });
+      
+      // Fetch human-readable location name
+      reverseGeocode(lat, lng)
+        .then((locationName) => {
+          setDetectedLocationName(locationName);
+          setGeoSorting(false);
+        })
+        .catch((err) => {
+          console.error("Geocoding failed:", err);
+          setDetectedLocationName("your location");
+          setGeoSorting(false);
         });
-        setGeoSorting(false);
-      },
-      (error) => {
-        console.error("Geolocation error:", error);
-        setGeoSorting(false);
-      }
-    );
+    };
+
+    const onError = (error: GeolocationPositionError) => {
+      console.warn("High accuracy geolocation failed or timed out, trying fallback...", error);
+      // Fallback with enableHighAccuracy: false
+      navigator.geolocation.getCurrentPosition(
+        onSuccess,
+        (fallbackError) => {
+          console.error("Fallback geolocation error:", fallbackError);
+          setGeoSorting(false);
+          if (fallbackError.code === fallbackError.PERMISSION_DENIED) {
+            setLocationErrorMsg("Location access denied. Please enable location permissions in browser settings.");
+          } else if (fallbackError.code === fallbackError.POSITION_UNAVAILABLE) {
+            setLocationErrorMsg("Location unavailable. Please check if GPS/location services are enabled on your device.");
+          } else if (fallbackError.code === fallbackError.TIMEOUT) {
+            setLocationErrorMsg("Location request timed out. Please check location permissions or reload.");
+          } else {
+            setLocationErrorMsg("Could not determine your location. Showing all carts.");
+          }
+        },
+        { enableHighAccuracy: false, timeout: 10000 }
+      );
+    };
+
+    navigator.geolocation.getCurrentPosition(onSuccess, onError, {
+      enableHighAccuracy: true,
+      timeout: 5000,
+    });
   };
 
   const toggleType = (type: string) => {
@@ -316,6 +340,8 @@ function BrowseCartsPageContent() {
                     setMaxPrice(200);
                     setSearch("");
                     setUserCoords(null);
+                    setDetectedLocationName(null);
+                    setLocationErrorMsg(null);
                   }}
                   className="text-xs font-display text-[#f97316] uppercase tracking-wider hover:underline"
                 >
@@ -336,25 +362,51 @@ function BrowseCartsPageContent() {
                 <Text en="Distance Sort" ta="தொலைவு வாரியாக" />
               </label>
               {userCoords ? (
-                <div className="flex items-center gap-2 text-xs text-green-500 font-bold">
-                  <MapPin className="w-4 h-4 shrink-0" />
-                  <span>
-                    <Text en="Nearest Carts Shown First" ta="அருகிலுள்ள வண்டிகள் முதலில்" />
-                  </span>
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center gap-2 text-xs text-green-500 font-bold">
+                    <MapPin className="w-4 h-4 shrink-0" />
+                    <span>
+                      {detectedLocationName ? (
+                        <Text 
+                          en={`Showing carts near ${detectedLocationName}`} 
+                          ta={`${detectedLocationName} அருகே உள்ள வண்டிகள்`} 
+                        />
+                      ) : (
+                        <Text en="Nearest Carts Shown First" ta="அருகிலுள்ள வண்டிகள் முதலில்" />
+                      )}
+                    </span>
+                  </div>
+                  <button 
+                    onClick={() => {
+                      setUserCoords(null);
+                      setDetectedLocationName(null);
+                      setLocationErrorMsg(null);
+                    }}
+                    className="text-[10px] text-[#f97316] hover:underline text-left font-bold"
+                  >
+                    <Text en="Clear location sort" ta="இருப்பிட வரிசையை நீக்கு" />
+                  </button>
                 </div>
               ) : (
-                <Button 
-                  onClick={handleEnableLocationSort}
-                  disabled={geoSorting}
-                  className="w-full h-10 bg-transparent hover:bg-[#ffb690]/5 border border-[#ffb690]/35 text-[#ffb690] text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 rounded-xl"
-                >
-                  <Navigation className="w-3.5 h-3.5" />
-                  {geoSorting ? (
-                    <Text en="Finding GPS..." ta="GPS தேடப்படுகிறது..." />
-                  ) : (
-                    <Text en="Show Carts Near Me" ta="எனக்கு அருகிலுள்ள வண்டிகள்" />
+                <>
+                  <Button 
+                    onClick={handleEnableLocationSort}
+                    disabled={geoSorting}
+                    className="w-full h-10 bg-transparent hover:bg-[#ffb690]/5 border border-[#ffb690]/35 text-[#ffb690] text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 rounded-xl"
+                  >
+                    <Navigation className="w-3.5 h-3.5" />
+                    {geoSorting ? (
+                      <Text en="Finding GPS..." ta="GPS தேடப்படுகிறது..." />
+                    ) : (
+                      <Text en="Show Carts Near Me" ta="எனக்கு அருகிலுள்ள வண்டிகள்" />
+                    )}
+                  </Button>
+                  {locationErrorMsg && (
+                    <div className="mt-2 text-[10px] text-red-400 font-semibold bg-red-950/20 border border-red-500/20 p-2 rounded-lg leading-relaxed">
+                      {locationErrorMsg}
+                    </div>
                   )}
-                </Button>
+                </>
               )}
             </div>
 
@@ -439,13 +491,55 @@ function BrowseCartsPageContent() {
 
         {/* Cards Grid */}
         <section>
-          <div className="flex justify-between items-center mb-6">
+          <div className="flex flex-wrap justify-between items-center gap-4 mb-6">
             <span className="font-display text-xs tracking-wider text-[#f6ded3]/60 uppercase">
               <Text 
                 en={`${filteredCarts.length} carts matching your query`} 
                 ta={`உங்கள் தேடலுக்கு ${filteredCarts.length} வண்டிகள் உள்ளன`} 
               />
             </span>
+
+            {/* Quick action location sort */}
+            <div className="flex items-center gap-2">
+              {userCoords ? (
+                <div className="flex items-center gap-2 text-xs text-green-500 font-bold bg-[#160c06] border border-green-500/20 px-3 py-1.5 rounded-xl">
+                  <MapPin className="w-3.5 h-3.5" />
+                  <span>
+                    {detectedLocationName ? (
+                      <Text 
+                        en={`Near ${detectedLocationName}`} 
+                        ta={`${detectedLocationName} அருகே`} 
+                      />
+                    ) : (
+                      <Text en="Nearest first" ta="அருகிலுள்ளவை முதலில்" />
+                    )}
+                  </span>
+                  <button 
+                    onClick={() => {
+                      setUserCoords(null);
+                      setDetectedLocationName(null);
+                      setLocationErrorMsg(null);
+                    }}
+                    className="text-[10px] text-[#f97316] hover:underline ml-1 font-bold"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ) : (
+                <Button 
+                  onClick={handleEnableLocationSort}
+                  disabled={geoSorting}
+                  className="h-8 bg-[#251913] hover:bg-[#ffb690]/10 border border-[#ffb690]/25 text-[#ffb690] text-[10px] font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 rounded-lg px-3"
+                >
+                  <Navigation className="w-3 h-3" />
+                  {geoSorting ? (
+                    <Text en="Finding GPS..." ta="தேடப்படுகிறது..." />
+                  ) : (
+                    <Text en="Carts Near Me" ta="அருகிலுள்ள வண்டிகள்" />
+                  )}
+                </Button>
+              )}
+            </div>
           </div>
 
           {loading ? (
@@ -491,7 +585,7 @@ function BrowseCartsPageContent() {
                       <img 
                         src={cart.images[0]} 
                         alt={cart.nameEn}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105"
                       />
                     ) : (
                       <svg viewBox="0 0 100 80" className="w-12 h-12 md:w-20 md:h-20 text-[#ffb690]/10" fill="currentColor">
@@ -527,7 +621,7 @@ function BrowseCartsPageContent() {
                         </span>
                       </div>
                       <Button asChild className="bg-[#f97316] text-[#0a0a08] hover:bg-[#f97316]/95 border-none rounded-lg font-display uppercase tracking-widest text-[9px] md:text-xs py-1 px-3 md:py-2 md:px-6 h-7 md:h-9">
-                        <Link href={`/carts/${cart.id}`}>Details</Link>
+                        <Link href={`/carts/${cart.id}`} className="after:absolute after:inset-0 after:z-10">Details</Link>
                       </Button>
                     </div>
                   </div>

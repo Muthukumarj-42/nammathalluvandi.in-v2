@@ -28,6 +28,7 @@ import {
   updateDisputeStatusAction
 } from "@/app/actions";
 import { calculateHaversineDistance } from "@/lib/routing";
+import { getLocalFallbackLocationName } from "@/lib/geocoding";
 
 export default function AdminDashboard() {
   const [authorized, setAuthorized] = useState(false);
@@ -462,7 +463,7 @@ export default function AdminDashboard() {
                                 <p className="text-[#f6ded3]/40 uppercase font-semibold text-[10px] mb-1">Business Vendor (Renter)</p>
                                 <p className="font-bold text-[#fffdf7]">{bv ? bv.name : "Unknown Buyer"}</p>
                                 <p>{bv ? bv.phone : ""}</p>
-                                <p className="text-[10px] text-[#f6ded3]/50 font-mono mt-0.5">Loc: {booking.bv_latitude}, {booking.bv_longitude}</p>
+                                <p className="text-[10px] text-[#f6ded3]/50 font-mono mt-0.5">Loc: {getLocalFallbackLocationName(booking.bv_latitude, booking.bv_longitude)}</p>
                               </div>
                               <div>
                                 <p className="text-[#f6ded3]/40 uppercase font-semibold text-[10px] mb-1">Assigned Cart Vendor (Owner)</p>

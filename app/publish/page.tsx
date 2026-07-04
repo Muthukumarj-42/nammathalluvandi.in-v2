@@ -5,6 +5,7 @@ import { CheckCircle2, MapPin, Navigation, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { WA_PUBLISH, buildWAUrl } from "@/config/whatsapp";
 import { saveCart } from "@/app/actions";
+import { reverseGeocode } from "@/lib/geocoding";
 
 function Text({ en, ta }: { en: string; ta: string }) {
   return (
@@ -92,12 +93,26 @@ export default function PublishPage() {
     setGeoStatus("loading");
     navigator.geolocation.getCurrentPosition(
       (position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
         setPublishFormData((prev) => ({
           ...prev,
-          latitude: position.coords.latitude.toFixed(6),
-          longitude: position.coords.longitude.toFixed(6),
+          latitude: lat.toFixed(6),
+          longitude: lng.toFixed(6),
         }));
-        setGeoStatus("success");
+
+        reverseGeocode(lat, lng)
+          .then((locName) => {
+            setPublishFormData((prev) => ({
+              ...prev,
+              location: locName,
+            }));
+            setGeoStatus("success");
+          })
+          .catch((err) => {
+            console.error("Geocoding error:", err);
+            setGeoStatus("success");
+          });
       },
       (error) => {
         console.error("Error fetching location:", error);
@@ -133,7 +148,6 @@ Weight: ${publishFormData.weight}
 Stove Type: ${publishFormData.stoveType}
 Expected Monthly Rent: ₹${publishFormData.expectedRent.trim()}
 Location: ${publishFormData.location.trim()}
-Coordinates: Lat ${publishFormData.latitude}, Lng ${publishFormData.longitude}
 Description: ${extraDetails}`;
   }, [publishFormData]);
 

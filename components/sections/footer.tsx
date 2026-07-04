@@ -16,7 +16,7 @@ const groups = {
     ["Publish Cart", "என் வண்டி சேர்க்க", "/publish"],
   ],
   Branch: [
-    ["Coimbatore", "கோவை கிளை", "/contact"],
+    ["Coimbatore", "கோவை கிளை", "/contact#enquiry-form"],
   ],
   Contact: [
     [DISPLAY_CALL_PHONE, DISPLAY_CALL_PHONE, "tel:+919442763940"],
@@ -109,6 +109,7 @@ export function Footer() {
                     <li key={label}>
                       <Link
                         href={href}
+                        scroll={!href.includes("#")}
                         className="transition hover:text-primary-container"
                       >
                         <span className="en">{label}</span>

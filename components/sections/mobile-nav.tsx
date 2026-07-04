@@ -68,7 +68,8 @@ export default function MobileNav() {
         </div>
 
         <Link
-          href="/contact"
+          href="/contact#enquiry-form"
+          scroll={false}
           className={`flex flex-col items-center justify-center gap-1 text-[10px] font-bold w-16 transition-colors ${pathname === "/contact" ? "text-primary" : "text-on-surface-variant/60 hover:text-primary"}`}
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">

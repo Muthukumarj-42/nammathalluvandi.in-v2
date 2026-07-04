@@ -7,6 +7,7 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { getCart, type Cart } from "@/lib/carts";
 import { saveBooking } from "@/app/actions";
+import { reverseGeocode } from "@/lib/geocoding";
 
 const TAMIL_DICTIONARY: Record<string, string> = {
   // Pronouns / Particles
@@ -286,12 +287,26 @@ export function BookingFlow() {
     setGeoStatus("loading");
     navigator.geolocation.getCurrentPosition(
       (position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
         setFormData((prev) => ({
           ...prev,
-          latitude: position.coords.latitude.toFixed(6),
-          longitude: position.coords.longitude.toFixed(6),
+          latitude: lat.toFixed(6),
+          longitude: lng.toFixed(6),
         }));
-        setGeoStatus("success");
+
+        reverseGeocode(lat, lng)
+          .then((locName) => {
+            setFormData((prev) => ({
+              ...prev,
+              location: locName,
+            }));
+            setGeoStatus("success");
+          })
+          .catch((err) => {
+            console.error("Geocoding error:", err);
+            setGeoStatus("success");
+          });
       },
       (error) => {
         console.error("Error fetching location:", error);
@@ -430,7 +445,6 @@ export function BookingFlow() {
 தொலைபேசி: ${formData.phone.trim()}
 தேவையான தேதி: ${formData.date}
 இடம் (கோவையில்): ${translatedLocation}
-இருப்பிடம்: Lat ${formData.latitude}, Lng ${formData.longitude}
 மேலும் விவரம்: ${translatedDetails}
 
 அனைத்து வாடகை விதிகளையும் படித்து ஒப்புக்கொண்டேன். ✓`;
