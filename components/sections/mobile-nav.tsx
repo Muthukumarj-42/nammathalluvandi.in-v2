@@ -2,9 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Search, Plus, MessageSquare, User } from "lucide-react";
 
-export function MobileNav() {
+export default function MobileNav() {
   const pathname = usePathname();
 
   return (
@@ -17,7 +16,10 @@ export function MobileNav() {
           href="/"
           className={`flex flex-col items-center justify-center gap-1 text-[10px] font-bold w-16 transition-colors ${pathname === "/" ? "text-primary" : "text-on-surface-variant/60 hover:text-primary"}`}
         >
-          <Home className="w-5 h-5" />
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+            <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+            <polyline points="9 22 9 12 15 12 15 22" />
+          </svg>
           <span>Home</span>
         </Link>
 
@@ -41,7 +43,10 @@ export function MobileNav() {
             className="absolute -top-5 flex flex-col items-center justify-center"
           >
             <div className="w-12 h-12 bg-primary-container text-on-primary-container rounded-full flex items-center justify-center shadow-md border-4 border-surface transition-transform active:scale-95">
-              <Plus className="w-6 h-6" strokeWidth={3} />
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
             </div>
             <span className={`text-[10px] font-bold mt-1 ${pathname === "/publish" ? "text-primary" : "text-on-surface-variant/60"}`}>
               List
@@ -53,7 +58,9 @@ export function MobileNav() {
           href="/contact"
           className={`flex flex-col items-center justify-center gap-1 text-[10px] font-bold w-16 transition-colors ${pathname === "/contact" ? "text-primary" : "text-on-surface-variant/60 hover:text-primary"}`}
         >
-          <MessageSquare className="w-5 h-5" />
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+          </svg>
           <span>Contact</span>
         </Link>
 
@@ -61,7 +68,10 @@ export function MobileNav() {
           href="/profile"
           className={`flex flex-col items-center justify-center gap-1 text-[10px] font-bold w-16 transition-colors ${pathname === "/profile" ? "text-primary" : "text-on-surface-variant/60 hover:text-primary"}`}
         >
-          <User className="w-5 h-5" />
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+            <circle cx="12" cy="7" r="4" />
+          </svg>
           <span>Profile</span>
         </Link>
       </div>

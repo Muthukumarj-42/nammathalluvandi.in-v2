@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import Script from "next/script";
 import "./globals.css";
 import { Footer } from "@/components/sections/footer";
-import { MobileNav } from "@/components/sections/mobile-nav";
+import MobileNav from "@/components/sections/mobile-nav";
 import { Navbar } from "@/components/sections/navbar";
 import { WhatsAppFloat } from "@/components/sections/whatsapp-float";
 import { Outfit, Plus_Jakarta_Sans, Noto_Sans_Tamil } from "next/font/google";
