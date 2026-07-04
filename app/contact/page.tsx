@@ -606,7 +606,7 @@ export default function ContactPage() {
       <section className="site-container py-16">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Phone Card */}
-          <div className="bg-[#291d16] border border-[#ffb690]/15 p-8 group hover:border-[#ffb690]/40 transition-all duration-300">
+          <div className="bg-[#291d16] border border-[#ffb690]/15 p-8 group hover:border-[#ffb690]/40 transition-all duration-300 rounded-3xl">
             <div className="text-[#ffb690] mb-6">
               <PhoneCall size={36} />
             </div>
@@ -625,7 +625,7 @@ export default function ContactPage() {
           </div>
 
           {/* WhatsApp Card */}
-          <div className="bg-[#291d16] border border-[#ffb690]/15 p-8 group hover:border-[#ffb690]/40 transition-all duration-300 relative overflow-hidden">
+          <div className="bg-[#291d16] border border-[#ffb690]/15 p-8 group hover:border-[#ffb690]/40 transition-all duration-300 relative overflow-hidden rounded-3xl">
             <div className="absolute top-0 right-0 p-4">
               <div className="bg-[#ffb690]/10 text-[#ffb690] px-2 py-1 text-[10px] font-bold tracking-widest uppercase">
                 <Text en="FASTEST" ta="மிக விரைவு" />
@@ -650,7 +650,7 @@ export default function ContactPage() {
           </div>
 
           {/* Physical Address / Headquarters Card */}
-          <div className="bg-[#291d16] border border-[#ffb690]/15 p-8 group hover:border-[#ffb690]/40 transition-all duration-300">
+          <div className="bg-[#291d16] border border-[#ffb690]/15 p-8 group hover:border-[#ffb690]/40 transition-all duration-300 rounded-3xl">
             <div className="text-[#ffb690] mb-6">
               <MapPin size={36} />
             </div>
@@ -708,7 +708,7 @@ export default function ContactPage() {
                     value={rentFormData.name}
                     onChange={handleRentInputChange}
                     placeholder={lang === "ta" ? "உங்கள் முழு பெயர்" : "Karthik Raja"}
-                    className="w-full bg-[#251913] border-0 border-b border-[#e0c0b1]/30 py-3 px-3 text-[#f6ded3] placeholder-[#e0c0b1]/40 focus:border-[#f97316] transition-colors focus:ring-0 focus:outline-none"
+                    className="w-full bg-[#251913] border border-[#ffb690]/15 py-3 px-4 text-[#f6ded3] placeholder-[#e0c0b1]/40 focus:border-[#f97316] transition-colors focus:ring-0 focus:outline-none rounded-xl"
                   />
                 </div>
 
@@ -724,10 +724,10 @@ export default function ContactPage() {
                     value={rentFormData.phone}
                     onChange={handleRentInputChange}
                     placeholder={lang === "ta" ? "கைபேசி எண் (10 இலக்கங்கள்)" : "+91 00000 00000"}
-                    className={`w-full bg-[#251913] border-0 border-b py-3 px-3 text-[#f6ded3] placeholder-[#e0c0b1]/40 focus:ring-0 focus:outline-none transition-colors ${
+                    className={`w-full bg-[#251913] border py-3 px-4 text-[#f6ded3] placeholder-[#e0c0b1]/40 focus:ring-0 focus:outline-none transition-colors rounded-xl ${
                       phoneError
                         ? "border-red-500 focus:border-red-500"
-                        : "border-[#e0c0b1]/30 focus:border-[#f97316]"
+                        : "border-[#ffb690]/15 focus:border-[#f97316]"
                     }`}
                   />
                   {phoneError && (
@@ -748,7 +748,7 @@ export default function ContactPage() {
                     id="businessType"
                     value={rentFormData.businessType}
                     onChange={handleRentInputChange}
-                    className="w-full bg-[#251913] border-0 border-b border-[#e0c0b1]/30 py-3 px-2 text-[#f6ded3] focus:border-[#f97316] transition-colors focus:ring-0 focus:outline-none cursor-pointer"
+                    className="w-full bg-[#251913] border border-[#ffb690]/15 py-3 px-3 text-[#f6ded3] focus:border-[#f97316] transition-colors focus:ring-0 focus:outline-none cursor-pointer rounded-xl"
                   >
                     {lang === "ta" ? (
                       <>
@@ -779,7 +779,7 @@ export default function ContactPage() {
                     id="need"
                     value={rentFormData.need}
                     onChange={handleRentInputChange}
-                    className="w-full bg-[#251913] border-0 border-b border-[#e0c0b1]/30 py-3 px-2 text-[#f6ded3] focus:border-[#f97316] transition-colors focus:ring-0 focus:outline-none cursor-pointer"
+                    className="w-full bg-[#251913] border border-[#ffb690]/15 py-3 px-3 text-[#f6ded3] focus:border-[#f97316] transition-colors focus:ring-0 focus:outline-none cursor-pointer rounded-xl"
                   >
                     {lang === "ta" ? (
                       <>
@@ -810,7 +810,7 @@ export default function ContactPage() {
                   value={rentFormData.location}
                   onChange={handleRentInputChange}
                   placeholder={lang === "ta" ? "எ.கா: ஒண்டிப்புதூர், காந்திபுரம்" : "e.g. Ondipudur, Gandhipuram"}
-                  className="w-full bg-[#251913] border-0 border-b border-[#e0c0b1]/30 py-3 px-3 text-[#f6ded3] placeholder-[#e0c0b1]/40 focus:border-[#f97316] transition-colors focus:ring-0 focus:outline-none"
+                  className="w-full bg-[#251913] border border-[#ffb690]/15 py-3 px-4 text-[#f6ded3] placeholder-[#e0c0b1]/40 focus:border-[#f97316] transition-colors focus:ring-0 focus:outline-none rounded-xl"
                 />
               </div>
 
@@ -825,7 +825,7 @@ export default function ContactPage() {
                   value={rentFormData.details}
                   onChange={handleRentInputChange}
                   placeholder={lang === "ta" ? "வண்டி அளவு, குறிப்பிட்ட தேதி, அல்லது உங்கள் கேள்விகள்..." : "Cart size preference, required dates, or other questions..."}
-                  className="w-full bg-[#251913] border-0 border-b border-[#e0c0b1]/30 py-3 px-3 text-[#f6ded3] placeholder-[#e0c0b1]/40 focus:border-[#f97316] transition-colors focus:ring-0 focus:outline-none resize-none"
+                  className="w-full bg-[#251913] border border-[#ffb690]/15 py-3 px-4 text-[#f6ded3] placeholder-[#e0c0b1]/40 focus:border-[#f97316] transition-colors focus:ring-0 focus:outline-none resize-none rounded-xl"
                 />
               </div>
 
@@ -833,7 +833,7 @@ export default function ContactPage() {
               <button
                 type="submit"
                 disabled={!isRentFormValid}
-                className={`w-full md:w-auto bg-[#f97316] hover:bg-[#e2640e] text-white px-12 py-4 font-display text-2xl tracking-wider uppercase active:scale-95 transition-all ${
+                className={`w-full md:w-auto bg-[#f97316] hover:bg-[#e2640e] text-white px-12 py-4 font-display text-2xl tracking-wider uppercase active:scale-95 transition-all rounded-2xl ${
                   !isRentFormValid ? "opacity-40 cursor-not-allowed" : ""
                 }`}
               >
@@ -844,7 +844,7 @@ export default function ContactPage() {
         </div>
 
         {/* Map Column */}
-        <div className="relative h-full min-h-[400px] border border-[#ffb690]/25 overflow-hidden bg-[#291d16]">
+        <div className="relative h-full min-h-[400px] border border-[#ffb690]/25 overflow-hidden bg-[#291d16] rounded-3xl">
           <iframe
             title="Thalluvandi location - Ondipudur Coimbatore"
             src="https://maps.google.com/maps?q=11.0072893,77.057818&z=17&output=embed"
