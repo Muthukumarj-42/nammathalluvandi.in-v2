@@ -577,9 +577,6 @@ export default function ContactPage() {
                   e.currentTarget.style.display = 'none';
                 }}
               />
-              <div className="absolute font-display text-3xl font-black uppercase tracking-[0.15em] text-[#f97316] select-none pointer-events-none text-center">
-                THALLUVANDI
-              </div>
             </div>
           </div>
         </div>
