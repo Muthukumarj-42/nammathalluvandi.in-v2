@@ -7,7 +7,6 @@ import { useEffect, useState } from "react";
 import { MessageCircle, ShoppingCart, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LanguageToggle } from "@/components/sections/language-toggle";
-import { ThemeToggle } from "@/components/sections/theme-toggle";
 import { useCartStore } from "@/lib/store";
 
 const nav = [
@@ -49,7 +48,6 @@ export function Navbar() {
 
         {/* Right: Cart Button */}
         <div className="flex items-center gap-1">
-          <ThemeToggle compact />
           <Link href="/notifications" className="relative p-2 text-on-surface-variant hover:text-primary transition" aria-label="Notifications">
             <Bell size={20} />
           </Link>
@@ -84,7 +82,6 @@ export function Navbar() {
 
           <div className="hidden items-center gap-2 lg:gap-4 md:flex shrink-0">
             <LanguageToggle />
-            <ThemeToggle />
             <Link href="/notifications" className="relative p-2 text-on-surface-variant hover:text-primary-container transition shrink-0" aria-label="Notifications">
               <Bell size={20} />
             </Link>

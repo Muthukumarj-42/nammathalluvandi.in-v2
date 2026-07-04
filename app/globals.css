@@ -43,8 +43,8 @@
   --radius-lg: 0.75rem;
   --radius-xl: 1rem;
   --radius-2xl: 1.5rem;
-  --font-bebas: "Bebas Neue", sans-serif;
-  --font-jakarta: "DM Sans", sans-serif;
+  --font-bebas: "Outfit", sans-serif;
+  --font-jakarta: "Plus Jakarta Sans", sans-serif;
   --font-noto-tamil: "Noto Sans Tamil", sans-serif;
 }
 
@@ -310,6 +310,18 @@ html:not(.dark) [class*="bg-[#1a1208]"] {
   background-color: var(--surface-container-low) !important;
 }
 
+html:not(.dark) [class*="text-[#fffdf7]"] {
+  color: var(--on-surface) !important;
+}
+
+html:not(.dark) [class*="text-white"] {
+  color: #f6ded3 !important;
+}
+
+html:not(.dark) [class*="text-[#fff]"] {
+  color: #f6ded3 !important;
+}
+
 html:not(.dark) [class*="text-[#ffb690]"] {
   color: var(--primary) !important;
 }
@@ -396,16 +408,16 @@ html:not(.dark) [class*="border-[#ffca45]/20"] {
 
 /* Specific text color overrides on primary container background (saffron/orange becoming dark green in light mode) */
 html:not(.dark) [class*="bg-[#f97316]"] [class*="text-[#0a0a08]"] {
-  color: var(--surface) !important;
+  color: #f6ded3 !important;
 }
 html:not(.dark) [class*="bg-[#f97316]"][class*="text-[#0a0a08]"] {
-  color: var(--surface) !important;
+  color: #f6ded3 !important;
 }
 html:not(.dark) [class*="bg-[#f97316]"] [class*="text-[#0a0a08]/80"] {
-  color: rgba(255, 255, 255, 0.85) !important;
+  color: rgba(246, 222, 211, 0.85) !important;
 }
 html:not(.dark) [class*="bg-[#f97316]"] [class*="text-[#0a0a08]/40"] {
-  color: rgba(255, 255, 255, 0.4) !important;
+  color: rgba(246, 222, 211, 0.4) !important;
 }
 
 /* Hover/active state overrides for light mode */

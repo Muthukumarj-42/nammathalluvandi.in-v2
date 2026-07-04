@@ -127,74 +127,93 @@ export default function CartDetailClient({ cart }: CartDetailClientProps) {
   }, [cart, lang]);
 
   return (
-    <main className="bg-[#0a0a08] min-h-screen text-[#f6ded3] pb-24 pt-20">
+    <main className="bg-[#0a0a08] min-h-screen text-[#f6ded3] pb-36 md:pb-32 pt-14 md:pt-20">
       {/* Sticky Header */}
-      <header className="sticky top-20 bg-[#0a0a08]/90 backdrop-blur-md z-40 border-b border-[#ffb690]/10 py-4">
+      <header className="sticky top-14 md:top-20 bg-[#0a0a08]/90 backdrop-blur-md z-40 border-b border-[#ffb690]/10 py-4">
         <div className="site-container flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link href="/explore" className="text-[#ffb690] hover:text-[#f6ded3] transition-colors">
-              <ArrowLeft className="w-6 h-6" />
-            </Link>
             <h1 className="font-display text-2xl uppercase tracking-wider text-ink truncate max-w-xs md:max-w-md">
               <Text en={cart.nameEn} ta={cart.nameTa} />
             </h1>
           </div>
           <div className="flex items-center gap-2">
-            <span className="bg-[#ffb690]/10 text-[#ffb690] border border-[#ffb690]/20 px-3 py-1 text-[10px] font-bold tracking-widest uppercase">
+            <span className="bg-[#ffb690]/10 text-[#ffb690] border border-[#ffb690]/20 px-3 py-1 text-[10px] font-bold tracking-widest uppercase rounded-md">
               <Text en={cart.available ? "AVAILABLE" : "RENTED"} ta={cart.available ? "வண்டி உண்டு" : "வாடகையில் உள்ளது"} />
             </span>
           </div>
         </div>
       </header>
 
-      <div className="site-container py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
-          {/* Left Column: Image Gallery */}
-          <div className="lg:col-span-6 space-y-4">
-            <div className="bg-[#251913] border border-[#ffb690]/15 w-full aspect-[4/3] relative flex items-center justify-center p-8">
-              {cart.images && cart.images.length > 0 ? (
-                <Image
-                  src={cart.images[selectedImageIndex]}
-                  alt={cart.nameEn}
-                  fill
-                  className="object-cover"
-                  priority
-                />
-              ) : (
-                <div className="text-[#ffb690] flex flex-col items-center gap-2">
-                  <ShoppingBag size={48} className="opacity-50" />
-                  <span className="text-sm font-bold uppercase tracking-wider">No Image Available</span>
+      <div className="site-container pt-4 pb-6 lg:pb-12 lg:pt-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12 items-start">
+          {/* Left Column: Image Gallery (Sticky on Desktop) */}
+          <div className="lg:col-span-6 lg:sticky lg:top-32 self-start space-y-4">
+            {/* Desktop View: Main Image + Thumbnails */}
+            <div className="hidden lg:block space-y-4">
+              <div className="bg-[#251913] border border-[#ffb690]/15 w-full aspect-[4/3] relative flex items-center justify-center p-8 rounded-2xl overflow-hidden">
+                {cart.images && cart.images.length > 0 ? (
+                  <Image
+                    src={cart.images[selectedImageIndex]}
+                    alt={cart.nameEn}
+                    fill
+                    className="object-cover rounded-2xl"
+                    priority
+                  />
+                ) : (
+                  <div className="text-[#ffb690] flex flex-col items-center gap-2">
+                    <ShoppingBag size={48} className="opacity-50" />
+                    <span className="text-sm font-bold uppercase tracking-wider">No Image Available</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Thumbnails */}
+              {cart.images && cart.images.length > 1 && (
+                <div className="flex gap-3 overflow-x-auto py-1 hide-scrollbar">
+                  {cart.images.map((img, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setSelectedImageIndex(idx)}
+                      className={`relative w-20 h-16 flex-shrink-0 bg-[#251913] border-2 rounded-lg overflow-hidden transition-all ${
+                        selectedImageIndex === idx ? "border-[#f97316]" : "border-transparent opacity-60 hover:opacity-100"
+                      }`}
+                    >
+                      <Image src={img} alt={`${cart.nameEn} thumbnail ${idx}`} fill className="object-cover rounded-lg" />
+                    </button>
+                  ))}
                 </div>
               )}
             </div>
 
-            {/* Thumbnails */}
-            {cart.images && cart.images.length > 1 && (
-              <div className="flex gap-3 overflow-x-auto py-1 hide-scrollbar">
-                {cart.images.map((img, idx) => (
-                  <button
+            {/* Mobile View: Horizontal Scroll Photos */}
+            <div className="flex lg:hidden gap-4 overflow-x-auto snap-x snap-mandatory pb-4 hide-scrollbar -mx-4 px-4">
+              {cart.images && cart.images.length > 0 ? (
+                cart.images.map((img, idx) => (
+                  <div
                     key={idx}
-                    onClick={() => setSelectedImageIndex(idx)}
-                    className={`relative w-20 h-16 flex-shrink-0 bg-[#251913] border-2 transition-all ${
-                      selectedImageIndex === idx ? "border-[#f97316]" : "border-transparent opacity-60 hover:opacity-100"
-                    }`}
+                    className="relative w-[85vw] aspect-[4/3] snap-center shrink-0 bg-[#251913] border border-[#ffb690]/15 rounded-2xl overflow-hidden"
                   >
-                    <Image src={img} alt={`${cart.nameEn} thumbnail ${idx}`} fill className="object-cover" />
-                  </button>
-                ))}
-              </div>
-            )}
+                    <Image src={img} alt={`${cart.nameEn} ${idx + 1}`} fill className="object-cover" />
+                  </div>
+                ))
+              ) : (
+                <div className="relative w-full aspect-[4/3] bg-[#251913] border border-[#ffb690]/15 rounded-2xl flex flex-col items-center justify-center p-8">
+                  <ShoppingBag size={48} className="opacity-50 text-[#ffb690]" />
+                  <span className="text-sm font-bold uppercase tracking-wider text-[#ffb690]">No Image Available</span>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Right Column: Details */}
-          <div className="lg:col-span-6 space-y-8">
+          <div className="lg:col-span-6 space-y-5 lg:space-y-8">
             {/* Title Block */}
-            <div className="space-y-3">
+            <div className="space-y-2 lg:space-y-3">
               <div className="flex flex-wrap gap-2">
                 {cart.type.map((t, idx) => (
                   <span
                     key={idx}
-                    className="border border-[#ffb690]/20 px-2 py-0.5 text-[9px] font-bold tracking-widest text-[#ffb690] uppercase"
+                    className="border border-[#ffb690]/20 px-2 py-0.5 text-[9px] font-bold tracking-widest text-[#ffb690] uppercase rounded"
                   >
                     {t}
                   </span>
@@ -216,7 +235,7 @@ export default function CartDetailClient({ cart }: CartDetailClientProps) {
             </div>
 
             {/* Price & Deposit Panel */}
-            <div className="bg-[#160c06] border border-[#ffb690]/15 p-6 space-y-4">
+            <div className="bg-[#160c06] border border-[#ffb690]/15 p-4 lg:p-6 space-y-3 lg:space-y-4 rounded-2xl">
               <div className="flex justify-between items-baseline border-b border-[#ffb690]/10 pb-4">
                 <div>
                   <span className="font-display text-4xl text-[#ffca45]">₹{cart.pricePerDay}</span>
@@ -236,7 +255,7 @@ export default function CartDetailClient({ cart }: CartDetailClientProps) {
             </div>
 
             {/* Specs Grid */}
-            <div className="grid grid-cols-3 gap-4 border-y border-[#ffb690]/15 py-6">
+            <div className="grid grid-cols-3 gap-4 border-y border-[#ffb690]/15 py-4 lg:py-6">
               <div className="text-center space-y-1">
                 <Ruler className="w-6 h-6 mx-auto text-[#ffb690]" />
                 <p className="text-xs font-bold text-ink uppercase tracking-wider">{specs.length}</p>
@@ -255,7 +274,7 @@ export default function CartDetailClient({ cart }: CartDetailClientProps) {
             </div>
 
             {/* About / Features */}
-            <div className="space-y-4">
+            <div className="space-y-3 lg:space-y-4">
               <h3 className="font-display text-2xl uppercase tracking-wider text-ink border-b border-[#ffb690]/10 pb-2">
                 <Text en="Features & Specifications" ta="அம்சங்கள் & விவரங்கள்" />
               </h3>
@@ -282,30 +301,13 @@ export default function CartDetailClient({ cart }: CartDetailClientProps) {
               </ul>
             </div>
 
-            {/* Call to Actions */}
-            <div className="space-y-3 pt-4">
-              <button
-                onClick={handleAddToCart}
-                className="w-full bg-[#f97316] hover:bg-[#e2640e] text-white py-4 font-display text-2xl tracking-wider uppercase active:scale-95 transition-all flex items-center justify-center gap-2"
-              >
-                {isAdded ? (
-                  <>
-                    <CheckCircle size={20} className="animate-bounce" />
-                    <Text en="ADDED TO LIST!" ta="பட்டியலில் சேர்க்கப்பட்டது!" />
-                  </>
-                ) : (
-                  <>
-                    <Plus size={20} />
-                    <Text en="ADD TO RENTAL LIST" ta="வாடகை பட்டியலில் சேர்க்க" />
-                  </>
-                )}
-              </button>
-
+            {/* Call to Actions (Secondary Contacts) */}
+            <div className="pt-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <a
                   href={waInquiryUrl}
                   target="_blank"
-                  className="bg-transparent hover:bg-[#ffb690]/5 border border-[#ffb690]/30 hover:border-[#ffb690] text-[#ffb690] hover:text-[#f6ded3] py-3 font-display text-xl tracking-wider uppercase active:scale-95 transition-all flex items-center justify-center gap-2"
+                  className="bg-transparent hover:bg-[#ffb690]/5 border border-[#ffb690]/30 hover:border-[#ffb690] text-[#ffb690] hover:text-[#f6ded3] py-3 font-display text-xl tracking-wider uppercase active:scale-95 transition-all flex items-center justify-center gap-2 rounded-xl"
                 >
                   <MessageCircle size={18} />
                   <Text en="WHATSAPP INQUIRY" ta="வாட்ஸ்அப் விசாரணை" />
@@ -313,7 +315,7 @@ export default function CartDetailClient({ cart }: CartDetailClientProps) {
 
                 <a
                   href={`tel:${CALL_PHONE}`}
-                  className="bg-transparent hover:bg-[#ffb690]/5 border border-[#ffb690]/30 hover:border-[#ffb690] text-[#ffb690] hover:text-[#f6ded3] py-3 font-display text-xl tracking-wider uppercase active:scale-95 transition-all flex items-center justify-center gap-2"
+                  className="bg-transparent hover:bg-[#ffb690]/5 border border-[#ffb690]/30 hover:border-[#ffb690] text-[#ffb690] hover:text-[#f6ded3] py-3 font-display text-xl tracking-wider uppercase active:scale-95 transition-all flex items-center justify-center gap-2 rounded-xl"
                 >
                   <Phone size={18} />
                   <Text en="CALL OFFICE" ta="அலுவலகத்திற்கு அழைக்க" />
@@ -321,6 +323,35 @@ export default function CartDetailClient({ cart }: CartDetailClientProps) {
               </div>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Sticky/Fixed Bottom Action Bar */}
+      <div className="fixed left-0 right-0 z-40 bg-[#0a0a08]/95 backdrop-blur-md border-t border-[#ffb690]/15 py-4 bottom-[calc(60px+env(safe-area-inset-bottom))] md:bottom-0">
+        <div className="site-container max-w-7xl mx-auto px-4 flex gap-4">
+          <Link
+            href="/explore"
+            className="h-12 border border-[#ffb690]/30 hover:border-[#ffb690] text-[#ffb690] hover:text-[#f6ded3] px-6 rounded-xl flex items-center justify-center font-display text-xl uppercase tracking-wider transition-all active:scale-95 shrink-0"
+          >
+            <ArrowLeft className="w-5 h-5 mr-1.5" />
+            <Text en="Back" ta="பின்னால்" />
+          </Link>
+          <button
+            onClick={handleAddToCart}
+            className="flex-1 bg-[#f97316] hover:bg-[#e2640e] text-[#0a0a08] font-bold h-12 font-display text-xl tracking-wider uppercase active:scale-95 transition-all flex items-center justify-center gap-2 rounded-xl"
+          >
+            {isAdded ? (
+              <>
+                <CheckCircle size={20} className="animate-bounce" />
+                <Text en="ADDED TO LIST!" ta="பட்டியலில் சேர்க்கப்பட்டது!" />
+              </>
+            ) : (
+              <>
+                <Plus size={20} />
+                <Text en="BOOK NOW" ta="இப்போதே முன்பதிவு செய்க" />
+              </>
+            )}
+          </button>
         </div>
       </div>
     </main>

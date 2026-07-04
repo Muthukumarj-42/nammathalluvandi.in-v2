@@ -1,25 +1,26 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { 
-  Users, 
-  ShoppingBag, 
-  CalendarDays, 
-  AlertTriangle, 
-  MessageSquare, 
-  CheckCircle, 
-  XCircle, 
-  ArrowRight, 
-  RefreshCw, 
+import {
+  Users,
+  ShoppingBag,
+  CalendarDays,
+  AlertTriangle,
+  MessageSquare,
+  CheckCircle,
+  XCircle,
+  ArrowRight,
+  RefreshCw,
   Lock,
   Compass,
-  FileText
+  FileText,
+  LogOut
 } from "lucide-react";
-import { 
-  getAllCartsAction, 
-  getBookingsAction, 
-  getWhatsappMessagesAction, 
-  getDisputesAction, 
+import {
+  getAllCartsAction,
+  getBookingsAction,
+  getWhatsappMessagesAction,
+  getDisputesAction,
   getUsersAction,
   updateCartStatusAction,
   updateBookingStatusAction,
@@ -32,7 +33,7 @@ export default function AdminDashboard() {
   const [authorized, setAuthorized] = useState(false);
   const [passcode, setPasscode] = useState("");
   const [passcodeError, setPasscodeError] = useState("");
-  
+
   // Data States
   const [carts, setCarts] = useState<any[]>([]);
   const [bookings, setBookings] = useState<any[]>([]);
@@ -121,11 +122,11 @@ export default function AdminDashboard() {
   };
 
   const handleResolveDispute = async (id: string) => {
-    const confirm = window.confirm("Mark this dispute as resolved?");
+    const confirm = window.confirm("Mark this complaint/query as resolved?");
     if (!confirm) return;
     const res = await updateDisputeStatusAction(id, "resolved");
     if (res.success) {
-      alert("Dispute marked as resolved.");
+      alert("Complaint/Query marked as resolved.");
       setRefreshTrigger(p => p + 1);
     } else {
       alert("Operation failed: " + res.error);
@@ -152,7 +153,7 @@ export default function AdminDashboard() {
       <main className="min-h-screen bg-[#0a0a08] flex items-center justify-center p-4 text-[#f6ded3]">
         <div className="w-full max-w-md bg-[#160c06] border border-[#ffb690]/15 rounded-2xl p-8 shadow-premium relative">
           <div className="absolute top-0 right-0 w-24 h-24 bg-[#f97316]/5 blur-2xl rounded-full"></div>
-          
+
           <div className="text-center space-y-3 mb-8">
             <div className="w-16 h-16 bg-[#f97316]/10 border border-[#f97316]/30 text-[#f97316] rounded-full flex items-center justify-center mx-auto">
               <Lock className="w-8 h-8" />
@@ -166,20 +167,20 @@ export default function AdminDashboard() {
               <label htmlFor="passcode" className="text-xs font-bold uppercase tracking-wider text-[#ffb690] mb-2">
                 Enter Admin Key / Phone
               </label>
-              <input 
-                type="password" 
-                id="passcode" 
+              <input
+                type="password"
+                id="passcode"
                 value={passcode}
                 onChange={e => setPasscode(e.target.value)}
                 placeholder="••••••••••••"
-                className="w-full h-12 bg-[#0a0a08] border border-[#ffb690]/25 rounded-xl px-4 text-center text-lg outline-none focus:border-[#f97316] text-[#fffdf7] tracking-widest"
+                className="w-full h-12 bg-[#0a0a08] border border-[#ffb690]/25 rounded-xl px-4 text-center text-lg outline-none focus:border-[#f97316] text-[#116D03] placeholder:text-[#116D03] tracking-widest"
               />
             </div>
             {passcodeError && (
               <p className="text-xs text-red-500 text-center font-bold">{passcodeError}</p>
             )}
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className="w-full h-12 bg-[#f97316] hover:bg-[#e2640e] text-[#0a0a08] font-bold uppercase tracking-wider text-sm rounded-xl flex items-center justify-center gap-1.5"
             >
               Authenticate <ArrowRight className="w-4 h-4" />
@@ -193,27 +194,27 @@ export default function AdminDashboard() {
   return (
     <main className="min-h-screen bg-[#0a0a08] text-[#f6ded3] pt-24 pb-12">
       <div className="noise-overlay"></div>
-      
+
       <div className="site-container max-w-7xl mx-auto px-4">
         {/* Dashboard Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-[#ffb690]/10 pb-6 mb-8">
           <div>
-            <span className="font-display text-xs tracking-widest text-[#f97316] uppercase">Control Panel</span>
-            <h1 className="font-display text-4xl text-[#fffdf7] uppercase tracking-wider mt-1">ADMINISTRATOR DASHBOARD</h1>
+            <span className="font-display text-xs tracking-widest text-[#116D03] uppercase">Control Panel</span>
+            <h1 className="font-display text-4xl text-[#116D03] uppercase tracking-wider mt-1">ADMINISTRATOR DASHBOARD</h1>
           </div>
           <div className="flex items-center gap-3">
-            <button 
+            <button
               onClick={() => setRefreshTrigger(p => p + 1)}
               disabled={loading}
               className="h-10 bg-[#160c06] hover:bg-[#251913] border border-[#ffb690]/15 text-[#ffb690] px-4 rounded-lg flex items-center gap-2 text-xs font-bold uppercase tracking-widest transition"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} /> Refresh
             </button>
-            <button 
+            <button
               onClick={() => setAuthorized(false)}
-              className="h-10 bg-red-950/20 hover:bg-red-900/30 border border-red-500/20 text-red-400 px-4 rounded-lg text-xs font-bold uppercase tracking-widest transition"
+              className="h-10 bg-red-950/20 hover:bg-red-900/30 border border-red-500/20 text-red-400 px-4 rounded-lg flex items-center gap-2 text-xs font-bold uppercase tracking-widest transition"
             >
-              Lock
+              <LogOut className="w-3.5 h-3.5" /> Logout
             </button>
           </div>
         </div>
@@ -252,7 +253,7 @@ export default function AdminDashboard() {
               <AlertTriangle className="w-6 h-6" />
             </div>
             <div>
-              <span className="text-[10px] text-[#f6ded3]/40 uppercase tracking-widest block">Open Disputes</span>
+              <span className="text-[10px] text-[#f6ded3]/40 uppercase tracking-widest block">Complaints/Queries</span>
               <span className="font-display text-2xl font-bold text-red-500">{openDisputes.length}</span>
             </div>
           </div>
@@ -264,7 +265,7 @@ export default function AdminDashboard() {
             { id: "pending", label: "Pending Approvals", count: pendingCarts.length, icon: AlertTriangle },
             { id: "live", label: "Live Carts", count: liveCarts.length, icon: ShoppingBag },
             { id: "bookings", label: "Bookings Monitor", count: bookings.length, icon: CalendarDays },
-            { id: "disputes", label: "Disputes Queue", count: openDisputes.length, icon: AlertTriangle },
+            { id: "disputes", label: "Complaints/Queries", count: openDisputes.length, icon: AlertTriangle },
             { id: "vendors", label: "Cart Vendors", count: users.filter(u => u.role === "cv").length, icon: Users },
             { id: "messages", label: "WhatsApp Log", count: messages.length, icon: MessageSquare }
           ].map(tab => {
@@ -274,11 +275,10 @@ export default function AdminDashboard() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
-                className={`h-11 shrink-0 rounded-lg border px-5 text-xs font-bold uppercase tracking-wider transition flex items-center gap-2 ${
-                  isActive 
-                    ? "border-[#f97316] bg-[#f97316] text-[#0a0a08]" 
+                className={`h-11 shrink-0 rounded-lg border px-5 text-xs font-bold uppercase tracking-wider transition flex items-center gap-2 ${isActive
+                    ? "border-[#f97316] bg-[#f97316] text-[#0a0a08]"
                     : "border-[#ffb690]/15 bg-[#160c06] text-[#f6ded3] hover:border-[#ffb690]/30"
-                }`}
+                  }`}
               >
                 <Icon className="w-3.5 h-3.5" />
                 <span>{tab.label}</span>
@@ -338,13 +338,13 @@ export default function AdminDashboard() {
                             )}
 
                             <div className="flex gap-3 pt-2">
-                              <button 
+                              <button
                                 onClick={() => handleApproveCart(cart.id)}
                                 className="flex-1 h-10 bg-green-600 hover:bg-green-700 text-[#0a0a08] font-bold uppercase tracking-wider text-xs rounded-lg flex items-center justify-center gap-1 transition"
                               >
                                 <CheckCircle className="w-4 h-4" /> Approve & Go Live
                               </button>
-                              <button 
+                              <button
                                 onClick={() => handleRejectCart(cart.id)}
                                 className="h-10 bg-transparent hover:bg-red-500/10 border border-red-500/30 hover:border-red-500 text-red-400 px-4 rounded-lg text-xs font-bold uppercase tracking-wider transition"
                               >
@@ -389,7 +389,7 @@ export default function AdminDashboard() {
                                 <td className="p-4 font-bold text-[#ffca45]">₹{cart.price_per_month}</td>
                                 <td className="p-4 text-[10px] font-mono">{cart.latitude}, {cart.longitude}</td>
                                 <td className="p-4 text-right">
-                                  <button 
+                                  <button
                                     onClick={() => handleRejectCart(cart.id)}
                                     className="bg-red-950/20 hover:bg-red-900/30 border border-red-500/20 text-red-400 px-3 py-1.5 rounded text-[10px] uppercase font-bold"
                                   >
@@ -418,13 +418,13 @@ export default function AdminDashboard() {
                         const bv = users.find(u => u.id === booking.bv_id);
                         const cv = users.find(u => u.id === booking.cv_id);
                         const cart = carts.find(c => c.id === booking.cart_id);
-                        
+
                         // Calculate matching distance
-                        const distance = cart 
+                        const distance = cart
                           ? Number(calculateHaversineDistance(
-                              { latitude: booking.bv_latitude, longitude: booking.bv_longitude },
-                              { latitude: cart.latitude, longitude: cart.longitude }
-                            ).toFixed(2))
+                            { latitude: booking.bv_latitude, longitude: booking.bv_longitude },
+                            { latitude: cart.latitude, longitude: cart.longitude }
+                          ).toFixed(2))
                           : 0;
 
                         return (
@@ -435,14 +435,13 @@ export default function AdminDashboard() {
                                 <h4 className="font-bold text-[#fffdf7] text-base">{cart ? cart.type : "Custom Cart Variant Enquiry"}</h4>
                               </div>
                               <div className="flex gap-2">
-                                <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider border ${
-                                  booking.status === "confirmed" 
-                                    ? "bg-green-500/10 text-green-500 border-green-500/20" 
-                                    : booking.status === "sent" 
-                                      ? "bg-[#f97316]/10 text-[#f97316] border-[#f97316]/20" 
+                                <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider border ${booking.status === "confirmed"
+                                    ? "bg-green-500/10 text-green-500 border-green-500/20"
+                                    : booking.status === "sent"
+                                      ? "bg-[#f97316]/10 text-[#f97316] border-[#f97316]/20"
                                       : "bg-red-500/10 text-red-500 border-red-500/20"
-                                }`}>
-                                  {booking.status}
+                                  }`}>
+                                  {booking.status === "disputed" ? "complaint/query" : booking.status}
                                 </span>
                                 <span className="bg-[#160c06] text-[#ffca45] border border-[#ffca45]/20 px-2 py-0.5 rounded text-[9px] font-bold">
                                   Escalations: {booking.escalation_count}
@@ -470,29 +469,29 @@ export default function AdminDashboard() {
                             </div>
 
                             <div className="flex flex-wrap gap-2 pt-2">
-                              <button 
+                              <button
                                 onClick={() => handleForceEscalate(booking.id)}
                                 className="h-9 bg-amber-500 hover:bg-amber-600 text-[#0a0a08] font-bold uppercase tracking-wider text-[10px] px-4 rounded-lg flex items-center gap-1.5 transition"
                               >
                                 <RefreshCw className="w-3.5 h-3.5" /> Force Next Nearest Escalate
                               </button>
-                              <button 
+                              <button
                                 onClick={() => handleUpdateBookingStatus(booking.id, "confirmed")}
                                 className="h-9 bg-transparent hover:bg-green-500/10 border border-green-500/20 text-green-400 px-4 rounded-lg text-[10px] uppercase font-bold transition"
                               >
                                 Confirm
                               </button>
-                              <button 
+                              <button
                                 onClick={() => handleUpdateBookingStatus(booking.id, "completed")}
                                 className="h-9 bg-transparent hover:bg-blue-500/10 border border-blue-500/20 text-blue-400 px-4 rounded-lg text-[10px] uppercase font-bold transition"
                               >
                                 Mark Completed
                               </button>
-                              <button 
+                              <button
                                 onClick={() => handleUpdateBookingStatus(booking.id, "disputed")}
                                 className="h-9 bg-transparent hover:bg-red-500/10 border border-red-500/20 text-red-400 px-4 rounded-lg text-[10px] uppercase font-bold transition"
                               >
-                                Disputed
+                                Complaint/Query
                               </button>
                             </div>
                           </div>
@@ -506,9 +505,9 @@ export default function AdminDashboard() {
               {/* DISPUTES QUEUE */}
               {activeTab === "disputes" && (
                 <div className="space-y-6">
-                  <h3 className="font-display text-xl uppercase tracking-wider text-[#fffdf7]">Active Disputes & Flagged Bookings</h3>
+                  <h3 className="font-display text-xl uppercase tracking-wider text-[#fffdf7]">Active Complaints/Queries & Flagged Bookings</h3>
                   {disputes.length === 0 ? (
-                    <div className="py-12 text-center text-[#f6ded3]/50 text-sm">No disputes reported. All running smoothly.</div>
+                    <div className="py-12 text-center text-[#f6ded3]/50 text-sm">No complaints/queries reported. All running smoothly.</div>
                   ) : (
                     <div className="space-y-4">
                       {disputes.map(dispute => {
@@ -521,9 +520,8 @@ export default function AdminDashboard() {
                                 <h4 className="font-bold text-[#fffdf7] text-sm">Booking Ref: {booking ? booking.booking_code : "Unknown Code"}</h4>
                                 <p className="text-xs text-[#f6ded3]/50">Reported by: {reporter ? `${reporter.name} (${reporter.role.toUpperCase()})` : "Anonymous"}</p>
                               </div>
-                              <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase border ${
-                                dispute.status === "open" ? "bg-red-500/10 text-red-400 border-red-500/25" : "bg-green-500/10 text-green-400 border-green-500/25"
-                              }`}>
+                              <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase border ${dispute.status === "open" ? "bg-red-500/10 text-red-400 border-red-500/25" : "bg-green-500/10 text-green-400 border-green-500/25"
+                                }`}>
                                 {dispute.status}
                               </span>
                             </div>
@@ -533,11 +531,11 @@ export default function AdminDashboard() {
                             </p>
 
                             {dispute.status === "open" && (
-                              <button 
+                              <button
                                 onClick={() => handleResolveDispute(dispute.id)}
                                 className="h-9 bg-green-600 hover:bg-green-700 text-[#0a0a08] font-bold uppercase tracking-wider text-[10px] px-4 rounded-lg flex items-center gap-1 transition"
                               >
-                                <CheckCircle className="w-3.5 h-3.5" /> Mark Dispute Resolved
+                                <CheckCircle className="w-3.5 h-3.5" /> Mark Resolved
                               </button>
                             )}
                           </div>
@@ -602,18 +600,16 @@ export default function AdminDashboard() {
                           {messages.map(msg => (
                             <tr key={msg.id} className="hover:bg-[#ffb690]/5">
                               <td className="p-4">
-                                <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase ${
-                                  msg.direction === "outbound" ? "bg-blue-500/10 text-blue-400" : "bg-purple-500/10 text-purple-400"
-                                }`}>
+                                <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase ${msg.direction === "outbound" ? "bg-blue-500/10 text-blue-400" : "bg-purple-500/10 text-purple-400"
+                                  }`}>
                                   {msg.direction}
                                 </span>
                               </td>
                               <td className="p-4 font-mono">{msg.recipient_phone}</td>
                               <td className="p-4 max-w-sm truncate" title={msg.message_body}>{msg.message_body}</td>
                               <td className="p-4">
-                                <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold uppercase ${
-                                  msg.status === "delivered" ? "text-green-500" : "text-amber-500"
-                                }`}>
+                                <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold uppercase ${msg.status === "delivered" ? "text-green-500" : "text-amber-500"
+                                  }`}>
                                   {msg.status}
                                 </span>
                               </td>

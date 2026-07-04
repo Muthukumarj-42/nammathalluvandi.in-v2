@@ -1,13 +1,16 @@
 "use client";
 
-import { useEffect } from "react";
+import { Sun } from "lucide-react";
 
 export function ThemeToggle({ compact = false }: { compact?: boolean }) {
-  useEffect(() => {
-    // Force light theme
-    document.documentElement.classList.remove("dark");
-    window.localStorage.setItem("thalluvandi-theme", "light");
-  }, []);
-
-  return null;
+  return (
+    <button
+      disabled
+      className="p-2 text-on-surface-variant/40 cursor-not-allowed opacity-50 transition"
+      aria-label="Theme toggle (disabled)"
+      title="Theme toggle is disabled"
+    >
+      <Sun size={20} className="shrink-0" />
+    </button>
+  );
 }

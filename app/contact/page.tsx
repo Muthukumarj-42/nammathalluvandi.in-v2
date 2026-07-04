@@ -2,6 +2,7 @@
 
 import { useMemo, useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { MapPin, MessageCircle, PhoneCall, Clock, Zap, Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -532,30 +533,55 @@ export default function ContactPage() {
   return (
     <main className="bg-[#0a0a08] pt-20">
       {/* Hero Section */}
-      <section className="relative min-h-[50vh] flex flex-col justify-center items-center text-center px-6 py-20 border-b border-[#ffb690]/10 overflow-hidden bg-[#160c06]">
+      <section className="relative min-h-[50vh] flex items-center border-b border-[#ffb690]/10 overflow-hidden bg-[#160c06] py-16 md:py-24 px-6">
         <div className="absolute inset-0 opacity-10 map-grid"></div>
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background to-background"></div>
-        <div className="relative z-10 max-w-4xl site-container">
-          <p className="font-sans text-xs font-bold uppercase tracking-[0.2em] text-[#ffb690] mb-3">
-            <Text en="GET IN TOUCH" ta="தொடர்பு கொள்ள" />
-          </p>
-          <h1 className="font-display text-5xl md:text-7xl uppercase mb-6 tracking-tighter leading-none text-ink">
-            <Text en="CONNECT WITH THE STREETS" ta="எங்களுடன் இணையுங்கள்" />
-          </h1>
-          <p className="font-sans text-lg text-muted max-w-2xl mx-auto mb-8">
-            <Text 
-              en="Experience the heart of local commerce. Whether you're looking to partner, book a rental, or custom-design a cart, we're one message away." 
-              ta="உள்ளூர் வணிகத்தின் இதயத்தை அனுபவியுங்கள். எங்களுடன் இணைய, தள்ளுவண்டி வாடகைக்கு எடுக்க அல்லது பிரத்யேக வண்டி வடிவமைக்க, ஒரு குறுஞ்செய்தி போதும்." 
-            />
-          </p>
-          <a 
-            href={`https://wa.me/${WA_NUMBER}`}
-            target="_blank"
-            className="inline-flex items-center gap-3 bg-[#1c110b] text-[#ffb690] hover:text-[#f6ded3] px-8 py-4 font-display text-xl hover:bg-[#45362f] transition-all active:scale-95 border border-[#ffb690]/20"
-          >
-            <MessageCircle size={20} className="shrink-0" />
-            <Text en="CHAT ON WHATSAPP" ta="வாட்ஸ்அப்பில் சாட் செய்ய" />
-          </a>
+        
+        <div className="relative z-10 site-container max-w-6xl mx-auto w-full grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+          {/* Left Side: Hero Content */}
+          <div className="text-left flex flex-col items-start">
+            <span className="font-display text-sm tracking-[0.2em] text-[#f97316] bg-[#f97316]/10 px-4 py-1.5 uppercase mb-6 border border-[#f97316]/20 rounded-full">
+              ★ <Text en="FOOD CART MARKETPLACE" ta="உணவு வண்டி சந்தை" /> ★
+            </span>
+            <h1 className="font-display text-5xl md:text-7xl uppercase mb-6 tracking-tighter leading-none text-[#fffdf7]">
+              THALLUVANDI<br />
+              <span className="text-[#f97316]"><Text en="PREMIUM RENTAL" ta="பிரீமியம் வாடகை" /></span>
+            </h1>
+            <p className="font-sans text-lg md:text-xl text-[#f6ded3]/80 leading-relaxed mb-8">
+              <Text 
+                en="Find the right cart for your street business. High quality, premium models, and verified vendors — active in Coimbatore and Tiruppur." 
+                ta="உங்கள் தெரு வணிகத்திற்கு சரியான வண்டியைத் தேர்ந்தெடுங்கள். சிறந்த தரம், பிரீமியம் மாடல்கள் மற்றும் சரிபார்க்கப்பட்ட விற்பனையாளர்கள் — கோயம்புத்தூர் மற்றும் திருப்பூரில்." 
+              />
+            </p>
+            <a 
+              href={`https://wa.me/${WA_NUMBER}`}
+              target="_blank"
+              className="inline-flex items-center gap-3 bg-[#1c110b] text-[#ffb690] hover:text-[#f6ded3] px-8 py-4 font-display text-xl hover:bg-[#45362f] transition-all active:scale-95 border border-[#ffb690]/20 rounded-2xl"
+            >
+              <MessageCircle size={20} className="shrink-0" />
+              <Text en="CHAT ON WHATSAPP" ta="வாட்ஸ்அப்பில் சாட் செய்ய" />
+            </a>
+          </div>
+
+          {/* Right Side: Company Logo */}
+          <div className="flex justify-center md:justify-end items-center">
+            <div className="relative w-64 h-64 md:w-80 md:h-80 flex items-center justify-center bg-[#251913]/30 rounded-3xl border border-[#ffb690]/15 shadow-premium overflow-hidden group">
+              <div className="absolute inset-0 bg-gradient-to-tr from-[#f97316]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <Image 
+                src="/brand/full-logo.webp" 
+                alt="Thalluvandi Logo" 
+                width={280} 
+                height={280} 
+                className="object-contain max-w-[85%] max-h-[85%] transition-transform duration-500 group-hover:scale-105"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                }}
+              />
+              <div className="absolute font-display text-3xl font-black uppercase tracking-[0.15em] text-[#f97316] select-none pointer-events-none text-center">
+                THALLUVANDI
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
