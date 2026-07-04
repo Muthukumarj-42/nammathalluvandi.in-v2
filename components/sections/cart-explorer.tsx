@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { carts, filters, type Cart } from "@/lib/carts";
+import { filters, type Cart } from "@/lib/carts";
 
 function Text({ en, ta }: { en: string; ta: string }) {
   return (
@@ -78,7 +78,7 @@ export function CartExplorer({
   const [searchQuery, setSearchQuery] = useState("");
   const [lang, setLang] = useState<"en" | "ta">("en");
   
-  const activeCarts = initialCarts || carts;
+  const activeCarts = initialCarts ?? [];
 
   // Sync React language state dynamically with DOM mutations (data-lang toggle) - FIX 4
   useEffect(() => {

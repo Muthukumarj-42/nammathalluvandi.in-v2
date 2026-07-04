@@ -159,7 +159,7 @@ export default function AdminDashboard() {
               <Lock className="w-8 h-8" />
             </div>
             <h1 className="font-display text-3xl uppercase tracking-wider text-[#fffdf7]">Admin Portal</h1>
-            <p className="text-xs text-[#f6ded3]/60 uppercase tracking-widest">Namma Thalluvandi V2 Management</p>
+            <p className="text-xs text-[#f6ded3]/60 uppercase tracking-widest">Namma Thalluvandi Management</p>
           </div>
 
           <form onSubmit={handleLogin} className="space-y-4">

@@ -47,7 +47,7 @@ function BrowseCartsPageContent() {
   const [search, setSearch] = useState("");
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [selectedConditions, setSelectedConditions] = useState<string[]>([]);
-  const [maxPrice, setMaxPrice] = useState(5000); // V2 uses monthly rent (up to 5000/month)
+  const [maxPrice, setMaxPrice] = useState(200); // daily rent (up to ₹200/day)
   const [dbCarts, setDbCarts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   
@@ -91,7 +91,7 @@ function BrowseCartsPageContent() {
     if (qSearch) setSearch(qSearch);
     if (qType) setSelectedTypes(qType.split(","));
     if (qCondition) setSelectedConditions(qCondition.split(","));
-    if (qPrice) setMaxPrice(Number(qPrice) || 5000);
+    if (qPrice) setMaxPrice(Number(qPrice) || 200);
   }, [searchParams]);
 
   // Request browser geolocation to sort carts by closest distance
@@ -135,7 +135,8 @@ function BrowseCartsPageContent() {
       
       const matchesType = selectedTypes.length === 0 || selectedTypes.includes(cart.type);
       const matchesCondition = selectedConditions.length === 0 || selectedConditions.includes(cart.condition);
-      const matchesPrice = cart.price_per_month <= maxPrice;
+      const dailyPrice = Math.round(cart.price_per_month / 30);
+      const matchesPrice = dailyPrice <= maxPrice;
 
       // Handle location query filter
       let matchesLocation = true;
@@ -177,7 +178,7 @@ function BrowseCartsPageContent() {
       <section className="relative overflow-hidden border-b border-[#ffb690]/10 pt-3 pb-6 md:py-8 px-4 md:px-8">
         <div className="site-container max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
           <div>
-            <span className="font-display text-xs tracking-widest text-[#f97316] uppercase">Fleet Directory [V2]</span>
+            <span className="font-display text-xs tracking-widest text-[#f97316] uppercase">Fleet Directory</span>
             <h1 className="font-display text-4xl md:text-6xl text-[#fffdf7] mt-1 uppercase">BROWSE THE FLEET</h1>
           </div>
           
@@ -244,7 +245,7 @@ function BrowseCartsPageContent() {
                   onClick={() => {
                     setSelectedTypes([]);
                     setSelectedConditions([]);
-                    setMaxPrice(5000);
+                    setMaxPrice(200);
                     setSearch("");
                     setUserCoords(null);
                   }}
@@ -328,19 +329,19 @@ function BrowseCartsPageContent() {
 
             {/* Price Range Filter */}
             <div>
-              <label className="font-display text-xs tracking-widest text-[#f6ded3]/70 uppercase block mb-2">Max Monthly Rent (₹{maxPrice.toLocaleString()})</label>
+              <label className="font-display text-xs tracking-widest text-[#f6ded3]/70 uppercase block mb-2">Max Daily Rent (₹{maxPrice}/day)</label>
               <input 
                 type="range"
-                min="1500"
-                max="5000"
-                step="100"
+                min="50"
+                max="200"
+                step="5"
                 value={maxPrice}
                 onChange={e => setMaxPrice(Number(e.target.value))}
                 className="w-full accent-[#f97316] bg-[#0a0a08] h-1"
               />
               <div className="flex justify-between text-[10px] text-[#f6ded3]/40 mt-1">
-                <span>₹1,500</span>
-                <span>₹5,000</span>
+                <span>₹50/day</span>
+                <span>₹200/day</span>
               </div>
             </div>
           </aside>
@@ -376,43 +377,43 @@ function BrowseCartsPageContent() {
               </button>
             </div>
           ) : (
-            <div className={`grid grid-cols-1 md:grid-cols-2 ${showFilterPanel ? "xl:grid-cols-2" : "lg:grid-cols-3 xl:grid-cols-4"} gap-6`}>
+            <div className={`grid grid-cols-2 md:grid-cols-2 ${showFilterPanel ? "xl:grid-cols-2" : "lg:grid-cols-3 xl:grid-cols-4"} gap-3 md:gap-6`}>
               {filteredCarts.map(cart => (
-                <div key={cart.id} className="bg-[#160c06] border border-[#ffb690]/15 hover:border-[#f97316]/50 transition-all duration-300 flex flex-col p-4 rounded-xl relative">
+                <div key={cart.id} className="bg-[#160c06] border border-[#ffb690]/15 hover:border-[#f97316]/50 transition-all duration-300 flex flex-col p-2.5 md:p-4 rounded-xl relative">
                   {cart.distanceKm !== undefined && (
-                    <div className="absolute top-2 left-2 z-20 bg-[#f97316] text-[#0a0a08] font-bold text-[9px] px-2 py-0.5 rounded-full flex items-center gap-0.5 shadow-md">
-                      📍 {cart.distanceKm} km away
+                    <div className="absolute top-2 left-2 z-20 bg-[#f97316] text-[#0a0a08] font-bold text-[8px] md:text-[9px] px-1.5 py-0.5 rounded-full flex items-center gap-0.5 shadow-md">
+                      📍 {cart.distanceKm} km
                     </div>
                   )}
                   
-                  <div className="aspect-[16/10] bg-[#251913] relative shrink-0 p-4 flex items-center justify-center mb-4 rounded-lg overflow-hidden">
-                    <span className={`absolute top-2 right-2 text-[8px] font-display tracking-widest px-2 py-0.5 font-bold rounded-full ${cart.condition === "New" ? "bg-[#f97316] text-[#0a0a08]" : "bg-[#ffca45] text-[#0a0a08]"}`}>
+                  <div className="aspect-[16/10] bg-[#251913] relative shrink-0 p-2 md:p-4 flex items-center justify-center mb-2 md:mb-4 rounded-lg overflow-hidden">
+                    <span className={`absolute top-2 right-2 text-[7px] md:text-[8px] font-display tracking-widest px-1.5 py-0.5 font-bold rounded-full ${cart.condition === "New" ? "bg-[#f97316] text-[#0a0a08]" : "bg-[#ffca45] text-[#0a0a08]"}`}>
                       {cart.condition.toUpperCase()}
                     </span>
-                    <svg viewBox="0 0 100 80" className="w-20 h-20 text-[#ffb690]/10" fill="currentColor">
+                    <svg viewBox="0 0 100 80" className="w-12 h-12 md:w-20 md:h-20 text-[#ffb690]/10" fill="currentColor">
                       <path d="M20 20 h60 v40 h-60 z M30 60 v10 M70 60 v10 M25 70 h50 M35 70 v5 M65 70 v5"/>
                     </svg>
                   </div>
                   
                   <div className="flex flex-col flex-grow">
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-[9px] uppercase tracking-widest bg-[#0a0a08] text-[#ffb690] px-2 py-0.5 border border-[#ffb690]/20 rounded-md">
+                      <span className="text-[8px] md:text-[9px] uppercase tracking-widest bg-[#0a0a08] text-[#ffb690] px-1.5 py-0.5 border border-[#ffb690]/20 rounded-md">
                         {cart.type.toUpperCase()}
                       </span>
                       {cart.verified && (
-                        <span className="text-[9px] text-[#25D366] font-bold uppercase tracking-wider">✓ Verified</span>
+                        <span className="text-[8px] md:text-[9px] text-[#25D366] font-bold uppercase tracking-wider">✓ Verified</span>
                       )}
                     </div>
 
-                    <h3 className="font-display text-xl text-[#fffdf7] tracking-wider uppercase mb-1 line-clamp-1 mt-1">{cart.type}</h3>
-                    <p className="text-xs text-[#f6ded3]/70 mb-4 line-clamp-2 leading-relaxed h-10">{cart.description || "Premium rental food cart option."}</p>
+                    <h3 className="font-display text-sm md:text-xl text-[#fffdf7] tracking-wider uppercase mb-1 line-clamp-1 mt-1">{cart.type}</h3>
+                    <p className="text-[10px] md:text-xs text-[#f6ded3]/70 mb-2 md:mb-4 line-clamp-2 leading-relaxed h-8 md:h-10">{cart.description || "Premium rental food cart option."}</p>
                     
-                    <div className="mt-auto pt-4 border-t border-[#ffb690]/10 flex justify-between items-end">
+                    <div className="mt-auto pt-2 md:pt-4 border-t border-[#ffb690]/10 flex flex-col xs:flex-row justify-between items-stretch xs:items-end gap-2">
                       <div>
-                        <span className="text-[9px] uppercase tracking-wider text-[#f6ded3]/40 block">Monthly Rent</span>
-                        <span className="font-display text-2xl text-[#ffca45] block">₹{cart.price_per_month.toLocaleString()}</span>
+                        <span className="text-[8px] md:text-[9px] uppercase tracking-wider text-[#f6ded3]/40 block">Daily Rent</span>
+                        <span className="font-display text-sm md:text-2xl text-[#ffca45] block">₹{Math.round(cart.price_per_month / 30)}/day</span>
                       </div>
-                      <Button asChild className="bg-[#f97316] text-[#0a0a08] hover:bg-[#f97316]/95 border-none rounded-lg font-display uppercase tracking-widest text-xs py-2 px-6">
+                      <Button asChild className="bg-[#f97316] text-[#0a0a08] hover:bg-[#f97316]/95 border-none rounded-lg font-display uppercase tracking-widest text-[9px] md:text-xs py-1 px-3 md:py-2 md:px-6 h-7 md:h-9">
                         <Link href={`/carts/${cart.id}`}>Details</Link>
                       </Button>
                     </div>

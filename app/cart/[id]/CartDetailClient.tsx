@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { 
   ArrowLeft, 
-  CheckCircle, 
+  CheckCircle,
   MessageCircle, 
   Phone, 
   MapPin, 
@@ -16,7 +16,6 @@ import {
   ShoppingBag,
   Plus
 } from "lucide-react";
-import { useCartStore } from "@/lib/store";
 import { Cart } from "@/lib/carts";
 import { WA_NUMBER, buildWAUrl } from "@/config/whatsapp";
 import { CALL_PHONE } from "@/lib/utils";
@@ -37,10 +36,7 @@ interface CartDetailClientProps {
 export default function CartDetailClient({ cart }: CartDetailClientProps) {
   const [lang, setLang] = useState<"en" | "ta">("en");
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
-  const [isAdded, setIsAdded] = useState(false);
   const router = useRouter();
-
-  const addItem = useCartStore((state) => state.addItem);
 
   // Sync language toggle dynamically
   useEffect(() => {
@@ -60,22 +56,6 @@ export default function CartDetailClient({ cart }: CartDetailClientProps) {
 
     return () => observer.disconnect();
   }, []);
-
-  const handleAddToCart = () => {
-    addItem({
-      id: cart.id,
-      nameEn: cart.nameEn,
-      nameTa: cart.nameTa,
-      pricePerDay: cart.pricePerDay,
-      depositAmount: cart.depositAmount,
-      image: cart.images && cart.images.length > 0 ? cart.images[0] : "/placeholder-cart.png",
-    });
-    setIsAdded(true);
-    setTimeout(() => {
-      setIsAdded(false);
-      router.push("/cart");
-    }, 800);
-  };
 
   // Determine Specs
   const specs = useMemo(() => {
@@ -327,31 +307,22 @@ export default function CartDetailClient({ cart }: CartDetailClientProps) {
       </div>
 
       {/* Sticky/Fixed Bottom Action Bar */}
-      <div className="fixed left-0 right-0 z-40 bg-[#0a0a08]/95 backdrop-blur-md border-t border-[#ffb690]/15 py-4 bottom-[calc(60px+env(safe-area-inset-bottom))] md:bottom-0">
-        <div className="site-container max-w-7xl mx-auto px-4 flex gap-4">
+      <div className="fixed left-0 right-0 z-40 bg-[#0a0a08]/95 backdrop-blur-md border-t border-[#ffb690]/15 py-3 md:py-4 bottom-[calc(60px+env(safe-area-inset-bottom))] md:bottom-0">
+        <div className="site-container max-w-7xl mx-auto px-4 flex gap-3 md:gap-4">
           <Link
             href="/explore"
-            className="h-12 border border-[#ffb690]/30 hover:border-[#ffb690] text-[#ffb690] hover:text-[#f6ded3] px-6 rounded-xl flex items-center justify-center font-display text-xl uppercase tracking-wider transition-all active:scale-95 shrink-0"
+            className="h-10 md:h-11 border border-[#ffb690]/30 hover:border-[#ffb690] text-[#ffb690] hover:text-[#f6ded3] px-4 md:px-6 rounded-xl flex items-center justify-center font-display text-xs md:text-sm uppercase tracking-widest transition-all active:scale-95 shrink-0"
           >
-            <ArrowLeft className="w-5 h-5 mr-1.5" />
+            <ArrowLeft className="w-4 h-4 mr-1.5" />
             <Text en="Back" ta="பின்னால்" />
           </Link>
-          <button
-            onClick={handleAddToCart}
-            className="flex-1 bg-[#f97316] hover:bg-[#e2640e] text-[#0a0a08] font-bold h-12 font-display text-xl tracking-wider uppercase active:scale-95 transition-all flex items-center justify-center gap-2 rounded-xl"
+          <Link
+            href={`/book?cart=${cart.id}`}
+            className="flex-1 bg-[#f97316] hover:bg-[#e2640e] text-[#0a0a08] font-bold h-10 md:h-11 font-display text-xs md:text-sm tracking-widest uppercase active:scale-95 transition-all flex items-center justify-center gap-2 rounded-xl"
           >
-            {isAdded ? (
-              <>
-                <CheckCircle size={20} className="animate-bounce" />
-                <Text en="ADDED TO LIST!" ta="பட்டியலில் சேர்க்கப்பட்டது!" />
-              </>
-            ) : (
-              <>
-                <Plus size={20} />
-                <Text en="BOOK NOW" ta="இப்போதே முன்பதிவு செய்க" />
-              </>
-            )}
-          </button>
+            <Plus size={20} />
+            <Text en="BOOK NOW" ta="இப்போதே முன்பதிவு செய்க" />
+          </Link>
         </div>
       </div>
     </main>

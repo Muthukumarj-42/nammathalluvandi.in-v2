@@ -36,8 +36,10 @@ export function Navbar() {
     <>
       {/* Mobile Header (below 768px) */}
       <header className="fixed inset-x-0 top-0 z-50 flex h-14 items-center justify-between border-b border-outline-variant/20 bg-surface/95 backdrop-blur-sm px-4 md:hidden">
-        {/* Left Placeholder for symmetry */}
-        <div className="w-8"></div>
+        {/* Mobile Language Toggle */}
+        <div className="flex shrink-0 pl-1">
+          <LanguageToggle compact={true} />
+        </div>
 
         {/* Center: Brand Logo & Text */}
         <Link href="/" className="flex items-center gap-1.5 absolute left-1/2 -translate-x-1/2" aria-label="Thalluvandi home">
@@ -81,7 +83,6 @@ export function Navbar() {
           </nav>
 
           <div className="hidden items-center gap-2 lg:gap-4 md:flex shrink-0">
-            <LanguageToggle />
             <Link href="/notifications" className="relative p-2 text-on-surface-variant hover:text-primary-container transition shrink-0" aria-label="Notifications">
               <Bell size={20} />
             </Link>
@@ -100,6 +101,7 @@ export function Navbar() {
                 <span className="ta tamil-text">💬 WhatsApp</span>
               </Link>
             </Button>
+            <LanguageToggle />
           </div>
         </div>
       </header>

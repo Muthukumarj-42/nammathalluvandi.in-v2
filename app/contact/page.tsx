@@ -848,7 +848,7 @@ export default function ContactPage() {
           <iframe
             title="Thalluvandi location - Ondipudur Coimbatore"
             src="https://maps.google.com/maps?q=11.0072893,77.057818&z=17&output=embed"
-            className="absolute inset-0 h-full w-full opacity-60 grayscale invert contrast-125 border-none"
+            className="absolute inset-0 h-full w-full opacity-90 border-none"
             loading="lazy"
           />
           {/* Editorial grid overlay for map */}

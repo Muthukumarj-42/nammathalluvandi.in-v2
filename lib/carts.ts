@@ -65,47 +65,26 @@ function mapDbCartToCart(item: any): Cart {
   };
 }
 
-// Static fallback array to maintain compatibility with legacy components (like unused cart-explorer.tsx)
-export const carts: Cart[] = [
-  {
-    id: "premium-fast-food-cart",
-    nameEn: "Wooden Fast Food Cart",
-    nameTa: "மரத்தாலான வண்டி",
-    type: ["With Store"],
-    pricePerDay: 80,
-    depositAmount: 2000,
-    available: true,
-    availableCount: 1,
-    city: ["Coimbatore"],
-    featuresEn: ["Size: 6ft x 4ft", "Weight: 120kg", "Stove Type: Double Stove"],
-    featuresTa: ["அளவு: 6ft x 4ft", "எடை: 120kg", "அடுப்பு: Double Stove"],
-    images: ["/carts/premium-fast-food-cart-with-stove/photo-1.webp"],
-    whatsappMessageTa: "வணக்கம், நான் மரத்தாலான வண்டி வாடகைக்கு எடுக்க விரும்புகிறேன்.",
-    descriptionEn: "Elite fast food cart with double stove",
-    descriptionTa: "அடுப்புடன் கூடிய சிறந்த தள்ளுவண்டி"
-  }
-];
+// Empty — all cart data comes exclusively from the database (Supabase)
+export const carts: Cart[] = [];
 
 export async function getCarts(): Promise<Cart[]> {
   try {
     const dbCarts = await getAllCarts();
-    if (dbCarts.length === 0) return carts;
     return dbCarts.map(mapDbCartToCart);
   } catch (err) {
     console.error("Failed to query carts in getCarts mapping:", err);
-    return carts;
+    return [];
   }
 }
 
 export async function getCart(id: string): Promise<Cart | null> {
   try {
     const dbCart = await getCartById(id);
-    if (!dbCart) {
-      return carts.find(c => c.id === id) || null;
-    }
+    if (!dbCart) return null;
     return mapDbCartToCart(dbCart);
   } catch (err) {
     console.error(`Failed to query cart ${id} in getCart mapping:`, err);
-    return carts.find(c => c.id === id) || null;
+    return null;
   }
 }

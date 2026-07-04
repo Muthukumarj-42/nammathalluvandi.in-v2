@@ -16,7 +16,7 @@ const groups = {
     ["Publish Cart", "என் வண்டி சேர்க்க", "/publish"],
   ],
   Branch: [
-    ["Coimbatore Hub", "கோவை கிளை", "/contact"],
+    ["Coimbatore", "கோவை கிளை", "/contact"],
   ],
   Contact: [
     [DISPLAY_CALL_PHONE, DISPLAY_CALL_PHONE, "tel:+919442763940"],

@@ -122,7 +122,7 @@ export default function PublishPage() {
     
     return `Hello Thalluvandi team,
 
-I want to list my food cart for rent (V2 Listing Request):
+I want to list my food cart for rent:
 
 Name: ${publishFormData.name.trim()}
 Phone: ${publishFormData.phone.trim()}
@@ -178,7 +178,7 @@ Description: ${extraDetails}`;
           <div className="flex flex-col justify-between h-full py-4">
             <div>
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-primary">
-                <Text en="Vendor Network [V2]" ta="வண்டி உரிமையாளர் நெட்வொர்க் [V2]" />
+                <Text en="Vendor Network" ta="வண்டி உரிமையாளர் நெட்வொர்க்" />
               </p>
               <h1 className="mt-3 font-display text-5xl uppercase leading-none text-ink md:text-7xl">
                 <Text en="List Your Thallu Vandi Across Tamil Nadu" ta="தமிழ்நாடு முழுவதும் உங்கள் வண்டியை பதிவு செய்யுங்கள்" />
@@ -207,7 +207,7 @@ Description: ${extraDetails}`;
           <div className="rounded-2xl border border-black/10 bg-[#fffdf7] p-6 shadow-premium md:p-8 flex flex-col gap-5">
             <div>
               <h2 className="font-display text-4xl uppercase leading-none text-ink">
-                <Text en="Quick Listing Form [V2]" ta="விரைவு பதிவு படிவம் [V2]" />
+                <Text en="Quick Listing Form" ta="விரைவு பதிவு படிவம்" />
               </h2>
             </div>
 
@@ -454,7 +454,7 @@ Description: ${extraDetails}`;
         <div className="site-container">
           <div className="rounded-2xl border border-black/10 bg-white p-6 md:p-8">
             <h2 className="font-display text-5xl uppercase leading-none text-ink">
-              <Text en="Why list on V2 platform?" ta="ஏன் வி2 தளத்தில் பதிவு செய்ய வேண்டும்?" />
+              <Text en="Why list on Thalluvandi?" ta="ஏன் தள்ளுவண்டி தளத்தில் பதிவு செய்ய வேண்டும்?" />
             </h2>
             <div className="mt-8 grid gap-4 md:grid-cols-2 md:gap-6">
               {benefits.map(([benefit, tamil]) => (
