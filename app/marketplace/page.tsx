@@ -26,8 +26,8 @@ export default function MarketplacePage() {
 
 
   return (
-    <main className="bg-[#F8F6F2] pt-0 md:pt-28">
-      <section className="pb-24 pt-12 md:pt-0">
+    <main className="bg-[#F8F6F2] pt-14 md:pt-28">
+      <section className="pb-24 pt-6 md:pt-0">
         <div className="site-container">
           <p className="text-xs font-bold uppercase tracking-[0.2em] text-primary">
             <Text en="Marketplace Placeholder" ta="அடுத்த கட்ட marketplace" />
