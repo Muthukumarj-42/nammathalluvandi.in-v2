@@ -145,11 +145,12 @@ export default function CartPage() {
             ta="வாடகைக்கு எடுக்க தள்ளுவண்டிகள் எதையும் நீங்கள் இன்னும் தேர்ந்தெடுக்கவில்லை." 
           />
         </p>
-        <button className="bg-[#f97316] hover:bg-[#e2640e] text-white px-8 py-4 font-display text-lg tracking-wider uppercase active:scale-95 transition-all">
-          <Link href="/explore">
-            <Text en="Explore Carts →" ta="வண்டிகளை ஆராய →" />
-          </Link>
-        </button>
+        <Link 
+          href="/explore" 
+          className="inline-block bg-[#f97316] hover:bg-[#e2640e] text-white px-8 py-4 font-display text-lg tracking-wider uppercase active:scale-95 transition-all rounded-2xl"
+        >
+          <Text en="Explore Carts →" ta="வண்டிகளை ஆராய →" />
+        </Link>
       </main>
     );
   }
@@ -165,9 +166,9 @@ export default function CartPage() {
           {/* Cart Items List */}
           <div className="lg:col-span-7 space-y-4">
             {items.map((item) => (
-              <div key={item.id} className="flex gap-4 p-4 bg-[#291d16] border border-[#ffb690]/15 relative group">
+              <div key={item.id} className="flex gap-4 p-4 bg-[#291d16] border border-[#ffb690]/15 relative group rounded-3xl">
                 {/* Product Image */}
-                <div className="relative w-24 h-24 sm:w-32 sm:h-32 flex-shrink-0 bg-[#251913] border border-[#ffb690]/10">
+                <div className="relative w-24 h-24 sm:w-32 sm:h-32 flex-shrink-0 bg-[#251913] border border-[#ffb690]/10 rounded-2xl overflow-hidden">
                   <Image src={item.image} alt={item.nameEn} fill className="object-cover" />
                 </div>
                 
@@ -228,7 +229,7 @@ export default function CartPage() {
 
           {/* Checkout Form */}
           <div className="lg:col-span-5">
-            <div className="bg-[#160c06] p-6 border border-[#ffb690]/15 sticky top-24 space-y-6">
+            <div className="bg-[#160c06] p-6 border border-[#ffb690]/15 sticky top-24 space-y-6 rounded-3xl">
               <h2 className="font-display text-3xl uppercase tracking-wider text-ink border-b border-[#ffb690]/10 pb-3">
                 <Text en="RENTAL SUMMARY" ta="வாடகை விவரம்" />
               </h2>
@@ -268,7 +269,7 @@ export default function CartPage() {
                       placeholder={lang === "ta" ? "உங்கள் பெயர்" : "Karthik Raja"}
                       value={formData.name}
                       onChange={e => setFormData({ ...formData, name: e.target.value })}
-                      className="w-full bg-[#251913] border-0 border-b border-[#e0c0b1]/30 py-3 px-3 text-[#f6ded3] placeholder-[#e0c0b1]/40 focus:border-[#f97316] transition-colors focus:ring-0 focus:outline-none"
+                      className="w-full bg-[#251913] border border-[#ffb690]/15 py-3 px-4 text-[#f6ded3] placeholder-[#e0c0b1]/40 focus:border-[#f97316] transition-colors focus:ring-0 focus:outline-none rounded-xl"
                     />
                   </div>
 
@@ -283,10 +284,10 @@ export default function CartPage() {
                       placeholder="+91 00000 00000"
                       value={formData.phone}
                       onChange={handlePhoneChange}
-                      className={`w-full bg-[#251913] border-0 border-b py-3 px-3 text-[#f6ded3] placeholder-[#e0c0b1]/40 focus:ring-0 focus:outline-none transition-colors ${
+                      className={`w-full bg-[#251913] border py-3 px-4 text-[#f6ded3] placeholder-[#e0c0b1]/40 focus:ring-0 focus:outline-none transition-colors rounded-xl ${
                         phoneError
                           ? "border-red-500 focus:border-red-500"
-                          : "border-[#e0c0b1]/30 focus:border-[#f97316]"
+                          : "border-[#ffb690]/15 focus:border-[#f97316]"
                       }`}
                     />
                     {phoneError && (
@@ -307,7 +308,7 @@ export default function CartPage() {
                       min={new Date().toISOString().split("T")[0]}
                       value={formData.date}
                       onChange={e => setFormData({ ...formData, date: e.target.value })}
-                      className="w-full bg-[#251913] border-0 border-b border-[#e0c0b1]/30 py-3 px-3 text-[#f6ded3] focus:border-[#f97316] transition-colors focus:ring-0 focus:outline-none cursor-pointer"
+                      className="w-full bg-[#251913] border border-[#ffb690]/15 py-3 px-4 text-[#f6ded3] focus:border-[#f97316] transition-colors focus:ring-0 focus:outline-none cursor-pointer rounded-xl"
                     />
                   </div>
 
@@ -319,10 +320,10 @@ export default function CartPage() {
                     <input
                       type="text"
                       required
-                      placeholder={lang === "ta" ? "எ.கா: ஒண்டிப்புதூர்" : "e.g. Ondipudur"}
+                      placeholder={lang === "ta" ? "உங்கள் இடம்" : "e.g. Ondipudur"}
                       value={formData.location}
                       onChange={e => setFormData({ ...formData, location: e.target.value })}
-                      className="w-full bg-[#251913] border-0 border-b border-[#e0c0b1]/30 py-3 px-3 text-[#f6ded3] placeholder-[#e0c0b1]/40 focus:border-[#f97316] transition-colors focus:ring-0 focus:outline-none"
+                      className="w-full bg-[#251913] border border-[#ffb690]/15 py-3 px-4 text-[#f6ded3] placeholder-[#e0c0b1]/40 focus:border-[#f97316] transition-colors focus:ring-0 focus:outline-none rounded-xl"
                     />
                   </div>
                 </div>
@@ -330,7 +331,7 @@ export default function CartPage() {
                 <button 
                   type="submit"
                   disabled={!isFormValid}
-                  className={`w-full bg-[#f97316] hover:bg-[#e2640e] text-white font-display text-2xl tracking-wider py-4 mt-6 uppercase active:scale-95 transition-all flex items-center justify-center gap-2 ${
+                  className={`w-full bg-[#f97316] hover:bg-[#e2640e] text-white font-display text-2xl tracking-wider py-4 mt-6 uppercase active:scale-95 transition-all flex items-center justify-center gap-2 rounded-2xl ${
                     !isFormValid ? "opacity-40 cursor-not-allowed" : ""
                   }`}
                 >
