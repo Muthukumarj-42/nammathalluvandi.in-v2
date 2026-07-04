@@ -17,7 +17,6 @@ import {
   Plus
 } from "lucide-react";
 import { Cart } from "@/lib/carts";
-import { WA_NUMBER, buildWAUrl } from "@/config/whatsapp";
 import { CALL_PHONE } from "@/lib/utils";
 
 function Text({ en, ta }: { en: string; ta: string }) {
@@ -92,19 +91,11 @@ export default function CartDetailClient({ cart }: CartDetailClientProps) {
     return { length, material, stove };
   }, [cart]);
 
-  // Compile Direct Inquiry WhatsApp Message
-  const waInquiryUrl = useMemo(() => {
-    const cartName = lang === "ta" ? cart.nameTa : cart.nameEn;
-    const message = `வணக்கம் தள்ளுவண்டி குழுவினரே,
-
-நான் இந்த வண்டியை வாடகைக்கு எடுக்க விரும்புகிறேன்:
-வண்டி பெயர்: ${cartName}
-தினசரி வாடகை: ₹${cart.pricePerDay}
-முன்பதிவு தொகை: ₹${cart.depositAmount}
-
-வண்டி விவரங்கள் மற்றும் இருப்பு பற்றி அறிய விரும்புகிறேன்.`;
-    return buildWAUrl(WA_NUMBER, message);
-  }, [cart, lang]);
+  // Build contact form URL with cart pre-filled
+  const contactInquiryUrl = useMemo(() => {
+    const slug = encodeURIComponent(cart.nameEn);
+    return `/contact?cart=${cart.id}&name=${slug}&ref=inquiry#enquiry-form`;
+  }, [cart]);
 
   return (
     <main className="bg-[#0a0a08] min-h-screen text-[#f6ded3] pb-36 md:pb-32 pt-14 md:pt-20">
@@ -281,24 +272,22 @@ export default function CartDetailClient({ cart }: CartDetailClientProps) {
               </ul>
             </div>
 
-            {/* Call to Actions (Secondary Contacts) */}
             <div className="pt-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <a
-                  href={waInquiryUrl}
-                  target="_blank"
+                <Link
+                  href={contactInquiryUrl}
                   className="bg-transparent hover:bg-[#ffb690]/5 border border-[#ffb690]/30 hover:border-[#ffb690] text-[#ffb690] hover:text-[#f6ded3] py-3 font-display text-xl tracking-wider uppercase active:scale-95 transition-all flex items-center justify-center gap-2 rounded-xl"
                 >
                   <MessageCircle size={18} />
-                  <Text en="WHATSAPP INQUIRY" ta="வாட்ஸ்அப் விசாரணை" />
-                </a>
+                  <Text en="INQUIRY" ta="விசாரணை" />
+                </Link>
 
                 <a
                   href={`tel:${CALL_PHONE}`}
                   className="bg-transparent hover:bg-[#ffb690]/5 border border-[#ffb690]/30 hover:border-[#ffb690] text-[#ffb690] hover:text-[#f6ded3] py-3 font-display text-xl tracking-wider uppercase active:scale-95 transition-all flex items-center justify-center gap-2 rounded-xl"
                 >
                   <Phone size={18} />
-                  <Text en="CALL OFFICE" ta="அலுவலகத்திற்கு அழைக்க" />
+                  <Text en="CALL OFFICE" ta="அலுவலகத்திர்கு அழைக்க" />
                 </a>
               </div>
             </div>
@@ -317,7 +306,7 @@ export default function CartDetailClient({ cart }: CartDetailClientProps) {
             <Text en="Back" ta="பின்னால்" />
           </Link>
           <Link
-            href={`/book?cart=${cart.id}`}
+            href={`/contact?cart=${cart.id}&name=${encodeURIComponent(cart.nameEn)}&ref=booknow#enquiry-form`}
             className="flex-1 bg-[#f97316] hover:bg-[#e2640e] text-[#0a0a08] font-bold h-10 md:h-11 font-display text-xs md:text-sm tracking-widest uppercase active:scale-95 transition-all flex items-center justify-center gap-2 rounded-xl"
           >
             <Plus size={20} />

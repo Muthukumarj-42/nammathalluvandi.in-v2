@@ -32,7 +32,7 @@ export function LanguageToggle({ compact = false }: { compact?: boolean }) {
       aria-label="Toggle language"
     >
       <Globe2 size={compact ? 15 : 17} />
-      <span>{lang === "en" ? "EN | தமிழ்" : "தமிழ் | EN"}</span>
+      <span>{compact ? (lang === "en" ? "EN" : "தமிழ்") : (lang === "en" ? "EN | தமிழ்" : "தமிழ் | EN")}</span>
     </button>
   );
 }

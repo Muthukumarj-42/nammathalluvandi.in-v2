@@ -329,7 +329,7 @@ export default function AdminDashboard() {
                               <div><span className="text-[#f6ded3]/40">Stove:</span> {cart.stove_type || "None"}</div>
                               <div><span className="text-[#f6ded3]/40">Expected Rent:</span> ₹{cart.price_per_month}/month</div>
                               <div className="col-span-2 mt-1">
-                                <span className="text-[#f6ded3]/40">GPS Coordinates:</span> Lat {cart.latitude}, Lng {cart.longitude}
+                                <span className="text-[#f6ded3]/40">Location:</span> {cart.latitude >= 11.08 ? "Tiruppur" : "Coimbatore"}
                               </div>
                             </div>
 
@@ -374,7 +374,7 @@ export default function AdminDashboard() {
                             <th className="p-4">Condition</th>
                             <th className="p-4">Owner / Phone</th>
                             <th className="p-4">Monthly Price</th>
-                            <th className="p-4">GPS Coordinates</th>
+                            <th className="p-4">Location</th>
                             <th className="p-4 text-right">Actions</th>
                           </tr>
                         </thead>
@@ -383,11 +383,19 @@ export default function AdminDashboard() {
                             const owner = users.find(u => u.id === cart.owner_id);
                             return (
                               <tr key={cart.id} className="hover:bg-[#ffb690]/5">
-                                <td className="p-4 font-bold text-[#fffdf7]">{cart.type}</td>
+                                <td className="p-4">
+                                  <div className="flex flex-wrap gap-1">
+                                    {(Array.isArray(cart.type) ? cart.type : [cart.type]).map((t: string, i: number) => (
+                                      <span key={i} className="bg-[#ffb690]/10 text-[#ffb690] border border-[#ffb690]/20 px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wide">{t}</span>
+                                    ))}
+                                  </div>
+                                </td>
                                 <td className="p-4">{cart.condition}</td>
                                 <td className="p-4">{owner ? owner.name : "Unknown"} <span className="block text-[10px] text-[#f6ded3]/50">{owner ? owner.phone : ""}</span></td>
-                                <td className="p-4 font-bold text-[#ffca45]">₹{cart.price_per_month}</td>
-                                <td className="p-4 text-[10px] font-mono">{cart.latitude}, {cart.longitude}</td>
+                                <td className="p-4 font-bold text-[#ffca45]">₹{cart.price_per_month || "—"}</td>
+                                <td className="p-4 text-[10px]">
+                                  {cart.latitude >= 11.08 ? "Tiruppur" : "Coimbatore"}
+                                </td>
                                 <td className="p-4 text-right">
                                   <button
                                     onClick={() => handleRejectCart(cart.id)}

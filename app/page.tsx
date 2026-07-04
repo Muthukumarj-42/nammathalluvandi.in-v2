@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useState, useEffect, useMemo } from "react";
 import { Search, ChevronRight, MoreHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { IconTent, IconIceCream, IconCoffee, IconRickshaw, IconMapPinRed, IconWhatsApp, IconSearchStove } from "@/components/ui/icons";
+import { IconTent, IconIceCream, IconCoffee, IconRickshaw, IconMapPinRed, IconSearchStove } from "@/components/ui/icons";
 import { getLiveCartsAction } from "@/app/actions";
 
 const SUGGESTIONS = [
@@ -156,9 +156,9 @@ export default function HomePage() {
                 />
                 {/* Animated suggestion placeholder */}
                 {!searchValue && !isFocused && (
-                  <div className="absolute left-10 top-1/2 -translate-y-1/2 pointer-events-none text-sm text-on-surface-variant/40 flex items-center gap-1 select-none z-10">
-                    <span>Search by</span>
-                    <span className="relative overflow-hidden inline-block h-5 w-36">
+                  <div className="absolute left-10 right-3 top-1/2 -translate-y-1/2 pointer-events-none text-sm text-on-surface-variant/40 flex items-center gap-1 select-none z-10 overflow-hidden max-w-[calc(100%-3.5rem)]">
+                    <span className="shrink-0">Search by</span>
+                    <span className="relative overflow-hidden inline-block h-5 w-36 shrink-0">
                       {SUGGESTIONS.map((sug, idx) => (
                         <span
                           key={sug}
@@ -306,53 +306,71 @@ export default function HomePage() {
             </Link>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-2 gap-3 md:gap-6">
-            {[
-              { tag: "BESTSELLER", tagColor: "bg-[#f97316] text-[#0a0a08]", title: "ELITE STAINLESS PRO V2", desc: "Dual integrated high-power burners, premium food-grade steel & display shelf.", price: "₹24,500", image: "/carts/premium-fast-food-cart-with-stove/photo-1.webp" },
-              { tag: "NEW ARRIVAL", tagColor: "bg-[#ffca45] text-[#0a0a08]", title: "CLASSIC TEAX STATION V1", desc: "Equipped with wide partition counters, utility lock-box, and waste sink.", price: "₹16,000", image: "/carts/covered-premium-cart/photo-1.webp" }
-            ].map((item, i) => (
-              <div key={i} className="group bg-surface border border-[#f97316]/25 hover:border-[#f97316]/60 transition-all duration-300 flex flex-col rounded-3xl overflow-hidden shadow-premium p-3 md:p-6">
-                <div className="aspect-[16/9] bg-[#251913] relative shrink-0 p-4 md:p-6 flex items-center justify-center rounded-2xl overflow-hidden">
-                  <span className={`absolute top-2 left-2 md:top-4 md:left-4 z-10 text-[8px] md:text-[10px] font-display font-bold px-2 py-0.5 md:px-3 md:py-1 ${item.tagColor} tracking-wider rounded-full`}>
-                    {item.tag}
-                  </span>
-                  
-                  {item.image ? (
-                    <img 
-                      src={item.image} 
-                      alt={item.title}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 rounded-xl"
-                    />
-                  ) : (
-                    <svg viewBox="0 0 100 80" className="w-12 h-12 md:w-24 md:h-24 text-on-surface-variant/20" fill="currentColor">
-                      <path d="M20 20 h60 v40 h-60 z M30 60 v10 M70 60 v10 M25 70 h50 M35 70 v5 M65 70 v5"/>
-                    </svg>
-                  )}
-                </div>
-                <div className="pt-4 flex flex-col flex-grow border-t border-outline-variant/20 mt-3 md:mt-4">
-                  <h4 className="font-display text-xs md:text-xl text-on-surface tracking-wider line-clamp-1">{item.title}</h4>
-                  <p className="font-body text-[10px] md:text-sm text-on-surface-variant mt-1.5 mb-3 md:mt-2 md:mb-6 flex-grow line-clamp-2">{item.desc}</p>
-                  
-                  <div className="flex justify-between items-center pt-3 border-t border-outline-variant/10">
-                    <div>
-                      <span className="font-display text-sm md:text-2xl text-[#ffca45] block">{item.price}</span>
-                      <span className="text-[8px] md:text-[10px] uppercase tracking-wider text-on-surface-variant/60 block line-clamp-1">Daily/Monthly Plans</span>
+          {dbCarts.length === 0 ? (
+            <div className="py-12 text-center text-[#f6ded3]/40 text-sm font-display uppercase tracking-widest">
+              No carts available yet — check back soon.
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-2 gap-3 md:gap-6">
+              {dbCarts.slice(0, 2).map((cart, i) => {
+                const image = Array.isArray(cart.photos) && cart.photos.length > 0 ? cart.photos[0] : null;
+                const typeArr: string[] = Array.isArray(cart.type) ? cart.type : [cart.type];
+                const tagLabel = i === 0 ? "BESTSELLER" : "POPULAR";
+                const tagColor = i === 0 ? "bg-[#f97316] text-[#0a0a08]" : "bg-[#ffca45] text-[#0a0a08]";
+                const pricePerDay = cart.price_per_day
+                  ? Number(cart.price_per_day)
+                  : Math.round(Number(cart.price_per_month) / 30) || 80;
+                return (
+                  <div key={cart.id} className="group bg-surface border border-[#f97316]/25 hover:border-[#f97316]/60 transition-all duration-300 flex flex-col rounded-3xl overflow-hidden shadow-premium p-3 md:p-6">
+                    <div className="aspect-[16/9] bg-[#251913] relative shrink-0 p-4 md:p-6 flex items-center justify-center rounded-2xl overflow-hidden">
+                      <span className={`absolute top-2 left-2 md:top-4 md:left-4 z-10 text-[8px] md:text-[10px] font-display font-bold px-2 py-0.5 md:px-3 md:py-1 ${tagColor} tracking-wider rounded-full`}>
+                        {tagLabel}
+                      </span>
+                      {image ? (
+                        <img
+                          src={image}
+                          alt={cart.type}
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 rounded-xl"
+                        />
+                      ) : (
+                        <svg viewBox="0 0 100 80" className="w-12 h-12 md:w-24 md:h-24 text-on-surface-variant/20" fill="currentColor">
+                          <path d="M20 20 h60 v40 h-60 z M30 60 v10 M70 60 v10 M25 70 h50 M35 70 v5 M65 70 v5"/>
+                        </svg>
+                      )}
                     </div>
-                    <Button asChild className="bg-transparent border border-[#f97316] text-[#f97316] hover:bg-[#f97316]/10 rounded-xl px-2 py-1 md:px-6 md:py-2 h-7 md:h-auto font-display tracking-wider text-[9px] md:text-xs">
-                      <Link href={`/explore`}>Read More</Link>
-                    </Button>
+                    <div className="pt-4 flex flex-col flex-grow border-t border-outline-variant/20 mt-3 md:mt-4">
+                      <div className="flex flex-wrap gap-1 mb-1.5">
+                        {typeArr.map((t, idx) => (
+                          <span key={idx} className="text-[8px] font-bold bg-[#f97316]/10 text-[#f97316] border border-[#f97316]/20 px-1.5 py-0.5 rounded uppercase tracking-wide">{t}</span>
+                        ))}
+                      </div>
+                      <h4 className="font-display text-xs md:text-xl text-on-surface tracking-wider line-clamp-1">{cart.name_en || typeArr.join(", ")}</h4>
+                      <p className="font-body text-[10px] md:text-sm text-on-surface-variant mt-1.5 mb-3 md:mt-2 md:mb-6 flex-grow line-clamp-2">{cart.description || "Premium quality food cart available for rent."}</p>
+
+                      <div className="flex justify-between items-center pt-3 border-t border-outline-variant/10">
+                        <div>
+                          <span className="font-display text-sm md:text-2xl text-[#ffca45] block">₹{pricePerDay}/day</span>
+                          <span className="text-[8px] md:text-[10px] uppercase tracking-wider text-on-surface-variant/60 block line-clamp-1">
+                            {getCartLocationName(cart)}
+                          </span>
+                        </div>
+                        <Button asChild className="bg-transparent border border-[#f97316] text-[#f97316] hover:bg-[#f97316]/10 rounded-xl px-2 py-1 md:px-6 md:py-2 h-7 md:h-auto font-display tracking-wider text-[9px] md:text-xs">
+                          <Link href={`/cart/${cart.id}`}>Details</Link>
+                        </Button>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
-            ))}
-          </div>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {/* Live Sale */}
         <div className="mt-10 md:mt-12 mb-16">
           <div className="flex justify-between items-end mb-6 border-b border-outline-variant/20 pb-4">
             <div>
-              <span className="font-display text-xs tracking-widest text-[#f97316] uppercase">Used & Affordable Fleet</span>
+              <span className="font-display text-xs tracking-widest text-[#f97316] uppercase">Used &amp; Affordable Fleet</span>
               <h3 className="font-display text-3xl text-on-surface mt-1">LIVE SALE</h3>
             </div>
             <Link href="/explore" className="font-display text-sm text-[#f97316] hover:underline flex items-center tracking-widest uppercase">
@@ -360,39 +378,52 @@ export default function HomePage() {
             </Link>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-2 gap-3 md:gap-6">
-            {[
-              { title: "STANDARD MS PUSH FOOD CART (3FT)", price: "₹12,000", location: "Ondipudur, Coimbatore" },
-              { title: "MINIMALIST FAST FOOD TEA STATION", price: "₹15,000", location: "Tiruppur Junction" }
-            ].map((item, i) => (
-              <div key={i} className="bg-surface border border-outline-variant/30 flex flex-col p-3 md:p-4 rounded-3xl shadow-premium">
-                <div className="aspect-[16/10] bg-[#251913] relative shrink-0 p-2 md:p-4 flex items-center justify-center mb-2 md:mb-4 rounded-2xl">
-                  <span className="absolute top-1.5 left-1.5 text-[7px] md:text-[8px] font-display tracking-widest bg-[#ffca45] text-[#0a0a08] px-2 py-0.5 font-bold rounded-full">
-                    PRE-OWNED
-                  </span>
-                  <svg viewBox="0 0 100 80" className="w-12 h-12 md:w-20 md:h-20 text-on-surface-variant/10" fill="currentColor">
-                    <path d="M20 20 h60 v40 h-60 z M30 60 v10 M70 60 v10 M25 70 h50 M35 70 v5 M65 70 v5"/>
-                  </svg>
-                </div>
-                <div className="flex flex-col flex-grow">
-                  <h4 className="font-display text-xs md:text-lg text-on-surface tracking-wider line-clamp-1">{item.title}</h4>
-                  <span className="font-display text-sm md:text-xl text-[#ffca45] mt-1 mb-1 block">{item.price}</span>
-                  <p className="text-[10px] md:text-xs text-on-surface-variant mb-2 md:mb-4 flex items-center gap-1">
-                    📍 {item.location}
-                  </p>
-                  
-                  <Button asChild className="w-full bg-[#16a34a] hover:bg-[#15803d] text-white border-none rounded-xl font-display uppercase tracking-widest text-[9px] md:text-xs py-1.5 md:py-2 h-8 md:h-10">
-                    <Link href={`/explore`}>
-                      <IconWhatsApp className="w-3.5 h-3.5 mr-1 inline-block align-middle" />
-                      WhatsApp
-                    </Link>
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
+          {dbCarts.length === 0 ? (
+            <div className="py-12 text-center text-[#f6ded3]/40 text-sm font-display uppercase tracking-widest">
+              No sale listings at this time.
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-2 gap-3 md:gap-6">
+              {dbCarts.slice(2, 4).map((cart, i) => {
+                const image = Array.isArray(cart.photos) && cart.photos.length > 0 ? cart.photos[0] : null;
+                const pricePerDay = cart.price_per_day
+                  ? Number(cart.price_per_day)
+                  : Math.round(Number(cart.price_per_month) / 30) || 80;
+                return (
+                  <div key={cart.id} className="bg-surface border border-outline-variant/30 flex flex-col p-3 md:p-4 rounded-3xl shadow-premium">
+                    <div className="aspect-[16/10] bg-[#251913] relative shrink-0 p-2 md:p-4 flex items-center justify-center mb-2 md:mb-4 rounded-2xl overflow-hidden">
+                      <span className="absolute top-1.5 left-1.5 text-[7px] md:text-[8px] font-display tracking-widest bg-[#ffca45] text-[#0a0a08] px-2 py-0.5 font-bold rounded-full z-10">
+                        {cart.condition?.includes("New") ? "NEW" : "PRE-OWNED"}
+                      </span>
+                      {image ? (
+                        <img src={image} alt={cart.type} className="w-full h-full object-cover rounded-xl" />
+                      ) : (
+                        <svg viewBox="0 0 100 80" className="w-12 h-12 md:w-20 md:h-20 text-on-surface-variant/10" fill="currentColor">
+                          <path d="M20 20 h60 v40 h-60 z M30 60 v10 M70 60 v10 M25 70 h50 M35 70 v5 M65 70 v5"/>
+                        </svg>
+                      )}
+                    </div>
+                    <div className="flex flex-col flex-grow">
+                      <h4 className="font-display text-xs md:text-lg text-on-surface tracking-wider line-clamp-1">{cart.name_en || cart.type}</h4>
+                      <span className="font-display text-sm md:text-xl text-[#ffca45] mt-1 mb-1 block">₹{pricePerDay}/day</span>
+                      <p className="text-[10px] md:text-xs text-on-surface-variant mb-2 md:mb-4 flex items-center gap-1">
+                        📍 {getCartLocationName(cart)}
+                      </p>
+
+                      <Button asChild className="w-full bg-[#f97316] hover:bg-[#e2640e] text-[#0a0a08] border-none rounded-xl font-display uppercase tracking-widest text-[9px] md:text-xs py-1.5 md:py-2 h-8 md:h-10">
+                        <Link href={`/contact?cart=${cart.id}&name=${encodeURIComponent(cart.name_en || cart.type)}&ref=sale#enquiry-form`}>
+                          Enquire Now
+                        </Link>
+                      </Button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
     </main>
   );
 }
+
