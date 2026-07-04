@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { getLiveCartsAction } from "@/app/actions";
 import { calculateHaversineDistance } from "@/lib/routing";
 import { mapDbCartToCart } from "@/lib/carts";
+import { isDbConfigured } from "@/lib/supabase";
 import { IconSearchStove, IconTent, IconIceCream, IconCoffee } from "@/components/ui/icons";
 
 const SUGGESTIONS = [
@@ -72,7 +73,9 @@ function BrowseCartsPageContent() {
   useEffect(() => {
     async function loadData() {
       try {
+        console.log("[DIAGNOSTIC] isDbConfigured:", isDbConfigured);
         const res = await getLiveCartsAction();
+        console.log("[DIAGNOSTIC] getLiveCartsAction response:", res);
         if (res.success && res.data) {
           const mapped = res.data.map(mapDbCartToCart);
           setDbCarts(mapped);
