@@ -114,9 +114,11 @@ function LoginForm() {
             priority
           />
         </div>
-        <h1 className="font-display text-2xl font-bold tracking-tight text-gray-900">
-          THALLUVANDI
-        </h1>
+        <Link href="/admin">
+          <h1 className="font-display text-2xl font-bold tracking-tight text-gray-900 hover:text-[#075200] transition-colors cursor-pointer">
+            THALLUVANDI
+          </h1>
+        </Link>
         <p className="text-sm text-gray-500 mt-1">
           <T en="Premium Cart Marketplace" ta="தரமான வண்டி சந்தை" />
         </p>
