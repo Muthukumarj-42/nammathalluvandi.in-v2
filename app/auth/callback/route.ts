@@ -8,11 +8,23 @@ export async function GET(request: Request) {
   const error = searchParams.get("error");
   const errorDescription = searchParams.get("error_description");
 
+  const forwardedHost = request.headers.get("x-forwarded-host");
+  const isLocalEnv = process.env.NODE_ENV === "development";
+
+  // Determine the correct public origin to redirect to
+  let targetOrigin = origin;
+  if (!isLocalEnv) {
+    const host = (forwardedHost && !forwardedHost.includes("localhost") && !forwardedHost.includes("127.0.0.1"))
+      ? forwardedHost
+      : "nammathalluvandi.in";
+    targetOrigin = `https://${host}`;
+  }
+
   // Handle auth errors
   if (error) {
     console.error("Auth callback error:", error, errorDescription);
     return NextResponse.redirect(
-      `${origin}/login?error=${encodeURIComponent(errorDescription ?? error)}`
+      `${targetOrigin}/login?error=${encodeURIComponent(errorDescription ?? error)}`
     );
   }
 
@@ -22,16 +34,7 @@ export async function GET(request: Request) {
 
     if (!exchangeError) {
       // Successful auth — redirect to intended destination
-      const forwardedHost = request.headers.get("x-forwarded-host");
-      const isLocalEnv = process.env.NODE_ENV === "development";
-
-      if (isLocalEnv) {
-        return NextResponse.redirect(`${origin}${next}`);
-      } else if (forwardedHost) {
-        return NextResponse.redirect(`https://${forwardedHost}${next}`);
-      } else {
-        return NextResponse.redirect(`${origin}${next}`);
-      }
+      return NextResponse.redirect(`${targetOrigin}${next}`);
     }
 
     console.error("Code exchange error:", exchangeError);
@@ -39,6 +42,6 @@ export async function GET(request: Request) {
 
   // Fallback: redirect to login with error
   return NextResponse.redirect(
-    `${origin}/login?error=Authentication+failed.+Please+try+again.`
+    `${targetOrigin}/login?error=Authentication+failed.+Please+try+again.`
   );
 }

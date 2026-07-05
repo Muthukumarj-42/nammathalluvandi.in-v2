@@ -302,10 +302,15 @@ export function BookingFlow() {
               location: locName,
             }));
             setGeoStatus("success");
+            // Save coordinates and name to localStorage for persistence
+            window.localStorage.setItem("thalluvandi-user-coords", JSON.stringify({ latitude: lat, longitude: lng }));
+            window.localStorage.setItem("thalluvandi-detected-location-name", locName);
           })
           .catch((err) => {
             console.error("Geocoding error:", err);
             setGeoStatus("success");
+            window.localStorage.setItem("thalluvandi-user-coords", JSON.stringify({ latitude: lat, longitude: lng }));
+            window.localStorage.setItem("thalluvandi-detected-location-name", "your location");
           });
       },
       (error) => {
@@ -315,6 +320,29 @@ export function BookingFlow() {
       { enableHighAccuracy: true, timeout: 10000 }
     );
   };
+
+  // Pre-fill location from localStorage on mount if available
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const savedCoords = window.localStorage.getItem("thalluvandi-user-coords");
+    const savedName = window.localStorage.getItem("thalluvandi-detected-location-name");
+    if (savedCoords && savedName) {
+      try {
+        const parsed = JSON.parse(savedCoords);
+        if (parsed && typeof parsed.latitude === "number" && typeof parsed.longitude === "number") {
+          setFormData((prev) => ({
+            ...prev,
+            latitude: prev.latitude || parsed.latitude.toFixed(6),
+            longitude: prev.longitude || parsed.longitude.toFixed(6),
+            location: prev.location || savedName,
+          }));
+          setGeoStatus("success");
+        }
+      } catch (err) {
+        console.error("Error reading saved location in booking flow:", err);
+      }
+    }
+  }, []);
 
   // Validation States
   const [phoneError, setPhoneError] = useState("");

@@ -70,6 +70,24 @@ function BrowseCartsPageContent() {
   const [detectedLocationName, setDetectedLocationName] = useState<string | null>(null);
   const [locationErrorMsg, setLocationErrorMsg] = useState<string | null>(null);
 
+  // Load saved location from localStorage on mount
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const savedCoords = window.localStorage.getItem("thalluvandi-user-coords");
+    const savedName = window.localStorage.getItem("thalluvandi-detected-location-name");
+    if (savedCoords) {
+      try {
+        const parsed = JSON.parse(savedCoords);
+        if (parsed && typeof parsed.latitude === "number" && typeof parsed.longitude === "number") {
+          setUserCoords(parsed);
+          if (savedName) setDetectedLocationName(savedName);
+        }
+      } catch (err) {
+        console.error("Error reading location from localStorage:", err);
+      }
+    }
+  }, []);
+
   // Search filter and suggestion states
   const [showFilterPanel, setShowFilterPanel] = useState(false);
   const [suggestionIndex, setSuggestionIndex] = useState(0);
@@ -113,11 +131,30 @@ function BrowseCartsPageContent() {
   }, [searchParams]);
 
   // Request browser geolocation to sort carts by closest distance
-  const handleEnableLocationSort = () => {
+  const handleEnableLocationSort = (forceReDetect = false) => {
     if (!navigator.geolocation) {
       setLocationErrorMsg("Geolocation is not supported by your browser.");
       return;
     }
+
+    if (!forceReDetect) {
+      const savedCoords = window.localStorage.getItem("thalluvandi-user-coords");
+      const savedName = window.localStorage.getItem("thalluvandi-detected-location-name");
+      if (savedCoords) {
+        try {
+          const parsed = JSON.parse(savedCoords);
+          if (parsed && typeof parsed.latitude === "number" && typeof parsed.longitude === "number") {
+            setUserCoords(parsed);
+            if (savedName) setDetectedLocationName(savedName);
+            setLocationErrorMsg(null);
+            return;
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    }
+
     setGeoSorting(true);
     setLocationErrorMsg(null);
     setDetectedLocationName(null);
@@ -125,20 +162,21 @@ function BrowseCartsPageContent() {
     const onSuccess = (position: GeolocationPosition) => {
       const lat = position.coords.latitude;
       const lng = position.coords.longitude;
-      setUserCoords({
-        latitude: lat,
-        longitude: lng,
-      });
+      const coords = { latitude: lat, longitude: lng };
+      setUserCoords(coords);
+      window.localStorage.setItem("thalluvandi-user-coords", JSON.stringify(coords));
       
       // Fetch human-readable location name
       reverseGeocode(lat, lng)
         .then((locationName) => {
           setDetectedLocationName(locationName);
+          window.localStorage.setItem("thalluvandi-detected-location-name", locationName);
           setGeoSorting(false);
         })
         .catch((err) => {
           console.error("Geocoding failed:", err);
           setDetectedLocationName("your location");
+          window.localStorage.setItem("thalluvandi-detected-location-name", "your location");
           setGeoSorting(false);
         });
     };
@@ -376,21 +414,31 @@ function BrowseCartsPageContent() {
                       )}
                     </span>
                   </div>
-                  <button 
-                    onClick={() => {
-                      setUserCoords(null);
-                      setDetectedLocationName(null);
-                      setLocationErrorMsg(null);
-                    }}
-                    className="text-[10px] text-[#f97316] hover:underline text-left font-bold"
-                  >
-                    <Text en="Clear location sort" ta="இருப்பிட வரிசையை நீக்கு" />
-                  </button>
+                  <div className="flex flex-col gap-1.5">
+                    <button 
+                      onClick={() => {
+                        setUserCoords(null);
+                        setDetectedLocationName(null);
+                        setLocationErrorMsg(null);
+                        window.localStorage.removeItem("thalluvandi-user-coords");
+                        window.localStorage.removeItem("thalluvandi-detected-location-name");
+                      }}
+                      className="text-[10px] text-[#f97316] hover:underline text-left font-bold"
+                    >
+                      <Text en="Clear location sort" ta="இருப்பிட வரிசையை நீக்கு" />
+                    </button>
+                    <button 
+                      onClick={() => handleEnableLocationSort(true)}
+                      className="text-[10px] text-[#f6ded3]/60 hover:text-[#f97316] hover:underline text-left font-bold"
+                    >
+                      <Text en="Update / Re-detect location" ta="இருப்பிடத்தை புதுப்பிக்கவும்" />
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <>
                   <Button 
-                    onClick={handleEnableLocationSort}
+                    onClick={() => handleEnableLocationSort(false)}
                     disabled={geoSorting}
                     className="w-full h-10 bg-transparent hover:bg-[#ffb690]/5 border border-[#ffb690]/35 text-[#ffb690] text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 rounded-xl"
                   >
@@ -527,7 +575,7 @@ function BrowseCartsPageContent() {
                 </div>
               ) : (
                 <Button 
-                  onClick={handleEnableLocationSort}
+                  onClick={() => handleEnableLocationSort(false)}
                   disabled={geoSorting}
                   className="h-8 bg-[#251913] hover:bg-[#ffb690]/10 border border-[#ffb690]/25 text-[#ffb690] text-[10px] font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 rounded-lg px-3"
                 >
