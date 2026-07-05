@@ -105,12 +105,14 @@ function LoginForm() {
     <div className="relative z-10 w-full max-w-md mx-auto px-4">
       {/* Logo */}
       <div className="flex flex-col items-center mb-8">
-        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#f97316] to-[#dc2626] flex items-center justify-center shadow-lg shadow-orange-200 mb-4">
-          <svg viewBox="0 0 24 24" fill="none" className="w-9 h-9 text-white" stroke="currentColor" strokeWidth="1.8">
-            <path d="M3 9h18M3 9l2-4h14l2 4M3 9v10a1 1 0 001 1h16a1 1 0 001-1V9" strokeLinecap="round" strokeLinejoin="round"/>
-            <circle cx="8" cy="20" r="1.5" fill="currentColor" stroke="none"/>
-            <circle cx="16" cy="20" r="1.5" fill="currentColor" stroke="none"/>
-          </svg>
+        <div className="w-16 h-16 relative flex items-center justify-center mb-4">
+          <Image
+            src="/brand/full-logo.webp"
+            alt="Thalluvandi Logo"
+            fill
+            className="object-contain"
+            priority
+          />
         </div>
         <h1 className="font-display text-2xl font-bold tracking-tight text-gray-900">
           THALLUVANDI
@@ -125,7 +127,7 @@ function LoginForm() {
         {/* Back to home — top-left arrow */}
         <Link
           href="/"
-          className="absolute top-5 left-5 flex items-center justify-center w-9 h-9 rounded-xl bg-gray-100 hover:bg-orange-100 hover:text-[#f97316] text-gray-500 transition-all duration-200 group"
+          className="absolute top-5 left-5 flex items-center justify-center w-9 h-9 rounded-xl bg-gray-100 hover:bg-green-100 hover:text-[#075200] text-gray-500 transition-all duration-200 group"
           aria-label="Back to home"
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5 transition-transform duration-200 group-hover:-translate-x-0.5">
@@ -173,7 +175,7 @@ function LoginForm() {
             <button
               id="login-email-btn"
               onClick={() => setMode("email")}
-              className="w-full flex items-center justify-center gap-3 px-5 py-3.5 rounded-2xl bg-orange-50 border border-orange-200 text-[#f97316] font-semibold text-sm hover:bg-orange-100 hover:border-orange-300 transition-all duration-200 active:scale-[0.98]"
+              className="w-full flex items-center justify-center gap-3 px-5 py-3.5 rounded-2xl bg-green-50 border border-green-200 text-[#075200] font-semibold text-sm hover:bg-green-100 hover:border-green-300 transition-all duration-200 active:scale-[0.98]"
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5">
                 <rect x="2" y="4" width="20" height="16" rx="2" />
@@ -230,14 +232,14 @@ function LoginForm() {
                   placeholder="you@example.com"
                   required
                   autoFocus
-                  className="w-full px-4 py-3.5 rounded-xl bg-gray-50 border border-gray-200 text-gray-900 placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-[#f97316]/40 focus:border-[#f97316] transition-all"
+                  className="w-full px-4 py-3.5 rounded-xl bg-gray-50 border border-gray-200 text-gray-900 placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-[#075200]/40 focus:border-[#075200] transition-all"
                 />
               </div>
               <button
                 id="send-magic-link-btn"
                 type="submit"
                 disabled={loading || !email.trim()}
-                className="w-full py-3.5 rounded-xl bg-gradient-to-r from-[#f97316] to-[#ea580c] text-white font-bold text-sm hover:from-[#fb923c] hover:to-[#f97316] transition-all duration-200 shadow-md shadow-orange-200 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full py-3.5 rounded-xl bg-gradient-to-r from-[#075200] to-[#116d03] text-white font-bold text-sm hover:from-[#116d03] hover:to-[#075200] transition-all duration-200 shadow-md shadow-green-100 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? (
                   <span className="flex items-center justify-center gap-2">

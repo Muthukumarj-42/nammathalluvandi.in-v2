@@ -133,21 +133,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           .select("roles(name)")
           .eq("user_id", authUser.id);
 
+        let roleNames: UserRole[] = [];
         if (userRoles) {
-          const roleNames = userRoles
+          roleNames = userRoles
             .map((r: any) => r.roles?.name)
             .filter(Boolean) as UserRole[];
-          setRoles(roleNames);
+        }
 
-          // 3. If vendor, load vendor profile
-          if (roleNames.includes("VENDOR")) {
-            const { data: vProf } = await supabase
-              .from("vendor_profiles")
-              .select("*")
-              .eq("id", authUser.id)
-              .single();
-            if (vProf) setVendorProfile(vProf as VendorProfile);
+        // FOR TESTING: Force +91 88382 92849 to have ADMIN role
+        // REMOVE_BEFORE_GMAIL_ADOPTION
+        const phone = authUser.phone || authUser.user_metadata?.phone;
+        if (phone === "+918838292849" || phone === "+91 88382 92849" || phone === "8838292849") {
+          if (!roleNames.includes("ADMIN")) {
+            roleNames.push("ADMIN");
           }
+        }
+
+        setRoles(roleNames);
+
+        // 3. If vendor, load vendor profile
+        if (roleNames.includes("VENDOR")) {
+          const { data: vProf } = await supabase
+            .from("vendor_profiles")
+            .select("*")
+            .eq("id", authUser.id)
+            .single();
+          if (vProf) setVendorProfile(vProf as VendorProfile);
         }
       } catch (err) {
         console.error("Failed to load user data:", err);
@@ -210,7 +221,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     (role: UserRole) => roles.includes(role),
     [roles]
   );
-  const isAdmin = roles.includes("ADMIN") || roles.includes("SUPER_ADMIN");
+  // FOR TESTING: Force phone number to be ADMIN.
+  // REMOVE_BEFORE_GMAIL_ADOPTION
+  const userPhone = user?.phone || user?.user_metadata?.phone;
+  const isForcedAdmin = userPhone === "+918838292849" || userPhone === "+91 88382 92849" || userPhone === "8838292849";
+  const isAdmin = roles.includes("ADMIN") || roles.includes("SUPER_ADMIN") || isForcedAdmin;
   const isVendor = roles.includes("VENDOR");
   const isBuyer = roles.includes("BUYER");
 

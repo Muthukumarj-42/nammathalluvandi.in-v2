@@ -59,11 +59,21 @@ export default function AdminDashboard() {
   // Cart status filter for listed tab
   const [cartStatusFilter, setCartStatusFilter] = useState<"all" | "pending_review" | "live" | "inactive">("all");
 
+  // Custom Confirmation modal states
+  const [confirmModal, setConfirmModal] = useState<{
+    open: boolean;
+    title: string;
+    message: string;
+    onConfirm: () => void;
+  } | null>(null);
+
+  const showToast = (message: string, type: "success" | "error" | "info" = "success") => {
+    // Toast notifications disabled
+  };
 
   // Authenticate Muthu
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    // Simple passcode authorization tied to Muthu's mock phone number or secret key
     if (passcode === "8838292849" || passcode === "muthuadmin") {
       setAuthorized(true);
       setPasscodeError("");
@@ -100,85 +110,110 @@ export default function AdminDashboard() {
     loadAdminData();
   }, [authorized, refreshTrigger]);
 
-  // Operations
-  const handleApproveCart = async (id: string) => {
-    const confirm = window.confirm("Approve this cart and make it live in the directory?");
-    if (!confirm) return;
-    const res = await updateCartStatusAction(id, "live", true);
-    if (res.success) {
-      alert("Cart approved & set to LIVE!");
-      setRefreshTrigger(p => p + 1);
-    } else {
-      alert("Operation failed: " + res.error);
-    }
+  // Operations using custom toast & confirm Modal
+  const handleApproveCart = (id: string) => {
+    setConfirmModal({
+      open: true,
+      title: "Approve Listing",
+      message: "Are you sure you want to approve this cart and make it live in the directory?",
+      onConfirm: async () => {
+        const res = await updateCartStatusAction(id, "live", true);
+        if (res.success) {
+          showToast("Cart approved & set to LIVE!", "success");
+          setRefreshTrigger(p => p + 1);
+        } else {
+          showToast("Operation failed: " + res.error, "error");
+        }
+      }
+    });
   };
 
-  const handleRejectCart = async (id: string) => {
-    const confirm = window.confirm("Deactivate/Reject this listing?");
-    if (!confirm) return;
-    const res = await updateCartStatusAction(id, "inactive", false);
-    if (res.success) {
-      alert("Cart deactivated!");
-      setRefreshTrigger(p => p + 1);
-    } else {
-      alert("Operation failed: " + res.error);
-    }
+  const handleRejectCart = (id: string) => {
+    setConfirmModal({
+      open: true,
+      title: "Deactivate Listing",
+      message: "Are you sure you want to deactivate/reject this listing?",
+      onConfirm: async () => {
+        const res = await updateCartStatusAction(id, "inactive", false);
+        if (res.success) {
+          showToast("Cart deactivated!", "success");
+          setRefreshTrigger(p => p + 1);
+        } else {
+          showToast("Operation failed: " + res.error, "error");
+        }
+      }
+    });
   };
 
-  const handleForceEscalate = async (id: string) => {
-    const confirm = window.confirm("Manually escalate this booking to the next nearest Cart Vendor?");
-    if (!confirm) return;
-    const res = await escalateBookingAction(id);
-    if (res.success) {
-      alert("Booking escalated successfully!");
-      setRefreshTrigger(p => p + 1);
-    } else {
-      alert("Escalation failed: " + res.error);
-    }
+  const handleForceEscalate = (id: string) => {
+    setConfirmModal({
+      open: true,
+      title: "Escalate Booking",
+      message: "Are you sure you want to manually escalate this booking to the next nearest Cart Vendor?",
+      onConfirm: async () => {
+        const res = await escalateBookingAction(id);
+        if (res.success) {
+          showToast("Booking escalated successfully!", "success");
+          setRefreshTrigger(p => p + 1);
+        } else {
+          showToast("Escalation failed: " + res.error, "error");
+        }
+      }
+    });
   };
 
-  const handleResolveDispute = async (id: string) => {
-    const confirm = window.confirm("Mark this complaint/query as resolved?");
-    if (!confirm) return;
-    const res = await updateDisputeStatusAction(id, "resolved");
-    if (res.success) {
-      alert("Complaint/Query marked as resolved.");
-      setRefreshTrigger(p => p + 1);
-    } else {
-      alert("Operation failed: " + res.error);
-    }
+  const handleResolveDispute = (id: string) => {
+    setConfirmModal({
+      open: true,
+      title: "Resolve Dispute",
+      message: "Are you sure you want to mark this complaint/query as resolved?",
+      onConfirm: async () => {
+        const res = await updateDisputeStatusAction(id, "resolved");
+        if (res.success) {
+          showToast("Complaint/Query marked as resolved.", "success");
+          setRefreshTrigger(p => p + 1);
+        } else {
+          showToast("Operation failed: " + res.error, "error");
+        }
+      }
+    });
   };
 
   const handleUpdateBookingStatus = async (id: string, status: any) => {
     const res = await updateBookingStatusAction(id, status);
     if (res.success) {
-      alert(`Booking status updated to ${status}`);
+      showToast(`Booking status updated to ${status}`, "success");
       setRefreshTrigger(p => p + 1);
     } else {
-      alert("Operation failed: " + res.error);
+      showToast("Operation failed: " + res.error, "error");
     }
   };
 
   // Export all carts as CSV
   const handleExportCarts = () => {
     const headers = ["ID", "Type", "Condition", "Size", "Weight", "Stove", "Price/Month", "Description", "Latitude", "Longitude", "Status", "Verified", "Owner ID", "Photo URL", "Created At"];
-    const rows = carts.map(c => [
-      c.id,
-      c.type,
-      c.condition,
-      c.size || "",
-      c.weight || "",
-      c.stove_type || "",
-      c.price_per_month || "",
-      (c.description || "").replace(/,/g, ";"),
-      c.latitude,
-      c.longitude,
-      c.status,
-      c.verified ? "Yes" : "No",
-      c.owner_id,
-      Array.isArray(c.photos) && c.photos.length > 0 ? `https://nammathalluvandi.in${c.photos[0]}` : "",
-      c.created_at || ""
-    ]);
+    const rows = carts.map(c => {
+      const img = (Array.isArray(c.images) && c.images.length > 0) ? c.images[0] : 
+                  ((Array.isArray(c.photos) && c.photos.length > 0) ? c.photos[0] : "");
+      const photoUrl = img ? (img.startsWith("http") ? img : `https://nammathalluvandi.in${img}`) : "";
+      return [
+        c.id,
+        c.type,
+        c.condition,
+        c.size || "",
+        c.weight || "",
+        c.stove_type || "",
+        c.price_per_month || "",
+        (c.description || "").replace(/,/g, ";"),
+        c.latitude,
+        c.longitude,
+        c.status,
+        c.verified ? "Yes" : "No",
+        c.owner_id,
+        photoUrl,
+        c.created_at || ""
+      ];
+    });
     const csvContent = [headers, ...rows].map(r => r.join(",")).join("\n");
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
@@ -203,6 +238,25 @@ export default function AdminDashboard() {
     setEditModal({ open: true, cart });
   };
 
+  // Download single cart image file
+  const handleDownloadSingleCartImage = (c: any) => {
+    const img = (Array.isArray(c.images) && c.images.length > 0) ? c.images[0] : 
+                ((Array.isArray(c.photos) && c.photos.length > 0) ? c.photos[0] : "");
+
+    if (img) {
+      const imgLink = document.createElement("a");
+      imgLink.href = img;
+      const ext = img.split('.').pop()?.split('?')[0] || "webp";
+      imgLink.download = `thalluvandi-cart-${c.id}-photo.${ext}`;
+      document.body.appendChild(imgLink);
+      imgLink.click();
+      document.body.removeChild(imgLink);
+      showToast(`Cart image for ID ${c.id} downloaded successfully!`, "success");
+    } else {
+      showToast("No image available for this cart.", "error");
+    }
+  };
+
   // Save edit from modal
   const handleSaveEdit = async () => {
     if (!editModal.cart) return;
@@ -218,10 +272,11 @@ export default function AdminDashboard() {
     });
     setEditSaving(false);
     if (res.success) {
+      showToast("Cart details updated successfully!", "success");
       setEditModal({ open: false, cart: null });
       setRefreshTrigger(p => p + 1);
     } else {
-      alert("Save failed: " + res.error);
+      showToast("Save failed: " + res.error, "error");
     }
   };
 
@@ -284,7 +339,7 @@ export default function AdminDashboard() {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-[#ffb690]/10 pb-6 mb-8">
           <div>
             <span className="font-display text-xs tracking-widest text-[#116D03] uppercase">Control Panel</span>
-            <h1 className="font-display text-4xl text-[#116D03] uppercase tracking-wider mt-1">ADMINISTRATOR DASHBOARD</h1>
+            <h1 className="font-display text-2xl sm:text-4xl text-[#116D03] uppercase tracking-wider mt-1">ADMINISTRATOR DASHBOARD</h1>
           </div>
           <div className="flex items-center gap-3">
             <button
@@ -305,40 +360,40 @@ export default function AdminDashboard() {
 
         {/* Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <div className="bg-[#160c06] border border-[#ffb690]/15 p-5 rounded-xl flex items-center gap-4">
-            <div className="w-12 h-12 bg-amber-400/10 text-amber-400 border border-amber-400/20 rounded-lg flex items-center justify-center shrink-0">
-              <ShoppingBag className="w-6 h-6" />
+          <div className="bg-[#160c06] border border-[#ffb690]/15 p-4 rounded-xl flex items-center gap-3">
+            <div className="w-10 h-10 bg-amber-400/10 text-amber-400 border border-amber-400/20 rounded-lg flex items-center justify-center shrink-0">
+              <ShoppingBag className="w-5 h-5" />
             </div>
             <div>
-              <span className="text-[10px] text-[#f6ded3]/40 uppercase tracking-widest block">Pending Reviews</span>
-              <span className="font-display text-2xl font-bold text-amber-400">{pendingCarts.length}</span>
+              <span className="text-[9px] md:text-[10px] text-[#f6ded3]/40 uppercase tracking-wider block leading-tight">Pending Reviews</span>
+              <span className="font-display text-xl md:text-2xl font-bold text-amber-400">{pendingCarts.length}</span>
             </div>
           </div>
-          <div className="bg-[#160c06] border border-[#ffb690]/15 p-5 rounded-xl flex items-center gap-4">
-            <div className="w-12 h-12 bg-green-500/10 text-green-500 border border-green-500/20 rounded-lg flex items-center justify-center shrink-0">
-              <CheckCircle className="w-6 h-6" />
+          <div className="bg-[#160c06] border border-[#ffb690]/15 p-4 rounded-xl flex items-center gap-3">
+            <div className="w-10 h-10 bg-green-500/10 text-green-500 border border-green-500/20 rounded-lg flex items-center justify-center shrink-0">
+              <CheckCircle className="w-5 h-5" />
             </div>
             <div>
-              <span className="text-[10px] text-[#f6ded3]/40 uppercase tracking-widest block">Live Directory</span>
-              <span className="font-display text-2xl font-bold text-green-500">{liveCarts.length}</span>
+              <span className="text-[9px] md:text-[10px] text-[#f6ded3]/40 uppercase tracking-wider block leading-tight">Live Directory</span>
+              <span className="font-display text-xl md:text-2xl font-bold text-green-500">{liveCarts.length}</span>
             </div>
           </div>
-          <div className="bg-[#160c06] border border-[#ffb690]/15 p-5 rounded-xl flex items-center gap-4">
-            <div className="w-12 h-12 bg-[#f97316]/10 text-[#f97316] border border-[#f97316]/20 rounded-lg flex items-center justify-center shrink-0">
-              <CalendarDays className="w-6 h-6" />
+          <div className="bg-[#160c06] border border-[#ffb690]/15 p-4 rounded-xl flex items-center gap-3">
+            <div className="w-10 h-10 bg-[#f97316]/10 text-[#f97316] border border-[#f97316]/20 rounded-lg flex items-center justify-center shrink-0">
+              <CalendarDays className="w-5 h-5" />
             </div>
             <div>
-              <span className="text-[10px] text-[#f6ded3]/40 uppercase tracking-widest block">Total Bookings</span>
-              <span className="font-display text-2xl font-bold text-[#f97316]">{bookings.length}</span>
+              <span className="text-[9px] md:text-[10px] text-[#f6ded3]/40 uppercase tracking-wider block leading-tight">Total Bookings</span>
+              <span className="font-display text-xl md:text-2xl font-bold text-[#f97316]">{bookings.length}</span>
             </div>
           </div>
-          <div className="bg-[#160c06] border border-[#ffb690]/15 p-5 rounded-xl flex items-center gap-4">
-            <div className="w-12 h-12 bg-red-500/10 text-red-500 border border-red-500/20 rounded-lg flex items-center justify-center shrink-0">
-              <AlertTriangle className="w-6 h-6" />
+          <div className="bg-[#160c06] border border-[#ffb690]/15 p-4 rounded-xl flex items-center gap-3">
+            <div className="w-10 h-10 bg-red-500/10 text-red-500 border border-red-500/20 rounded-lg flex items-center justify-center shrink-0">
+              <AlertTriangle className="w-5 h-5" />
             </div>
             <div>
-              <span className="text-[10px] text-[#f6ded3]/40 uppercase tracking-widest block">Complaints/Queries</span>
-              <span className="font-display text-2xl font-bold text-red-500">{openDisputes.length}</span>
+              <span className="text-[9px] md:text-[10px] text-[#f6ded3]/40 uppercase tracking-wider block leading-tight">Complaints / Queries</span>
+              <span className="font-display text-xl md:text-2xl font-bold text-red-500">{openDisputes.length}</span>
             </div>
           </div>
         </div>
@@ -368,7 +423,11 @@ export default function AdminDashboard() {
                 <Icon className="w-3.5 h-3.5" />
                 <span>{tab.label}</span>
                 {tab.count > 0 && (
-                  <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold ${isActive ? "bg-[#0a0a08] text-white" : "bg-[#f97316] text-[#0a0a08]"}`}>
+                  <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold ${
+                    isActive 
+                      ? "admin-active-count bg-[#fffdf7] text-[#116D03] dark:bg-[#0a0a08] dark:text-white font-black" 
+                      : "bg-[#f97316] text-[#0a0a08] dark:bg-[#f97316] dark:text-[#0a0a08] font-bold"
+                  }`}>
                     {tab.count}
                   </span>
                 )}
@@ -493,6 +552,13 @@ export default function AdminDashboard() {
                                 >
                                   <Pencil className="w-3 h-3" /> Edit
                                 </button>
+                                <button
+                                  onClick={() => handleDownloadSingleCartImage(cart)}
+                                  className="h-9 bg-[#160c06] hover:bg-[#251913] border border-[#ffb690]/20 text-[#ffb690] px-3 rounded-lg text-[10px] font-bold uppercase tracking-wider transition flex items-center gap-1"
+                                  title="Download cart photo"
+                                >
+                                  <Download className="w-3 h-3" /> Photo
+                                </button>
                               </div>
                             </div>
                           </div>
@@ -541,12 +607,21 @@ export default function AdminDashboard() {
                                   {cart.latitude >= 11.08 ? "Tiruppur" : "Coimbatore"}
                                 </td>
                                 <td className="p-4 text-right">
-                                  <button
-                                    onClick={() => handleRejectCart(cart.id)}
-                                    className="bg-red-950/20 hover:bg-red-900/30 border border-red-500/20 text-red-400 px-3 py-1.5 rounded text-[10px] uppercase font-bold"
-                                  >
-                                    Deactivate
-                                  </button>
+                                  <div className="flex justify-end gap-2">
+                                    <button
+                                      onClick={() => handleDownloadSingleCartImage(cart)}
+                                      className="bg-[#160c06] hover:bg-[#251913] border border-[#ffb690]/20 text-[#ffb690] px-3 py-1.5 rounded text-[10px] uppercase font-bold flex items-center gap-1"
+                                      title="Download cart photo"
+                                    >
+                                      <Download className="w-3 h-3" strokeWidth={2.5} /> Photo
+                                    </button>
+                                    <button
+                                      onClick={() => handleRejectCart(cart.id)}
+                                      className="bg-red-950/20 hover:bg-red-900/30 border border-red-500/20 text-red-400 px-3 py-1.5 rounded text-[10px] uppercase font-bold"
+                                    >
+                                      Deactivate
+                                    </button>
+                                  </div>
                                 </td>
                               </tr>
                             );
@@ -839,7 +914,7 @@ export default function AdminDashboard() {
                               <td className="p-4">
                                 <div className="flex gap-1.5">
                                   <button
-                                    onClick={() => alert(`View user: ${u.id}\nRole management via Supabase dashboard.`)}
+                                    onClick={() => showToast(`User ID: ${u.id.substring(0, 8)}... | Email: ${u.email || "N/A"} (Manage roles via Supabase Dashboard)`, "info")}
                                     className="px-2.5 py-1 rounded text-[9px] font-bold bg-[#ffb690]/10 text-[#ffb690] hover:bg-[#ffb690]/20 transition uppercase tracking-wider"
                                   >
                                     Manage
@@ -965,6 +1040,34 @@ export default function AdminDashboard() {
                 className="h-11 px-5 bg-[#0a0a08] hover:bg-[#251913] border border-[#ffb690]/20 text-[#f6ded3] font-bold text-sm rounded-xl transition"
               >
                 Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+
+      {/* Confirm Action Overlays (Modal) */}
+      {confirmModal && confirmModal.open && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-[#160c06] border border-[#ffb690]/25 rounded-2xl p-6 max-w-sm w-full space-y-4 shadow-2xl">
+            <h4 className="font-display text-lg uppercase tracking-wider text-[#ffb690]">{confirmModal.title}</h4>
+            <p className="text-xs text-[#f6ded3]/80 leading-relaxed font-sans">{confirmModal.message}</p>
+            <div className="flex justify-end gap-3 pt-2">
+              <button
+                onClick={() => setConfirmModal(null)}
+                className="px-4 py-2 border border-[#ffb690]/15 text-[#f6ded3]/70 hover:text-[#fffdf7] rounded-lg text-xs font-bold uppercase tracking-wider transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  confirmModal.onConfirm();
+                  setConfirmModal(null);
+                }}
+                className="px-4 py-2 bg-[#f97316] hover:bg-[#e2640e] text-[#0a0a08] rounded-lg text-xs font-bold uppercase tracking-wider transition"
+              >
+                Confirm
               </button>
             </div>
           </div>
