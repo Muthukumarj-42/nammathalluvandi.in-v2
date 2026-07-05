@@ -346,6 +346,38 @@ export async function updateCartStatus(id: string, status: DbCart["status"], ver
   return null;
 }
 
+export async function updateCart(id: string, data: Partial<Pick<DbCart, "type" | "condition" | "size" | "weight" | "stove_type" | "price_per_month" | "description" | "photos" | "latitude" | "longitude">>): Promise<DbCart | null> {
+  if (isDbConfigured) {
+    const { data: updated, error } = await supabase
+      .from("carts")
+      .update(data)
+      .eq("id", id)
+      .select()
+      .single();
+    if (error) throw new Error(error.message);
+    return updated;
+  }
+
+  const cart = mockCarts.find((c) => c.id === id);
+  if (cart) {
+    Object.assign(cart, data);
+    return cart;
+  }
+  return null;
+}
+
+export async function getCartsByOwnerId(ownerId: string): Promise<DbCart[]> {
+  if (isDbConfigured) {
+    const { data } = await supabase
+      .from("carts")
+      .select("*")
+      .eq("owner_id", ownerId)
+      .order("created_at", { ascending: false });
+    return data || [];
+  }
+  return mockCarts.filter((c) => c.owner_id === ownerId);
+}
+
 // --------------------------------------------------
 // BOOKINGS & ROUTING DATABASE FUNCTIONS
 // --------------------------------------------------

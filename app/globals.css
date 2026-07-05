@@ -453,3 +453,23 @@ html:not(.dark) [class*="hover:text-[#f6ded3]"]:hover {
   color: var(--on-surface) !important;
 }
 
+.custom-line-clamp-2 {
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+html[data-lang="ta"] .explore-description {
+  line-height: 1.6 !important;
+}
+
+@media (min-width: 768px) {
+  html[data-lang="ta"] .explore-description {
+    line-height: 1.67 !important;
+  }
+}
+
+
+

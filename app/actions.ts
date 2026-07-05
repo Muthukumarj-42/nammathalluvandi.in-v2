@@ -5,6 +5,7 @@ import {
   saveCart as dbSaveCart, 
   saveUser, 
   updateCartStatus as dbUpdateCartStatus, 
+  updateCart as dbUpdateCart,
   updateBookingStatus as dbUpdateBookingStatus,
   escalateBooking as dbEscalateBooking,
   createDispute as dbCreateDispute,
@@ -13,6 +14,7 @@ import {
   getLiveCarts,
   getAllCarts,
   getCartById,
+  getCartsByOwnerId,
   getBookings,
   getWhatsappMessages,
   getDisputes,
@@ -80,22 +82,29 @@ export async function saveCart(cartData: {
   size?: string;
   weight?: string;
   stoveType?: string;
+  ownerId?: string; // When provided, skip phone-based user lookup
 }) {
   try {
-    let cvUser = await getUserByPhone(cartData.vendorPhone);
-    if (!cvUser) {
-      cvUser = await saveUser({
-        role: "cv",
-        name: cartData.vendorName,
-        phone: cartData.vendorPhone,
-      });
+    let ownerId = cartData.ownerId;
+
+    if (!ownerId) {
+      // Legacy flow: look up by phone
+      let cvUser = await getUserByPhone(cartData.vendorPhone);
+      if (!cvUser) {
+        cvUser = await saveUser({
+          role: "cv",
+          name: cartData.vendorName,
+          phone: cartData.vendorPhone,
+        });
+      }
+      ownerId = cvUser.id;
     }
 
     const lat = cartData.latitude || 11.0267;
     const lng = cartData.longitude || 77.0089;
 
     const data = await dbSaveCart({
-      owner_id: cvUser.id,
+      owner_id: ownerId,
       type: cartData.type || cartData.nameEn || "With Store",
       condition: cartData.condition || "Used - Good",
       size: cartData.size || "5ft x 3.5ft",
@@ -116,6 +125,7 @@ export async function saveCart(cartData: {
     return { success: false, error: err.message };
   }
 }
+
 
 export async function updateCartStatusAction(id: string, status: DbCart["status"], verified?: boolean) {
   try {
@@ -186,6 +196,35 @@ export async function getCartByIdAction(id: string) {
     return { success: true, data };
   } catch (err: any) {
     return { success: false, error: err.message, data: null };
+  }
+}
+
+export async function updateCartAction(id: string, data: {
+  type?: string;
+  condition?: string;
+  size?: string;
+  weight?: string;
+  stove_type?: string;
+  price_per_month?: number;
+  description?: string;
+  photos?: string[];
+  latitude?: number;
+  longitude?: number;
+}) {
+  try {
+    const updated = await dbUpdateCart(id, data);
+    return { success: true, data: updated };
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
+}
+
+export async function getVendorCartsAction(ownerId: string) {
+  try {
+    const data = await getCartsByOwnerId(ownerId);
+    return { success: true, data };
+  } catch (err: any) {
+    return { success: false, error: err.message, data: [] };
   }
 }
 

@@ -571,13 +571,13 @@ function BrowseCartsPageContent() {
             <div className={`grid grid-cols-2 md:grid-cols-2 ${showFilterPanel ? "xl:grid-cols-2" : "lg:grid-cols-3 xl:grid-cols-4"} gap-3 md:gap-6`}>
               {filteredCarts.map(cart => (
                 <div key={cart.id} className="group bg-[#160c06] border border-[#ffb690]/15 hover:border-[#f97316]/50 transition-all duration-300 flex flex-col p-2.5 md:p-4 rounded-xl relative">
-                  {cart.distanceKm !== undefined && (
-                    <div className="absolute top-2 left-2 z-20 bg-[#f97316] text-[#0a0a08] font-bold text-[8px] md:text-[9px] px-1.5 py-0.5 rounded-full flex items-center gap-0.5 shadow-md">
-                      📍 {cart.distanceKm} km
-                    </div>
-                  )}
                   
                   <div className="aspect-[16/10] bg-[#251913] relative shrink-0 flex items-center justify-center mb-2 md:mb-4 rounded-lg overflow-hidden">
+                    {cart.distanceKm !== undefined && (
+                      <div className="absolute bottom-2 left-2 z-20 bg-[#f97316] text-[#0a0a08] font-bold text-[8px] md:text-[9px] px-1.5 py-0.5 rounded-full flex items-center gap-0.5 shadow-md">
+                        📍 {cart.distanceKm} km
+                      </div>
+                    )}
                     <span className={`absolute top-2 right-2 z-10 text-[8px] font-display tracking-widest px-2 py-0.5 font-bold rounded-full ${cart.condition === "New" ? "bg-[#f97316] text-[#0a0a08]" : "bg-[#ffca45] text-[#0a0a08]"}`}>
                       {(cart.condition || "Used - Good").toUpperCase()}
                     </span>
@@ -607,9 +607,20 @@ function BrowseCartsPageContent() {
                     <h3 className="font-display text-sm md:text-xl text-[#fffdf7] tracking-wider uppercase mb-1 line-clamp-1 mt-1">
                       {cart.nameEn}
                     </h3>
-                    <p className="text-[10px] md:text-xs text-[#f6ded3]/70 mb-2 md:mb-4 line-clamp-2 leading-relaxed h-8 md:h-10">
-                      {cart.descriptionEn}
-                    </p>
+                    <div className="h-8 md:h-10 overflow-hidden">
+                      <p 
+                        className="text-[10px] md:text-xs text-[#f6ded3]/70 leading-4 md:leading-5 explore-description"
+                        style={{
+                          display: "-webkit-box",
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: "vertical",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis"
+                        }}
+                      >
+                        {lang === "ta" ? (cart.descriptionTa || cart.descriptionEn) : cart.descriptionEn}
+                      </p>
+                    </div>
                     
                     <div className="mt-auto pt-2 md:pt-4 border-t border-[#ffb690]/10 flex flex-col xs:flex-row justify-between items-stretch xs:items-end gap-2">
                       <div>

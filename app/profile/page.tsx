@@ -1,14 +1,16 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import {
   User, LogOut, Package, MapPin, Heart, Settings,
-  ChevronRight, Store, Shield, LayoutDashboard, Star, Clock,
+  ChevronRight, Store, Shield, LayoutDashboard, Pencil, Plus, Clock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/auth-context";
+import { getVendorCartsAction } from "@/app/actions";
 
 // ─── Bilingual text helper ────────────────────────────────────────────────────
 function T({ en, ta }: { en: string; ta: string }) {
@@ -141,7 +143,16 @@ function GuestView() {
 // ─── Authenticated view ───────────────────────────────────────────────────────
 function AuthenticatedView() {
   const router = useRouter();
-  const { profile, roles, vendorProfile, isAdmin, isVendor, signOut, loading } = useAuth();
+  const { user, profile, roles, vendorProfile, isAdmin, isVendor, signOut, loading } = useAuth();
+  const [myCarts, setMyCarts] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (user && isVendor) {
+      getVendorCartsAction(user.id).then(res => {
+        if (res.success) setMyCarts(res.data);
+      });
+    }
+  }, [user, isVendor]);
 
   const handleSignOut = async () => {
     await signOut();
@@ -212,32 +223,62 @@ function AuthenticatedView() {
         {/* Vendor section */}
         {isVendor ? (
           <div className="rounded-2xl border border-amber-700/30 bg-amber-900/10 overflow-hidden shadow-sm">
-            <div className="px-4 py-2 border-b border-amber-700/20 flex items-center justify-between">
+            <div className="px-4 py-3 border-b border-amber-700/20 flex items-center justify-between">
               <p className="text-xs font-bold text-amber-400 uppercase tracking-wider">
                 <T en="Vendor" ta="விற்பனையாளர்" />
               </p>
-              {vendorProfile && (
-                <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
-                  vendorProfile.status === "approved"
-                    ? "bg-green-900/40 text-green-400"
-                    : vendorProfile.status === "rejected"
-                    ? "bg-red-900/40 text-red-400"
-                    : "bg-yellow-900/40 text-yellow-400"
-                }`}>
-                  {vendorProfile.status === "approved" ? "✓ Approved" : vendorProfile.status === "rejected" ? "✗ Rejected" : "⏳ Pending"}
-                </span>
-              )}
+              <Link
+                href="/publish"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-on-primary text-xs font-bold hover:bg-primary/90 transition"
+              >
+                <Plus size={13} />
+                <T en="List New Cart" ta="புதிய வண்டி சேர்" />
+              </Link>
             </div>
             <MenuRow
               href="/vendor/dashboard"
               icon={<LayoutDashboard size={20} className="text-amber-400" />}
               label={<T en="Vendor Dashboard" ta="விற்பனையாளர் டாஷ்போர்டு" />}
             />
-            <MenuRow
-              href="/publish"
-              icon={<Store size={20} className="text-amber-400" />}
-              label={<T en="List a Cart" ta="வண்டி பதிவிடு" />}
-            />
+            {/* My Carts list */}
+            {myCarts.length > 0 && (
+              <div className="border-t border-amber-700/10">
+                <p className="px-4 pt-3 pb-1 text-[10px] font-bold uppercase tracking-wider text-amber-400/60">
+                  <T en="My Listed Carts" ta="என் பட்டியலிடப்பட்ட வண்டிகள்" />
+                </p>
+                {myCarts.map((cart, i) => (
+                  <div
+                    key={cart.id}
+                    className={`flex items-center justify-between px-4 py-3 ${i < myCarts.length - 1 ? "border-b border-amber-700/10" : ""}`}
+                  >
+                    <div className="flex-1 min-w-0 mr-3">
+                      <p className="font-semibold text-sm text-on-surface truncate">{cart.type || cart.name || "Cart"}</p>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full uppercase ${
+                          cart.status === "live"
+                            ? "bg-green-900/40 text-green-400"
+                            : cart.status === "pending_review"
+                            ? "bg-yellow-900/40 text-yellow-400"
+                            : "bg-red-900/40 text-red-400"
+                        }`}>
+                          {cart.status === "pending_review" ? "⏳ Pending Review" : cart.status === "live" ? "✓ Live" : cart.status}
+                        </span>
+                        {cart.price_per_month && (
+                          <span className="text-[10px] text-on-surface-variant">₹{cart.price_per_month}/mo</span>
+                        )}
+                      </div>
+                    </div>
+                    <Link
+                      href={`/publish?edit=${cart.id}`}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-900/30 text-amber-300 text-xs font-bold hover:bg-amber-900/50 transition shrink-0"
+                    >
+                      <Pencil size={12} />
+                      <T en="Edit" ta="திருத்து" />
+                    </Link>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         ) : (
           /* Become a vendor CTA */

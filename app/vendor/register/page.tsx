@@ -83,14 +83,14 @@ export default function VendorRegisterPage() {
           address: form.address.trim(),
           upi: form.upi.trim(),
           gst: form.gst.trim() || null,
-          status: "pending",
+          status: "approved",
         });
 
       if (insertError) throw insertError;
       await refreshProfile();
       setSuccess(true);
     } catch (err: any) {
-      setError(err.message ?? "Failed to submit application. Please try again.");
+      setError(err.message ?? "Failed to create vendor profile. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -128,17 +128,23 @@ export default function VendorRegisterPage() {
             <CheckCircle size={28} className="text-green-400" />
           </div>
           <h1 className="text-2xl font-bold text-on-surface mb-2">
-            <T en="Application Submitted!" ta="விண்ணப்பம் சமர்ப்பிக்கப்பட்டது!" />
+            <T en="Vendor Profile Created!" ta="விற்பனையாளர் சுயவிவரம் உருவாக்கப்பட்டது!" />
           </h1>
           <p className="text-sm text-on-surface-variant leading-relaxed mb-6">
             <T
-              en="Our team will review your application and get back to you within 1–2 business days."
-              ta="எங்கள் குழு உங்கள் விண்ணப்பத்தை மதிப்பாய்வு செய்து 1–2 நாட்களில் தெரிவிப்பார்கள்."
+              en="You're all set! You can now list your carts on Thalluvandi."
+              ta="நீங்கள் தயாராகிவிட்டீர்கள்! இப்போது உங்கள் வண்டிகளை Thalluvandil பதிவிடலாம்."
             />
           </p>
-          <Link href="/profile" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-on-primary font-bold text-sm hover:bg-primary/90 transition">
-            <T en="Back to Profile" ta="சுயவிவரத்திற்கு திரும்பு" />
-          </Link>
+          <div className="flex flex-col gap-3">
+            <Link href="/publish" className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-on-primary font-bold text-sm hover:bg-primary/90 transition">
+              <T en="List Your First Cart" ta="முதல் வண்டியை பதிவிடுங்கள்" />
+              <ChevronRight size={16} />
+            </Link>
+            <Link href="/vendor/dashboard" className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-surface-container text-on-surface font-semibold text-sm hover:bg-surface-dim transition border border-outline-variant/20">
+              <T en="Go to Dashboard" ta="டாஷ்போர்டுக்கு செல்" />
+            </Link>
+          </div>
         </div>
       </main>
     );
@@ -315,8 +321,8 @@ export default function VendorRegisterPage() {
 
           <p className="text-xs text-on-surface-variant px-1 leading-relaxed">
             <T
-              en="Your application will be reviewed by our admin team within 1–2 business days. You'll be notified once approved."
-              ta="உங்கள் விண்ணப்பம் 1–2 நாட்களில் மதிப்பாய்வு செய்யப்படும். அனுமதிக்கப்பட்டதும் தெரிவிக்கப்படும்."
+              en="Create your vendor profile to start listing carts. Your profile will be active immediately."
+              ta="வண்டிகளை பதிவிட உங்கள் விற்பனையாளர் சுயவிவரத்தை உருவாக்கவும். உங்கள் சுயவிவரம் உடனடியாக செயல்படும்."
             />
           </p>
 
@@ -332,10 +338,10 @@ export default function VendorRegisterPage() {
                   <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" className="opacity-25"/>
                   <path d="M4 12a8 8 0 018-8" stroke="currentColor" strokeWidth="3" strokeLinecap="round" className="opacity-75"/>
                 </svg>
-                <T en="Submitting…" ta="சமர்ப்பிக்கிறோம்…" />
+                <T en="Creating Profile…" ta="சுயவிவரம் உருவாக்குகிறோம்…" />
               </span>
             ) : (
-              <T en="Submit Application" ta="விண்ணப்பத்தை சமர்ப்பி" />
+              <T en="Create Vendor Profile" ta="விற்பனையாளர் சுயவிவரத்தை உருவாக்கு" />
             )}
           </button>
         </form>

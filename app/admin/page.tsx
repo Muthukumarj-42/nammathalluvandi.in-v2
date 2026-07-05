@@ -14,7 +14,12 @@ import {
   Lock,
   Compass,
   FileText,
-  LogOut
+  LogOut,
+  Download,
+  Pencil,
+  X,
+  Image as ImageIcon,
+  Filter,
 } from "lucide-react";
 import {
   getAllCartsAction,
@@ -23,6 +28,7 @@ import {
   getDisputesAction,
   getUsersAction,
   updateCartStatusAction,
+  updateCartAction,
   updateBookingStatusAction,
   escalateBookingAction,
   updateDisputeStatusAction
@@ -42,8 +48,17 @@ export default function AdminDashboard() {
   const [disputes, setDisputes] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"pending" | "live" | "bookings" | "disputes" | "vendors" | "messages" | "users">("pending");
+  const [activeTab, setActiveTab] = useState<"listed" | "live" | "bookings" | "disputes" | "vendors" | "messages" | "users">("listed");
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  // Edit Modal state
+  const [editModal, setEditModal] = useState<{ open: boolean; cart: any | null }>({ open: false, cart: null });
+  const [editForm, setEditForm] = useState<any>({});
+  const [editSaving, setEditSaving] = useState(false);
+
+  // Cart status filter for listed tab
+  const [cartStatusFilter, setCartStatusFilter] = useState<"all" | "pending_review" | "live" | "inactive">("all");
+
 
   // Authenticate Muthu
   const handleLogin = (e: React.FormEvent) => {
@@ -144,10 +159,78 @@ export default function AdminDashboard() {
     }
   };
 
+  // Export all carts as CSV
+  const handleExportCarts = () => {
+    const headers = ["ID", "Type", "Condition", "Size", "Weight", "Stove", "Price/Month", "Description", "Latitude", "Longitude", "Status", "Verified", "Owner ID", "Photo URL", "Created At"];
+    const rows = carts.map(c => [
+      c.id,
+      c.type,
+      c.condition,
+      c.size || "",
+      c.weight || "",
+      c.stove_type || "",
+      c.price_per_month || "",
+      (c.description || "").replace(/,/g, ";"),
+      c.latitude,
+      c.longitude,
+      c.status,
+      c.verified ? "Yes" : "No",
+      c.owner_id,
+      Array.isArray(c.photos) && c.photos.length > 0 ? `https://nammathalluvandi.in${c.photos[0]}` : "",
+      c.created_at || ""
+    ]);
+    const csvContent = [headers, ...rows].map(r => r.join(",")).join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `thalluvandi-carts-${new Date().toISOString().split("T")[0]}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
+  // Open edit modal
+  const handleOpenEditModal = (cart: any) => {
+    setEditForm({
+      type: cart.type || "",
+      condition: cart.condition || "New",
+      size: cart.size || "",
+      weight: cart.weight || "",
+      stove_type: cart.stove_type || "",
+      price_per_month: cart.price_per_month || "",
+      description: cart.description || "",
+    });
+    setEditModal({ open: true, cart });
+  };
+
+  // Save edit from modal
+  const handleSaveEdit = async () => {
+    if (!editModal.cart) return;
+    setEditSaving(true);
+    const res = await updateCartAction(editModal.cart.id, {
+      type: editForm.type,
+      condition: editForm.condition,
+      size: editForm.size,
+      weight: editForm.weight,
+      stove_type: editForm.stove_type,
+      price_per_month: Number(editForm.price_per_month),
+      description: editForm.description,
+    });
+    setEditSaving(false);
+    if (res.success) {
+      setEditModal({ open: false, cart: null });
+      setRefreshTrigger(p => p + 1);
+    } else {
+      alert("Save failed: " + res.error);
+    }
+  };
+
   // Helper stats
   const pendingCarts = carts.filter(c => c.status === "pending_review");
   const liveCarts = carts.filter(c => c.status === "live");
   const openDisputes = disputes.filter(d => d.status === "open");
+  const filteredListedCarts = cartStatusFilter === "all" ? carts : carts.filter(c => c.status === cartStatusFilter);
+
 
   if (!authorized) {
     return (
@@ -263,8 +346,8 @@ export default function AdminDashboard() {
         {/* Navigation Tabs */}
         <div className="flex gap-2 overflow-x-auto border-b border-[#ffb690]/10 pb-3 mb-8 hide-scrollbar">
           {[
-            { id: "pending", label: "Pending Approvals", count: pendingCarts.length, icon: AlertTriangle },
-            { id: "live", label: "Live Carts", count: liveCarts.length, icon: ShoppingBag },
+            { id: "listed", label: "Listed Carts", count: carts.length, icon: ShoppingBag },
+            { id: "live", label: "Live Carts", count: liveCarts.length, icon: CheckCircle },
             { id: "bookings", label: "Bookings Monitor", count: bookings.length, icon: CalendarDays },
             { id: "disputes", label: "Complaints/Queries", count: openDisputes.length, icon: AlertTriangle },
             { id: "vendors", label: "Cart Vendors", count: users.filter(u => u.role === "cv").length, icon: Users },
@@ -303,55 +386,114 @@ export default function AdminDashboard() {
             </div>
           ) : (
             <>
-              {/* PENDING APPROVALS */}
-              {activeTab === "pending" && (
-                <div className="space-y-6">
-                  <h3 className="font-display text-xl uppercase tracking-wider text-[#fffdf7]">Listed Carts Pending Approval</h3>
-                  {pendingCarts.length === 0 ? (
-                    <div className="py-12 text-center text-[#f6ded3]/50 text-sm">No listed carts pending review.</div>
+              {/* LISTED CARTS */}
+              {activeTab === "listed" && (
+                <div className="space-y-5">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                    <h3 className="font-display text-xl uppercase tracking-wider text-[#fffdf7]">Listed Carts ({carts.length} total)</h3>
+                    <button
+                      onClick={handleExportCarts}
+                      className="h-9 bg-[#f97316] hover:bg-[#e2640e] text-[#0a0a08] font-bold uppercase tracking-wider text-xs px-4 rounded-lg flex items-center gap-2 transition"
+                    >
+                      <Download className="w-3.5 h-3.5" /> Export CSV
+                    </button>
+                  </div>
+
+                  {/* Status filter chips */}
+                  <div className="flex gap-2 flex-wrap">
+                    {[
+                      { id: "all", label: `All (${carts.length})` },
+                      { id: "pending_review", label: `⏳ Pending (${pendingCarts.length})` },
+                      { id: "live", label: `✓ Live (${liveCarts.length})` },
+                      { id: "inactive", label: `✗ Inactive (${carts.filter(c => c.status === "inactive").length})` },
+                    ].map(f => (
+                      <button
+                        key={f.id}
+                        onClick={() => setCartStatusFilter(f.id as any)}
+                        className={`h-8 px-3 rounded-lg border text-[10px] font-bold uppercase tracking-wider transition ${
+                          cartStatusFilter === f.id
+                            ? "border-[#f97316] bg-[#f97316] text-[#0a0a08]"
+                            : "border-[#ffb690]/20 bg-[#0a0a08] text-[#f6ded3] hover:border-[#ffb690]/40"
+                        }`}
+                      >
+                        {f.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  {filteredListedCarts.length === 0 ? (
+                    <div className="py-12 text-center text-[#f6ded3]/50 text-sm">No carts matching this filter.</div>
                   ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {pendingCarts.map(cart => {
+                      {filteredListedCarts.map(cart => {
                         const owner = users.find(u => u.id === cart.owner_id);
+                        const photoUrl = Array.isArray(cart.photos) && cart.photos.length > 0 ? cart.photos[0] : null;
                         return (
-                          <div key={cart.id} className="bg-[#0a0a08] border border-[#ffb690]/10 rounded-xl p-5 space-y-4">
-                            <div className="flex justify-between items-start">
-                              <div>
-                                <h4 className="font-bold text-lg text-amber-400">{cart.type}</h4>
-                                <p className="text-xs text-[#f6ded3]/50">Listed by: {owner ? owner.name : "Unknown Vendor"} ({owner ? owner.phone : ""})</p>
+                          <div key={cart.id} className="bg-[#0a0a08] border border-[#ffb690]/10 rounded-xl overflow-hidden">
+                            {/* Image thumbnail */}
+                            {photoUrl ? (
+                              <div className="h-32 bg-[#160c06] overflow-hidden">
+                                <img src={photoUrl} alt={cart.type} className="w-full h-full object-cover opacity-80" />
                               </div>
-                              <span className="bg-amber-400/10 text-amber-400 border border-amber-400/20 px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider">
-                                {cart.status}
-                              </span>
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-2 text-xs border-y border-[#ffb690]/5 py-3">
-                              <div><span className="text-[#f6ded3]/40">Size:</span> {cart.size || "Standard"}</div>
-                              <div><span className="text-[#f6ded3]/40">Weight:</span> {cart.weight || "Standard"}</div>
-                              <div><span className="text-[#f6ded3]/40">Stove:</span> {cart.stove_type || "None"}</div>
-                              <div><span className="text-[#f6ded3]/40">Expected Rent:</span> ₹{cart.price_per_month}/month</div>
-                              <div className="col-span-2 mt-1">
-                                <span className="text-[#f6ded3]/40">Location:</span> {cart.latitude >= 11.08 ? "Tiruppur" : "Coimbatore"}
+                            ) : (
+                              <div className="h-20 bg-[#160c06] flex items-center justify-center">
+                                <ImageIcon className="w-6 h-6 text-[#ffb690]/20" />
                               </div>
-                            </div>
-
-                            {cart.description && (
-                              <p className="text-xs text-[#f6ded3]/75 leading-relaxed">{cart.description}</p>
                             )}
 
-                            <div className="flex gap-3 pt-2">
-                              <button
-                                onClick={() => handleApproveCart(cart.id)}
-                                className="flex-1 h-10 bg-green-600 hover:bg-green-700 text-[#0a0a08] font-bold uppercase tracking-wider text-xs rounded-lg flex items-center justify-center gap-1 transition"
-                              >
-                                <CheckCircle className="w-4 h-4" /> Approve & Go Live
-                              </button>
-                              <button
-                                onClick={() => handleRejectCart(cart.id)}
-                                className="h-10 bg-transparent hover:bg-red-500/10 border border-red-500/30 hover:border-red-500 text-red-400 px-4 rounded-lg text-xs font-bold uppercase tracking-wider transition"
-                              >
-                                Reject
-                              </button>
+                            <div className="p-4 space-y-3">
+                              <div className="flex justify-between items-start">
+                                <div>
+                                  <h4 className="font-bold text-base text-amber-400">{cart.type}</h4>
+                                  <p className="text-xs text-[#f6ded3]/50 mt-0.5">
+                                    {owner ? `${owner.name} · ${owner.phone}` : "Unknown Vendor"}
+                                  </p>
+                                </div>
+                                <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider border ${
+                                  cart.status === "live" ? "bg-green-500/10 text-green-400 border-green-500/20" :
+                                  cart.status === "pending_review" ? "bg-amber-400/10 text-amber-400 border-amber-400/20" :
+                                  "bg-red-500/10 text-red-400 border-red-500/20"
+                                }`}>
+                                  {cart.status === "pending_review" ? "Pending Review" : cart.status}
+                                </span>
+                              </div>
+
+                              <div className="grid grid-cols-2 gap-1.5 text-xs border-y border-[#ffb690]/5 py-3">
+                                <div><span className="text-[#f6ded3]/40">Size:</span> {cart.size || "—"}</div>
+                                <div><span className="text-[#f6ded3]/40">Weight:</span> {cart.weight || "—"}</div>
+                                <div><span className="text-[#f6ded3]/40">Stove:</span> {cart.stove_type || "None"}</div>
+                                <div><span className="text-[#f6ded3]/40">Rent:</span> ₹{cart.price_per_month}/mo</div>
+                                <div className="col-span-2"><span className="text-[#f6ded3]/40">Location:</span> {cart.latitude >= 11.08 ? "Tiruppur" : "Coimbatore"} ({Number(cart.latitude).toFixed(4)}, {Number(cart.longitude).toFixed(4)})</div>
+                              </div>
+
+                              {cart.description && (
+                                <p className="text-xs text-[#f6ded3]/60 leading-relaxed line-clamp-2">{cart.description}</p>
+                              )}
+
+                              <div className="flex gap-2 pt-1 flex-wrap">
+                                {cart.status !== "live" && (
+                                  <button
+                                    onClick={() => handleApproveCart(cart.id)}
+                                    className="flex-1 h-9 bg-green-600 hover:bg-green-700 text-white font-bold uppercase tracking-wider text-[10px] rounded-lg flex items-center justify-center gap-1 transition"
+                                  >
+                                    <CheckCircle className="w-3.5 h-3.5" /> Approve
+                                  </button>
+                                )}
+                                {cart.status !== "inactive" && (
+                                  <button
+                                    onClick={() => handleRejectCart(cart.id)}
+                                    className="h-9 bg-transparent hover:bg-red-500/10 border border-red-500/30 hover:border-red-500 text-red-400 px-3 rounded-lg text-[10px] font-bold uppercase tracking-wider transition"
+                                  >
+                                    {cart.status === "live" ? "Deactivate" : "Reject"}
+                                  </button>
+                                )}
+                                <button
+                                  onClick={() => handleOpenEditModal(cart)}
+                                  className="h-9 bg-[#160c06] hover:bg-[#251913] border border-[#ffb690]/20 text-[#ffb690] px-3 rounded-lg text-[10px] font-bold uppercase tracking-wider transition flex items-center gap-1"
+                                >
+                                  <Pencil className="w-3 h-3" /> Edit
+                                </button>
+                              </div>
                             </div>
                           </div>
                         );
@@ -713,10 +855,9 @@ export default function AdminDashboard() {
 
                   {/* Vendor Applications sub-section */}
                   <div className="mt-8">
-                    <h4 className="font-display text-base uppercase tracking-wider text-[#ffb690] mb-4">Vendor Applications</h4>
+                    <h4 className="font-display text-base uppercase tracking-wider text-[#ffb690] mb-4">Vendor Profiles</h4>
                     <p className="text-xs text-[#f6ded3]/50 bg-[#0a0a08] border border-[#ffb690]/10 rounded-xl px-4 py-3">
-                      Vendor approvals are managed via the Supabase dashboard → vendor_profiles table → set status to <code className="text-[#f97316]">&apos;approved&apos;</code> or <code className="text-[#f97316]">&apos;rejected&apos;</code>.
-                      Full in-panel approval UI coming in Phase 5.
+                      Vendor profiles are <span className="text-green-400 font-bold">auto-approved</span> when vendors register. No manual approval step is needed. Cart listings still require admin approval via the <span className="text-[#f97316] font-bold">Listed Carts</span> tab.
                     </p>
                   </div>
                 </div>
@@ -725,6 +866,110 @@ export default function AdminDashboard() {
           )}
         </section>
       </div>
+
+      {/* Edit Cart Modal */}
+      {editModal.open && editModal.cart && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-[#160c06] border border-[#ffb690]/20 rounded-2xl w-full max-w-lg shadow-2xl">
+            <div className="flex items-center justify-between p-5 border-b border-[#ffb690]/10">
+              <h3 className="font-display text-lg uppercase tracking-wider text-[#fffdf7]">Edit Cart</h3>
+              <button
+                onClick={() => setEditModal({ open: false, cart: null })}
+                className="w-8 h-8 rounded-lg bg-[#0a0a08] hover:bg-[#251913] text-[#f6ded3] flex items-center justify-center transition"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="p-5 space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-[#ffb690] mb-1 block">Cart Type</label>
+                  <select
+                    value={editForm.type}
+                    onChange={e => setEditForm((f: any) => ({ ...f, type: e.target.value }))}
+                    className="w-full h-10 bg-[#0a0a08] border border-[#ffb690]/20 rounded-lg px-3 text-sm text-[#f6ded3] outline-none focus:border-[#f97316]"
+                  >
+                    <option value="With Store">With Store / Stove Cart</option>
+                    <option value="With Roof">With Roof / Covered</option>
+                    <option value="Ice Cream">Ice Cream Cart</option>
+                    <option value="Tea Stall">Tea Stall Station</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-[#ffb690] mb-1 block">Condition</label>
+                  <select
+                    value={editForm.condition}
+                    onChange={e => setEditForm((f: any) => ({ ...f, condition: e.target.value }))}
+                    className="w-full h-10 bg-[#0a0a08] border border-[#ffb690]/20 rounded-lg px-3 text-sm text-[#f6ded3] outline-none focus:border-[#f97316]"
+                  >
+                    <option value="New">Brand New</option>
+                    <option value="Used - Very Good">Used - Very Good</option>
+                    <option value="Used - Good">Used - Good</option>
+                    <option value="Fair">Fair</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-3">
+                {[
+                  { key: "size", label: "Size", ph: "e.g. 6ft x 4ft" },
+                  { key: "weight", label: "Weight", ph: "e.g. 100kg" },
+                  { key: "stove_type", label: "Stove Type", ph: "e.g. None" },
+                ].map(({ key, label, ph }) => (
+                  <div key={key}>
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-[#ffb690] mb-1 block">{label}</label>
+                    <input
+                      type="text"
+                      value={editForm[key]}
+                      onChange={e => setEditForm((f: any) => ({ ...f, [key]: e.target.value }))}
+                      placeholder={ph}
+                      className="w-full h-10 bg-[#0a0a08] border border-[#ffb690]/20 rounded-lg px-3 text-sm text-[#f6ded3] outline-none focus:border-[#f97316]"
+                    />
+                  </div>
+                ))}
+              </div>
+
+              <div>
+                <label className="text-[10px] font-bold uppercase tracking-wider text-[#ffb690] mb-1 block">Monthly Price (₹)</label>
+                <input
+                  type="number"
+                  value={editForm.price_per_month}
+                  onChange={e => setEditForm((f: any) => ({ ...f, price_per_month: e.target.value }))}
+                  className="w-full h-10 bg-[#0a0a08] border border-[#ffb690]/20 rounded-lg px-3 text-sm text-[#f6ded3] outline-none focus:border-[#f97316]"
+                />
+              </div>
+
+              <div>
+                <label className="text-[10px] font-bold uppercase tracking-wider text-[#ffb690] mb-1 block">Description</label>
+                <textarea
+                  rows={3}
+                  value={editForm.description}
+                  onChange={e => setEditForm((f: any) => ({ ...f, description: e.target.value }))}
+                  className="w-full bg-[#0a0a08] border border-[#ffb690]/20 rounded-lg px-3 py-2 text-sm text-[#f6ded3] outline-none focus:border-[#f97316] resize-none"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-3 p-5 border-t border-[#ffb690]/10">
+              <button
+                onClick={handleSaveEdit}
+                disabled={editSaving}
+                className="flex-1 h-11 bg-[#f97316] hover:bg-[#e2640e] text-[#0a0a08] font-bold uppercase tracking-wider text-sm rounded-xl transition disabled:opacity-50"
+              >
+                {editSaving ? "Saving…" : "Save Changes"}
+              </button>
+              <button
+                onClick={() => setEditModal({ open: false, cart: null })}
+                className="h-11 px-5 bg-[#0a0a08] hover:bg-[#251913] border border-[#ffb690]/20 text-[#f6ded3] font-bold text-sm rounded-xl transition"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

@@ -5,7 +5,7 @@ import Link from "next/link";
 import {
   LayoutDashboard, Package, ShoppingBag, BarChart2,
   Settings, Plus, ChevronRight, Clock, CheckCircle,
-  XCircle, AlertCircle, Store, TrendingUp,
+  XCircle, Store, TrendingUp,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase-browser";
 import { useAuth } from "@/context/auth-context";
@@ -45,25 +45,6 @@ function StatCard({
   );
 }
 
-function StatusBadge({ status }: { status: "pending" | "approved" | "rejected" }) {
-  if (status === "approved")
-    return (
-      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-green-900/30 text-green-400 text-xs font-bold border border-green-700/30">
-        <CheckCircle size={12} /> <T en="Approved" ta="அனுமதிக்கப்பட்டது" />
-      </span>
-    );
-  if (status === "rejected")
-    return (
-      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-red-900/30 text-red-400 text-xs font-bold border border-red-700/30">
-        <XCircle size={12} /> <T en="Rejected" ta="நிராகரிக்கப்பட்டது" />
-      </span>
-    );
-  return (
-    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-yellow-900/30 text-yellow-400 text-xs font-bold border border-yellow-700/30">
-      <Clock size={12} /> <T en="Pending Review" ta="மதிப்பீட்டில் உள்ளது" />
-    </span>
-  );
-}
 
 export default function VendorDashboardPage() {
   const router = useRouter();
@@ -107,7 +88,6 @@ export default function VendorDashboardPage() {
   if (!user || !isVendor) return null;
 
   const shopName = vendorProfile?.shop_name ?? profile?.name ?? "My Shop";
-  const vendorStatus = vendorProfile?.status ?? "pending";
 
   return (
     <main className="min-h-screen bg-surface pb-24 pt-20">
@@ -124,9 +104,6 @@ export default function VendorDashboardPage() {
             <h1 className="text-2xl font-bold font-display tracking-tight text-on-surface">
               {shopName}
             </h1>
-            <div className="mt-2">
-              <StatusBadge status={vendorStatus} />
-            </div>
           </div>
           <Link
             href="/publish"
@@ -136,18 +113,6 @@ export default function VendorDashboardPage() {
             <T en="List Cart" ta="வண்டி சேர்" />
           </Link>
         </div>
-
-        {vendorStatus === "pending" && (
-          <div className="mt-4 flex items-start gap-3 p-3 rounded-xl bg-yellow-900/20 border border-yellow-700/30">
-            <AlertCircle size={16} className="text-yellow-400 shrink-0 mt-0.5" />
-            <p className="text-xs text-yellow-300 leading-relaxed">
-              <T
-                en="Your vendor application is under review. You can still list carts, but they'll be visible to buyers only after approval."
-                ta="உங்கள் விண்ணப்பம் மதிப்பீட்டில் உள்ளது. அனுமதிக்கப்பட்ட பிறகு மட்டுமே வண்டிகள் வாங்குபவர்களுக்கு தெரியும்."
-              />
-            </p>
-          </div>
-        )}
       </section>
 
       <div className="max-w-2xl mx-auto px-4 mt-6 space-y-6">

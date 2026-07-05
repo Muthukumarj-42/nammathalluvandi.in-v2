@@ -105,36 +105,46 @@ function LoginForm() {
     <div className="relative z-10 w-full max-w-md mx-auto px-4">
       {/* Logo */}
       <div className="flex flex-col items-center mb-8">
-        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#f97316] to-[#dc2626] flex items-center justify-center shadow-lg shadow-orange-900/40 mb-4">
+        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#f97316] to-[#dc2626] flex items-center justify-center shadow-lg shadow-orange-200 mb-4">
           <svg viewBox="0 0 24 24" fill="none" className="w-9 h-9 text-white" stroke="currentColor" strokeWidth="1.8">
             <path d="M3 9h18M3 9l2-4h14l2 4M3 9v10a1 1 0 001 1h16a1 1 0 001-1V9" strokeLinecap="round" strokeLinejoin="round"/>
             <circle cx="8" cy="20" r="1.5" fill="currentColor" stroke="none"/>
             <circle cx="16" cy="20" r="1.5" fill="currentColor" stroke="none"/>
           </svg>
         </div>
-        <h1 className="font-display text-2xl font-bold tracking-tight text-white">
+        <h1 className="font-display text-2xl font-bold tracking-tight text-gray-900">
           THALLUVANDI
         </h1>
-        <p className="text-sm text-white/50 mt-1">
+        <p className="text-sm text-gray-500 mt-1">
           <T en="Premium Cart Marketplace" ta="தரமான வண்டி சந்தை" />
         </p>
       </div>
 
       {/* Card */}
-      <div className="bg-white/5 border border-white/10 rounded-3xl p-8 backdrop-blur-sm shadow-2xl shadow-black/40">
+      <div className="relative bg-white border border-gray-200 rounded-3xl p-8 shadow-xl shadow-gray-100">
+        {/* Back to home — top-left arrow */}
+        <Link
+          href="/"
+          className="absolute top-5 left-5 flex items-center justify-center w-9 h-9 rounded-xl bg-gray-100 hover:bg-orange-100 hover:text-[#f97316] text-gray-500 transition-all duration-200 group"
+          aria-label="Back to home"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5 transition-transform duration-200 group-hover:-translate-x-0.5">
+            <path d="M19 12H5M5 12l7 7M5 12l7-7" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </Link>
 
         {mode === "choose" && (
           <>
-            <h2 className="text-xl font-bold text-white text-center mb-2">
+            <h2 className="text-xl font-bold text-gray-900 text-center mb-2">
               <T en="Sign in to continue" ta="தொடர உள்நுழையவும்" />
             </h2>
-            <p className="text-sm text-white/40 text-center mb-8">
+            <p className="text-sm text-gray-400 text-center mb-8">
               <T en="No password. No OTP. Just your email." ta="கடவுச்சொல் இல்லை. OTP இல்லை." />
             </p>
 
             {/* Error banner */}
             {error && (
-              <div className="mb-4 px-4 py-3 rounded-xl bg-red-900/30 border border-red-700/40 text-red-300 text-sm">
+              <div className="mb-4 px-4 py-3 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm">
                 {error}
               </div>
             )}
@@ -144,7 +154,7 @@ function LoginForm() {
               id="login-google-btn"
               onClick={handleGoogleLogin}
               disabled={loading}
-              className="w-full flex items-center justify-center gap-3 px-5 py-3.5 rounded-2xl bg-white text-gray-800 font-semibold text-sm hover:bg-gray-100 transition-all duration-200 shadow-md active:scale-[0.98] disabled:opacity-60 mb-3"
+              className="w-full flex items-center justify-center gap-3 px-5 py-3.5 rounded-2xl bg-white text-gray-700 font-semibold text-sm border border-gray-200 hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 shadow-sm active:scale-[0.98] disabled:opacity-60 mb-3"
             >
               <GoogleIcon />
               <T en="Continue with Google" ta="Google மூலம் தொடரவும்" />
@@ -152,18 +162,18 @@ function LoginForm() {
 
             {/* Divider */}
             <div className="flex items-center gap-3 my-5">
-              <div className="flex-1 h-px bg-white/10" />
-              <span className="text-xs text-white/30 font-medium">
+              <div className="flex-1 h-px bg-gray-200" />
+              <span className="text-xs text-gray-400 font-medium">
                 <T en="or" ta="அல்லது" />
               </span>
-              <div className="flex-1 h-px bg-white/10" />
+              <div className="flex-1 h-px bg-gray-200" />
             </div>
 
             {/* Email button */}
             <button
               id="login-email-btn"
               onClick={() => setMode("email")}
-              className="w-full flex items-center justify-center gap-3 px-5 py-3.5 rounded-2xl bg-[#f97316]/15 border border-[#f97316]/30 text-[#f97316] font-semibold text-sm hover:bg-[#f97316]/25 transition-all duration-200 active:scale-[0.98]"
+              className="w-full flex items-center justify-center gap-3 px-5 py-3.5 rounded-2xl bg-orange-50 border border-orange-200 text-[#f97316] font-semibold text-sm hover:bg-orange-100 hover:border-orange-300 transition-all duration-200 active:scale-[0.98]"
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5">
                 <rect x="2" y="4" width="20" height="16" rx="2" />
@@ -173,7 +183,7 @@ function LoginForm() {
             </button>
 
             {/* Legal */}
-            <p className="text-center text-xs text-white/25 mt-6 leading-relaxed">
+            <p className="text-center text-xs text-gray-400 mt-6 leading-relaxed">
               <T
                 en="By signing in, you agree to our Terms of Service and Privacy Policy."
                 ta="உள்நுழைவதன் மூலம், நிபந்தனைகளுக்கு ஒப்புக்கொள்கிறீர்கள்."
@@ -186,7 +196,7 @@ function LoginForm() {
           <>
             <button
               onClick={() => { setMode("choose"); setError(""); }}
-              className="flex items-center gap-2 text-white/40 hover:text-white/70 text-sm mb-6 transition-colors"
+              className="flex items-center gap-2 text-gray-400 hover:text-gray-600 text-sm mb-6 transition-colors"
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
                 <path d="M19 12H5M5 12l7 7M5 12l7-7" strokeLinecap="round" strokeLinejoin="round"/>
@@ -194,22 +204,22 @@ function LoginForm() {
               <T en="Back" ta="பின்செல்" />
             </button>
 
-            <h2 className="text-xl font-bold text-white mb-1">
+            <h2 className="text-xl font-bold text-gray-900 mb-1">
               <T en="Enter your email" ta="உங்கள் மின்னஞ்சலை உள்ளிடவும்" />
             </h2>
-            <p className="text-sm text-white/40 mb-6">
+            <p className="text-sm text-gray-400 mb-6">
               <T en="We'll send you a magic link to sign in instantly." ta="உடனடியாக உள்நுழைய ஒரு இணைப்பு அனுப்புவோம்." />
             </p>
 
             {error && (
-              <div className="mb-4 px-4 py-3 rounded-xl bg-red-900/30 border border-red-700/40 text-red-300 text-sm">
+              <div className="mb-4 px-4 py-3 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm">
                 {error}
               </div>
             )}
 
             <form onSubmit={handleMagicLink} className="space-y-4">
               <div>
-                <label htmlFor="email-input" className="block text-sm font-medium text-white/60 mb-2">
+                <label htmlFor="email-input" className="block text-sm font-medium text-gray-600 mb-2">
                   <T en="Email address" ta="மின்னஞ்சல் முகவரி" />
                 </label>
                 <input
@@ -220,14 +230,14 @@ function LoginForm() {
                   placeholder="you@example.com"
                   required
                   autoFocus
-                  className="w-full px-4 py-3.5 rounded-xl bg-white/8 border border-white/15 text-white placeholder-white/25 text-sm focus:outline-none focus:ring-2 focus:ring-[#f97316]/50 focus:border-[#f97316]/50 transition-all"
+                  className="w-full px-4 py-3.5 rounded-xl bg-gray-50 border border-gray-200 text-gray-900 placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-[#f97316]/40 focus:border-[#f97316] transition-all"
                 />
               </div>
               <button
                 id="send-magic-link-btn"
                 type="submit"
                 disabled={loading || !email.trim()}
-                className="w-full py-3.5 rounded-xl bg-gradient-to-r from-[#f97316] to-[#ea580c] text-white font-bold text-sm hover:from-[#fb923c] hover:to-[#f97316] transition-all duration-200 shadow-lg shadow-orange-900/30 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full py-3.5 rounded-xl bg-gradient-to-r from-[#f97316] to-[#ea580c] text-white font-bold text-sm hover:from-[#fb923c] hover:to-[#f97316] transition-all duration-200 shadow-md shadow-orange-200 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? (
                   <span className="flex items-center justify-center gap-2">
@@ -247,19 +257,19 @@ function LoginForm() {
 
         {mode === "sent" && (
           <div className="text-center py-4">
-            <div className="w-16 h-16 rounded-full bg-green-900/30 border border-green-700/40 flex items-center justify-center mx-auto mb-5">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-8 h-8 text-green-400">
+            <div className="w-16 h-16 rounded-full bg-green-50 border border-green-200 flex items-center justify-center mx-auto mb-5">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-8 h-8 text-green-500">
                 <path d="M20 6 9 17l-5-5" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             </div>
-            <h2 className="text-xl font-bold text-white mb-2">
+            <h2 className="text-xl font-bold text-gray-900 mb-2">
               <T en="Check your inbox!" ta="உங்கள் inbox பாருங்கள்!" />
             </h2>
-            <p className="text-sm text-white/50 mb-2">
+            <p className="text-sm text-gray-500 mb-2">
               <T en="We sent a magic link to" ta="இணைப்பை அனுப்பினோம்:" />
             </p>
             <p className="text-sm font-semibold text-[#f97316] mb-6">{email}</p>
-            <p className="text-xs text-white/30 leading-relaxed mb-6">
+            <p className="text-xs text-gray-400 leading-relaxed mb-6">
               <T
                 en="Click the link in the email to sign in. The link expires in 60 minutes."
                 ta="மின்னஞ்சலில் உள்ள இணைப்பை கிளிக் செய்யவும். இணைப்பு 60 நிமிடங்களில் காலாவதியாகும்."
@@ -267,7 +277,7 @@ function LoginForm() {
             </p>
             <button
               onClick={() => { setMode("email"); setError(""); }}
-              className="text-sm text-white/40 hover:text-white/70 transition-colors underline underline-offset-2"
+              className="text-sm text-gray-400 hover:text-gray-600 transition-colors underline underline-offset-2"
             >
               <T en="Use a different email" ta="வேறு மின்னஞ்சல் பயன்படுத்து" />
             </button>
@@ -275,12 +285,7 @@ function LoginForm() {
         )}
       </div>
 
-      {/* Back to home */}
-      <div className="text-center mt-6">
-        <Link href="/" className="text-sm text-white/30 hover:text-white/60 transition-colors">
-          <T en="← Back to Home" ta="← முகப்பிற்கு திரும்பு" />
-        </Link>
-      </div>
+
     </div>
   );
 }
@@ -289,24 +294,23 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <main className="min-h-screen flex items-center justify-center relative overflow-hidden bg-[#0d0704]">
-      {/* Ambient background glows */}
+    <main className="min-h-screen flex items-center justify-center relative overflow-hidden bg-gray-50">
+      {/* Subtle warm ambient glow */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0"
         style={{
           background:
-            "radial-gradient(ellipse 60% 50% at 20% 30%, rgba(249,115,22,0.12) 0%, transparent 70%), radial-gradient(ellipse 40% 40% at 80% 70%, rgba(220,38,38,0.08) 0%, transparent 70%)",
+            "radial-gradient(ellipse 60% 50% at 20% 30%, rgba(249,115,22,0.06) 0%, transparent 70%), radial-gradient(ellipse 40% 40% at 80% 70%, rgba(220,38,38,0.04) 0%, transparent 70%)",
         }}
       />
-      {/* Subtle grid */}
+      {/* Subtle dot grid */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 opacity-[0.04]"
+        className="pointer-events-none absolute inset-0"
         style={{
-          backgroundImage:
-            "linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)",
-          backgroundSize: "48px 48px",
+          backgroundImage: "radial-gradient(circle, rgba(0,0,0,0.06) 1px, transparent 1px)",
+          backgroundSize: "28px 28px",
         }}
       />
 
