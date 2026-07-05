@@ -45,13 +45,7 @@ export async function middleware(request: NextRequest) {
 
   // --- Admin route protection ---
   if (ADMIN_ROUTES.some((r) => pathname.startsWith(r))) {
-    if (!user) {
-      const loginUrl = new URL("/login", request.url);
-      loginUrl.searchParams.set("redirect", pathname);
-      return NextResponse.redirect(loginUrl);
-    }
-    // Role check for admin (allow existing passcode logic in the page itself)
-    // The page handles its own secondary auth with passcode fallback
+    // Allow direct access to admin pages as they handle passcode-based auth internally
     return supabaseResponse;
   }
 
