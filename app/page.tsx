@@ -62,23 +62,57 @@ export default function HomePage() {
     loadCarts();
   }, []);
 
-  // 5 seconds autoscroll timer
+  // 5 seconds autoscroll timer (fires only when page remains idle)
   useEffect(() => {
-    const timer = setTimeout(() => {
+    let timer: NodeJS.Timeout;
+
+    const resetTimer = () => {
+      clearTimeout(timer);
+
+      // Verify if target section is already reached/passed
       const element = document.getElementById("categories-section");
       if (element) {
         const headerHeight = window.innerWidth >= 768 ? 80 : 56;
-        const elementPosition = element.getBoundingClientRect().top;
-        const offsetPosition = elementPosition + window.scrollY - headerHeight;
-
-        window.scrollTo({
-          top: offsetPosition,
-          behavior: "smooth"
-        });
+        if (element.getBoundingClientRect().top <= headerHeight + 10) {
+          // User already reached or passed it, clear the timers forever
+          return;
+        }
       }
-    }, 5000);
 
-    return () => clearTimeout(timer);
+      timer = setTimeout(() => {
+        const element = document.getElementById("categories-section");
+        if (element) {
+          const headerHeight = window.innerWidth >= 768 ? 80 : 56;
+          const elementPosition = element.getBoundingClientRect().top;
+          if (elementPosition <= headerHeight + 10) {
+            // Already reached, skip
+            return;
+          }
+          const offsetPosition = elementPosition + window.scrollY - headerHeight;
+
+          window.scrollTo({
+            top: offsetPosition,
+            behavior: "smooth"
+          });
+        }
+      }, 5000);
+    };
+
+    // Initial run
+    resetTimer();
+
+    // Listen to user activity to reset the inactivity timer
+    const activityEvents = ["scroll", "mousedown", "touchstart", "keydown"];
+    activityEvents.forEach((event) => {
+      window.addEventListener(event, resetTimer, { passive: true });
+    });
+
+    return () => {
+      clearTimeout(timer);
+      activityEvents.forEach((event) => {
+        window.removeEventListener(event, resetTimer);
+      });
+    };
   }, []);
 
   return (
