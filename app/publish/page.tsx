@@ -104,11 +104,19 @@ function PublishPageContent() {
     });
   }, [editCartId]);
 
+  const getTenDigitPhone = (phoneStr: string) => {
+    const clean = phoneStr.replace(/\D/g, "");
+    if (clean.length === 12 && clean.startsWith("91")) {
+      return clean.slice(2);
+    }
+    return clean;
+  };
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { id, value } = e.target;
     setFormData(prev => ({ ...prev, [id]: value }));
     if (id === "phone") {
-      const digits = value.replace(/\D/g, "");
+      const digits = getTenDigitPhone(value);
       setPhoneError(value && digits.length !== 10 ? "Phone number must be exactly 10 digits" : "");
     }
   };
@@ -132,7 +140,7 @@ function PublishPageContent() {
 
   const isFormValid =
     formData.name.trim() !== "" &&
-    formData.phone.replace(/\D/g, "").length === 10 &&
+    getTenDigitPhone(formData.phone).length === 10 &&
     formData.location.trim() !== "" &&
     formData.expectedRent.trim() !== "" &&
     phoneError === "";
