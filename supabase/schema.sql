@@ -32,7 +32,7 @@ CREATE POLICY "Allow public insert/update on users" ON public.users FOR ALL TO p
 -- 3. Carts Table
 CREATE TABLE IF NOT EXISTS public.carts (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    owner_id UUID REFERENCES public.users(id) ON DELETE CASCADE,
+    owner_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE,
     type TEXT NOT NULL, -- e.g., 'With Store', 'With Roof', 'Ice Cream', 'Tea Stall'
     condition TEXT NOT NULL, -- e.g., 'Used - Very Good', 'New'
     size TEXT,
@@ -61,8 +61,8 @@ CREATE TABLE IF NOT EXISTS public.bookings (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     booking_code TEXT UNIQUE,
     cart_id UUID REFERENCES public.carts(id) ON DELETE SET NULL,
-    bv_id UUID REFERENCES public.users(id) ON DELETE SET NULL,
-    cv_id UUID REFERENCES public.users(id) ON DELETE SET NULL,
+    bv_id UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
+    cv_id UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
     bv_latitude DOUBLE PRECISION NOT NULL,
     bv_longitude DOUBLE PRECISION NOT NULL,
     status booking_status DEFAULT 'sent' NOT NULL,
