@@ -135,8 +135,6 @@ function PublishPageContent() {
     formData.phone.replace(/\D/g, "").length === 10 &&
     formData.location.trim() !== "" &&
     formData.expectedRent.trim() !== "" &&
-    formData.latitude.trim() !== "" &&
-    formData.longitude.trim() !== "" &&
     phoneError === "";
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -144,6 +142,9 @@ function PublishPageContent() {
     if (!isFormValid || !user) return;
     setSubmitLoading(true);
     try {
+      const latVal = formData.latitude.trim() !== "" ? Number(formData.latitude) : undefined;
+      const lngVal = formData.longitude.trim() !== "" ? Number(formData.longitude) : undefined;
+
       if (editCartId) {
         await updateCartAction(editCartId, {
           type: formData.cartType,
@@ -153,8 +154,8 @@ function PublishPageContent() {
           stove_type: formData.stoveType,
           price_per_month: Number(formData.expectedRent),
           description: formData.details,
-          latitude: Number(formData.latitude),
-          longitude: Number(formData.longitude),
+          latitude: latVal,
+          longitude: lngVal,
         });
         alert(lang === "ta" ? "வண்டி விவரங்கள் புதுப்பிக்கப்பட்டன!" : "Cart updated successfully!");
         router.push("/vendor/dashboard");
@@ -171,8 +172,8 @@ function PublishPageContent() {
           vendorName: formData.name,
           vendorPhone: formData.phone,
           vendorLocation: formData.location,
-          latitude: Number(formData.latitude),
-          longitude: Number(formData.longitude),
+          latitude: latVal,
+          longitude: lngVal,
           condition: formData.condition,
           size: formData.size,
           weight: formData.weight,
@@ -546,7 +547,6 @@ function PublishPageContent() {
                     <input
                       type="text"
                       id="latitude"
-                      required
                       placeholder="e.g. 11.0028"
                       value={formData.latitude}
                       onChange={handleChange}
@@ -558,7 +558,6 @@ function PublishPageContent() {
                     <input
                       type="text"
                       id="longitude"
-                      required
                       placeholder="e.g. 77.0347"
                       value={formData.longitude}
                       onChange={handleChange}
