@@ -178,3 +178,32 @@ DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION handle_new_user();
+
+-- ============================================================
+-- AUTO-ASSIGN VENDOR ROLE ON VENDOR PROFILE CREATION
+-- ============================================================
+
+CREATE OR REPLACE FUNCTION handle_new_vendor()
+RETURNS TRIGGER AS $$
+DECLARE
+  vendor_role_id INTEGER;
+BEGIN
+  -- Find VENDOR role ID
+  SELECT id INTO vendor_role_id FROM public.roles WHERE name = 'VENDOR';
+  
+  -- Insert into user_roles
+  IF vendor_role_id IS NOT NULL THEN
+    INSERT INTO public.user_roles (user_id, role_id)
+    VALUES (NEW.id, vendor_role_id)
+    ON CONFLICT DO NOTHING;
+  END IF;
+  
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Trigger fires AFTER INSERT on vendor_profiles
+DROP TRIGGER IF EXISTS on_vendor_profile_created ON public.vendor_profiles;
+CREATE TRIGGER on_vendor_profile_created
+  AFTER INSERT ON public.vendor_profiles
+  FOR EACH ROW EXECUTE FUNCTION handle_new_vendor();
