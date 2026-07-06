@@ -13,7 +13,7 @@ import type { User, Session } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase-browser";
 import { isDbConfigured } from "@/lib/supabase";
 
-export const USE_TEMPORARY_PHONE_LOGIN = true;
+export const USE_TEMPORARY_PHONE_LOGIN = false;
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

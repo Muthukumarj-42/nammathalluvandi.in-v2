@@ -7,7 +7,7 @@ import Image from "next/image";
 import { createClient } from "@/lib/supabase-browser";
 import { isDbConfigured } from "@/lib/supabase";
 
-const USE_TEMPORARY_PHONE_LOGIN = true;
+const USE_TEMPORARY_PHONE_LOGIN = false;
 
 // ─── Bilingual text helper ────────────────────────────────────────────────────
 function T({ en, ta }: { en: string; ta: string }) {

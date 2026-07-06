@@ -8,7 +8,7 @@ const VENDOR_ROUTES = ["/vendor"];
 // Routes that require ADMIN or SUPER_ADMIN role
 const ADMIN_ROUTES = ["/admin"];
 
-const USE_TEMPORARY_PHONE_LOGIN = true;
+const USE_TEMPORARY_PHONE_LOGIN = false;
 
 export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
