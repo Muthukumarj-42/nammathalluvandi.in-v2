@@ -13,6 +13,8 @@ import type { User, Session } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase-browser";
 import { isDbConfigured } from "@/lib/supabase";
 
+export const USE_TEMPORARY_PHONE_LOGIN = true;
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export type UserRole = "BUYER" | "VENDOR" | "ADMIN" | "SUPER_ADMIN";
@@ -176,6 +178,53 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // ── Initial session + auth state listener ─────────────────────────────────
   useEffect(() => {
+    if (USE_TEMPORARY_PHONE_LOGIN) {
+      const getCookie = (name: string) => {
+        if (typeof document === "undefined") return null;
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop()?.split(";").shift() || null;
+        return null;
+      };
+      const forcedPhone = getCookie("forced_user_phone");
+      if (forcedPhone === "8838292849" || forcedPhone === "+918838292849" || forcedPhone === "918838292849") {
+        const mockUser = {
+          id: "a1111111-1111-1111-1111-111111111111",
+          email: "muthuadmin@nammathalluvandi.in",
+          phone: forcedPhone,
+          aud: "authenticated",
+          role: "authenticated",
+          app_metadata: { provider: "email" },
+          user_metadata: { phone: forcedPhone, full_name: "Muthu Admin" },
+          created_at: new Date().toISOString(),
+        } as any;
+
+        const mockProfile: UserProfile = {
+          id: "a1111111-1111-1111-1111-111111111111",
+          email: "muthuadmin@nammathalluvandi.in",
+          name: "Muthu Admin",
+          avatar: null,
+          provider: "email",
+          status: "active",
+          created_at: new Date().toISOString(),
+        };
+
+        const mockVendorProfile = {
+          id: "a1111111-1111-1111-1111-111111111111",
+          shop_name: "Muthu Carts",
+          business_category: "fast_food",
+          status: "approved",
+        };
+
+        setUser(mockUser);
+        setProfile(mockProfile);
+        setVendorProfile(mockVendorProfile as VendorProfile);
+        setRoles(["ADMIN", "VENDOR"]);
+        setLoading(false);
+        return;
+      }
+    }
+
     if (!isDbConfigured) {
       setLoading(false);
       return;
@@ -210,6 +259,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // ── Sign out ───────────────────────────────────────────────────────────────
   const signOut = useCallback(async () => {
+    if (USE_TEMPORARY_PHONE_LOGIN) {
+      document.cookie = "forced_user_phone=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;";
+    }
     await supabase.auth.signOut();
     setUser(null);
     setSession(null);

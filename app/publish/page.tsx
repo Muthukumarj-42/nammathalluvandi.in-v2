@@ -330,7 +330,7 @@ function PublishPageContent() {
   // ── Main Form ─────────────────────────────────────────────────────────────────
   return (
     <main className="bg-[#F8F6F2] pt-16 md:pt-28">
-      <section className="pb-20 pt-24 md:pb-24 md:pt-0">
+      <section className="pb-20 pt-4 md:pb-24 md:pt-0">
         <div className="site-container grid gap-12 md:grid-cols-[1fr_1.2fr] md:gap-12 items-start">
           <div className="flex flex-col justify-between h-full py-4">
             <div>

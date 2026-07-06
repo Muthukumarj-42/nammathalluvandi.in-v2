@@ -7,6 +7,8 @@ import Image from "next/image";
 import { createClient } from "@/lib/supabase-browser";
 import { isDbConfigured } from "@/lib/supabase";
 
+const USE_TEMPORARY_PHONE_LOGIN = true;
+
 // ─── Bilingual text helper ────────────────────────────────────────────────────
 function T({ en, ta }: { en: string; ta: string }) {
   return (
@@ -45,13 +47,42 @@ function GoogleIcon() {
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirect = searchParams.get("redirect") ?? "/profile";
+  const defaultRedirect = USE_TEMPORARY_PHONE_LOGIN ? "/vendor/dashboard" : "/profile";
+  const redirect = searchParams.get("redirect") ?? defaultRedirect;
   const urlError = searchParams.get("error");
 
   const [mode, setMode] = useState<"choose" | "email" | "sent">("choose");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(urlError ?? "");
+
+  // ── Phone Login ─────────────────────────────────────────────────────────────
+  const handlePhoneLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!phone.trim()) return;
+    setLoading(true);
+    setError("");
+
+    const sanitizedPhone = phone.trim().replace(/\s+/g, "");
+    
+    // Admin / Vendor forced credentials checks
+    const isAllowed = sanitizedPhone === "8838292849" || 
+                      sanitizedPhone === "+918838292849" || 
+                      sanitizedPhone === "918838292849" ||
+                      sanitizedPhone === "muthuadmin";
+
+    if (isAllowed) {
+      const cookieValue = sanitizedPhone === "muthuadmin" ? "8838292849" : sanitizedPhone;
+      document.cookie = `forced_user_phone=${cookieValue}; path=/; max-age=${60 * 60 * 24 * 30}`;
+      
+      // Perform direct page navigation so auth state is fully re-initialized
+      window.location.href = redirect;
+    } else {
+      setError("Unauthorized phone number. Access Denied.");
+      setLoading(false);
+    }
+  };
 
   // ── Google OAuth ────────────────────────────────────────────────────────────
   const handleGoogleLogin = async () => {
@@ -100,6 +131,105 @@ function LoginForm() {
       setMode("sent");
     }
   };
+
+  if (USE_TEMPORARY_PHONE_LOGIN) {
+    return (
+      <div className="relative z-10 w-full max-w-md mx-auto px-4">
+        {/* Logo */}
+        <div className="flex flex-col items-center mb-8">
+          <div className="w-16 h-16 relative flex items-center justify-center mb-4">
+            <Image
+              src="/brand/full-logo.webp"
+              alt="Thalluvandi Logo"
+              fill
+              className="object-contain"
+              priority
+            />
+          </div>
+          <Link href="/admin">
+            <h1 className="font-display text-2xl font-bold tracking-tight text-gray-900 hover:text-[#075200] transition-colors cursor-pointer">
+              THALLUVANDI
+            </h1>
+          </Link>
+          <p className="text-sm text-gray-500 mt-1">
+            <T en="Premium Cart Marketplace" ta="தரமான வண்டி சந்தை" />
+          </p>
+        </div>
+
+        {/* Card */}
+        <div className="relative bg-white border border-gray-200 rounded-3xl p-8 shadow-xl shadow-gray-100">
+          {/* Back to home — top-left arrow */}
+          <Link
+            href="/"
+            className="absolute top-5 left-5 flex items-center justify-center w-9 h-9 rounded-xl bg-gray-100 hover:bg-green-100 hover:text-[#075200] text-gray-500 transition-all duration-200 group"
+            aria-label="Back to home"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5 transition-transform duration-200 group-hover:-translate-x-0.5">
+              <path d="M19 12H5M5 12l7 7M5 12l7-7" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </Link>
+
+          <h2 className="text-xl font-bold text-gray-900 text-center mb-2 mt-4">
+            <T en="Vendor Login" ta="விற்பனையாளர் உள்நுழைவு" />
+          </h2>
+          <p className="text-sm text-gray-400 text-center mb-8">
+            <T en="Enter your phone number to manage your carts" ta="உங்கள் வண்டிகளை நிர்வகிக்க தொலைபேசி எண்ணை உள்ளிடவும்" />
+          </p>
+
+          {/* Error banner */}
+          {error && (
+            <div className="mb-4 px-4 py-3 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm text-center">
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handlePhoneLogin} className="space-y-4">
+            <div>
+              <label htmlFor="phone-input" className="block text-sm font-medium text-gray-600 mb-2">
+                <T en="Phone Number" ta="தொலைபேசி எண்" />
+              </label>
+              <input
+                id="phone-input"
+                type="text"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="e.g. 8838292849"
+                required
+                autoFocus
+                className="w-full px-4 py-3.5 rounded-xl bg-gray-50 border border-gray-200 text-gray-900 placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-[#075200]/40 focus:border-[#075200] transition-all"
+              />
+            </div>
+            <button
+              id="phone-login-submit-btn"
+              type="submit"
+              disabled={loading || !phone.trim()}
+              className="w-full py-3.5 rounded-xl bg-gradient-to-r from-[#075200] to-[#116d03] text-white font-bold text-sm hover:from-[#116d03] hover:to-[#075200] transition-all duration-200 shadow-md shadow-green-100 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" className="opacity-25"/>
+                    <path d="M4 12a8 8 0 018-8" stroke="currentColor" strokeWidth="3" strokeLinecap="round" className="opacity-75"/>
+                  </svg>
+                  <T en="Verifying…" ta="சரிபார்க்கிறது…" />
+                </span>
+              ) : (
+                <T en="Login" ta="உள்நுழையவும்" />
+              )}
+            </button>
+          </form>
+
+          {/* Legal / Notice */}
+          <p className="text-center text-xs text-gray-400 mt-6 leading-relaxed">
+            <T
+              en="Only authorized vendors are allowed access to the console."
+              ta="அங்கீகரிக்கப்பட்ட விற்பனையாளர்களுக்கு மட்டுமே அனுமதி."
+            />
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative z-10 w-full max-w-md mx-auto px-4">

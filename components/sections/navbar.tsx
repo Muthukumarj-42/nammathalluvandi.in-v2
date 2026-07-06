@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { MessageCircle, Bell, User, Store, Shield, LogOut, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LanguageToggle } from "@/components/sections/language-toggle";
-import { useAuth } from "@/context/auth-context";
+import { useAuth, USE_TEMPORARY_PHONE_LOGIN } from "@/context/auth-context";
 
 const nav = [
   ["Home", "முகப்பு", "/"],
@@ -77,15 +77,17 @@ function UserMenu() {
 
             {/* Links */}
             <div className="py-1.5">
-              <Link
-                href="/profile"
-                onClick={() => setOpen(false)}
-                className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-on-surface hover:bg-surface-dim/50 transition"
-              >
-                <User size={15} className="text-on-surface-variant" />
-                <span className="en">My Profile</span>
-                <span className="ta tamil-text">சுயவிவரம்</span>
-              </Link>
+              {!USE_TEMPORARY_PHONE_LOGIN && (
+                <Link
+                  href="/profile"
+                  onClick={() => setOpen(false)}
+                  className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-on-surface hover:bg-surface-dim/50 transition"
+                >
+                  <User size={15} className="text-on-surface-variant" />
+                  <span className="en">My Profile</span>
+                  <span className="ta tamil-text">சுயவிவரம்</span>
+                </Link>
+              )}
 
               {isVendor && (
                 <Link

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect, useMemo } from "react";
-import { Search, ChevronRight, MoreHorizontal, ChevronDown } from "lucide-react";
+import { Search, ChevronRight, MoreHorizontal, ChevronDown, PenTool, Wrench, Truck, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { IconTent, IconIceCream, IconCoffee, IconRickshaw, IconSearchStove } from "@/components/ui/icons";
 import { getLiveCartsAction } from "@/app/actions";
@@ -329,6 +329,240 @@ export default function HomePage() {
           )}
         </div>
       </div>
+
+      {/* Custom Manufacturing Section */}
+      <section className="py-12 md:py-16 bg-surface border-t border-outline-variant/20">
+        <div className="site-container max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
+            {/* Left Box */}
+            <div className="md:col-span-4 flex flex-col gap-4 justify-between h-auto">
+              <div className="flex flex-col gap-3">
+                <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#f97316]">
+                  <Text en="CUSTOM MANUFACTURING" ta="தனிப்பயன் தயாரிப்பு" />
+                </p>
+                <h2 className="font-display text-3xl md:text-4xl uppercase leading-none text-on-surface">
+                  <Text en="CUSTOMIZE YOUR CART & OWN IT" ta="உங்களுக்கே ஒரு வண்டி — நீங்களே வடிவமையுங்கள்!" />
+                </h2>
+                <p className="text-sm md:text-base leading-relaxed text-on-surface-variant">
+                  <Text en="Build your own customized food cart based on your business needs. Delivery in 2–4 weeks." ta="உங்கள் தேவைக்கேற்ப தனிப்பட்ட உணவு வண்டி. 2-4 வாரங்களில் டெலிவரி." />
+                </p>
+              </div>
+              <div className="bg-primary/5 border border-primary/10 rounded-xl p-4">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-[#f97316]">
+                  <Text en="ESTIMATED RANGE" ta="மதிப்பிடப்பட்ட விலை" />
+                </p>
+                <p className="mt-1 font-display text-xl sm:text-2xl md:text-3xl font-bold text-on-surface">₹30,000 – ₹70,000+</p>
+              </div>
+              <Button asChild className="w-full bg-[#25D366] hover:bg-[#20ba5a] text-white border-none rounded-xl font-display uppercase tracking-widest text-xs h-11 flex items-center justify-center gap-2">
+                <a href="https://wa.me/918838292849?text=%E0%AE%B5%E0%AE%A3%E0%AE%95%E0%AF%8D%E0%AE%95%E0%AE%AE%E0%AF%8D%2C%20%E0%AE%A8%E0%AE%BE%E0%AE%A9%E0%AF%8D%20%E0%AE%A4%E0%AE%A9%E0%AE%BF%E0%AE%AA%E0%AF%8D%E0%AE%AA%E0%AE%9F%E0%AF%8D%E0%AE%9F%20%E0%AE%89%E0%AE%A3%E0%AE%B5%E0%AF%81%20%E0%AE%B5%E0%AE%A3%E0%AF%8D%E0%AE%9F%E0%AE%BF%20%E0%AE%B5%E0%AE%BE%E0%AE%99%E0%AF%8D%E0%AE%95%20%E0%AE%B5%E0%AE%BF%E0%AE%B0%E0%AF%81%E0%AE%AE%E0%AF%8D%E0%AE%AA%E0%AF%81%E0%AE%95%E0%AE%BF%E0%AE%B1%E0%AF%87%E0%AE%A9%E0%AF%8D.%0A%E0%AE%AA%E0%AF%86%E0%AE%AF%E0%AE%B0%E0%AF%8D%3A%0A%E0%AE%A4%E0%AF%8A%E0%AE%B2%E0%AF%88%E0%AE%AA%E0%AF%87%E0%AE%9A%E0%AE%BF%3A%0A%E0%AE%B5%E0%AE%A3%E0%AF%8D%E0%AE%9F%E0%AE%BF%20%E0%AE%85%E0%AE%B3%E0%AE%B5%E0%AF%81%3A%0A%E0%AE%B5%E0%AE%9F%E0%AE%BF%E0%AE%B5%E0%AE%AE%E0%AF%88%E0%AE%AA%E0%AF%8D%E0%AE%AA%E0%AF%81%20%E0%AE%B5%E0%AE%BF%E0%AE%B0%E0%AF%81%E0%AE%AA%E0%AF%8D%E0%AE%AA%E0%AE%AE%E0%AF%8D%3A%0A%E0%AE%AA%E0%AE%9F%E0%AF%8D%E0%AE%9C%E0%AF%86%E0%AE%9F%E0%AF%8D%3A" target="_blank">
+                  <MessageCircle size={18} />
+                  <Text en="REQUEST CUSTOM CART" ta="🔧 தனிப்பயன் வண்டிக்கு கேட்க" />
+                </a>
+              </Button>
+            </div>
+
+            {/* Right Cards */}
+            <div className="md:col-span-8 grid grid-cols-1 sm:grid-cols-3 gap-4 items-stretch">
+              {/* Card 1 */}
+              <div className="bg-primary/5 border border-primary/10 rounded-2xl p-5 flex flex-col justify-between h-full">
+                <div>
+                  <PenTool className="text-[#f97316] mb-3" size={20} />
+                  <h3 className="font-display text-lg uppercase font-bold text-on-surface">
+                    <Text en="DESIGN" ta="வடிவமைப்பு" />
+                  </h3>
+                </div>
+                <ul className="mt-4 flex flex-col gap-2 text-sm leading-relaxed text-on-surface-variant">
+                  <li className="flex gap-2">
+                    <span className="text-[#f97316] font-bold">•</span>
+                    <span><Text en="Tell us the size you need" ta="தேவையான அளவு சொல்லுங்கள்" /></span>
+                  </li>
+                  <li className="flex gap-2">
+                    <span className="text-[#f97316] font-bold">•</span>
+                    <span><Text en="Choose counter layout" ta="கவுண்டர் வடிவமைப்பு தேர்வு" /></span>
+                  </li>
+                  <li className="flex gap-2">
+                    <span className="text-[#f97316] font-bold">•</span>
+                    <span><Text en="Plan your branding space" ta="உங்கள் பிராண்ட் இடம் திட்டமிடுங்கள்" /></span>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Card 2 */}
+              <div className="bg-primary/5 border border-primary/10 rounded-2xl p-5 flex flex-col justify-between h-full">
+                <div>
+                  <Wrench className="text-[#f97316] mb-3" size={20} />
+                  <h3 className="font-display text-lg uppercase font-bold text-on-surface">
+                    <Text en="BUILD" ta="கட்டுமானம்" />
+                  </h3>
+                </div>
+                <ul className="mt-4 flex flex-col gap-2 text-sm leading-relaxed text-on-surface-variant">
+                  <li className="flex gap-2">
+                    <span className="text-[#f97316] font-bold">•</span>
+                    <span><Text en="Quality steel material" ta="தரமான ஸ்டீல் பொருள்" /></span>
+                  </li>
+                  <li className="flex gap-2">
+                    <span className="text-[#f97316] font-bold">•</span>
+                    <span><Text en="Stove setup (optional)" ta="அடுப்பு அமைப்பு (விருப்பம்)" /></span>
+                  </li>
+                  <li className="flex gap-2">
+                    <span className="text-[#f97316] font-bold">•</span>
+                    <span><Text en="Storage & cover options" ta="சேமிப்பு மற்றும் மூடி விருப்பங்கள்" /></span>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Card 3 */}
+              <div className="bg-primary/5 border border-primary/10 rounded-2xl p-5 flex flex-col justify-between h-full">
+                <div>
+                  <Truck className="text-[#f97316] mb-3" size={20} />
+                  <h3 className="font-display text-lg uppercase font-bold text-on-surface">
+                    <Text en="DELIVER" ta="டெலிவரி" />
+                  </h3>
+                </div>
+                <ul className="mt-4 flex flex-col gap-2 text-sm leading-relaxed text-on-surface-variant">
+                  <li className="flex gap-2">
+                    <span className="text-[#f97316] font-bold">•</span>
+                    <span><Text en="Ready in 2-4 weeks" ta="2-4 வாரங்களில் தயார்" /></span>
+                  </li>
+                  <li className="flex gap-2">
+                    <span className="text-[#f97316] font-bold">•</span>
+                    <span><Text en="Direct delivery in Coimbatore" ta="கோயம்புத்தூரில் நேரடி டெலிவரி" /></span>
+                  </li>
+                  <li className="flex gap-2">
+                    <span className="text-[#f97316] font-bold">•</span>
+                    <span><Text en="Fully checked before handover" ta="கையளிப்பதற்கு முன் முழு சரிபார்ப்பு" /></span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section className="py-12 md:py-16 border-t border-outline-variant/20">
+        <div className="site-container max-w-[1000px] mx-auto">
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#f97316]">
+            <Text en="FAQ" ta="கேள்விகள்" />
+          </p>
+          <h2 className="mt-3 font-display text-4xl md:text-5xl uppercase leading-none text-on-surface">
+            <Text en="How It Works" ta="வாடகை பற்றி கேள்விகள்" />
+          </h2>
+          <div className="mt-8 divide-y divide-outline-variant/20 rounded-2xl border border-outline-variant/20 bg-surface overflow-hidden">
+            <details className="group p-6 open:bg-surface-container-low transition duration-200">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-bold text-on-surface">
+                <span className="font-display text-base md:text-lg uppercase tracking-wider text-on-surface faq-question-title">
+                  <Text en="What is Thalluvandi?" ta="தள்ளுவண்டி என்றால் என்ன?" />
+                </span>
+                <span className="text-xl text-primary group-open:hidden">+</span>
+                <span className="hidden text-xl text-primary group-open:inline">−</span>
+              </summary>
+              <p className="mt-3 text-sm md:text-base leading-relaxed text-on-surface-variant max-w-3xl">
+                <Text
+                  en="Namma Thalluvandi is D. Nagaraj's thallu vandi rental service — Coimbatore's most trusted food cart rental with 30+ years of experience at Ondipudur. We offer food carts for daily and monthly rental to help vendors start their business with minimal investment. Our fleet includes both traditional old-style push carts and new modern model carts to suit every type of street food business."
+                  ta="நம்ம தளவண்டி என்பது D. நாகராஜ் அவர்களின் தளவண்டி வாடகை சேவை. 30+ ஆண்டுகளாக ஒண்டிப்புதூர், கோயம்பத்தூரில் நம்பகமான உணவு வண்டி வாடகை. வண்டிகள் தினசரி மற்றும் மாதாந்திர வாடகைக்கு தயாராக உள்ளன. எங்கள் வண்டிகளில் பாரம்பரிய தளவண்டிகளும் புதிய நவீன மாடல் வண்டிகளும் இரண்டும் உள்ளன."
+                />
+              </p>
+            </details>
+
+            <details className="group p-6 open:bg-surface-container-low transition duration-200">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-bold text-on-surface">
+                <span className="font-display text-base md:text-lg uppercase tracking-wider text-on-surface faq-question-title">
+                  <Text en="Where is your branch located?" ta="உங்கள் கிளை எங்குள்ளது?" />
+                </span>
+                <span className="text-xl text-primary group-open:hidden">+</span>
+                <span className="hidden text-xl text-primary group-open:inline">−</span>
+              </summary>
+              <p className="mt-3 text-sm md:text-base leading-relaxed text-on-surface-variant max-w-3xl">
+                <Text
+                  en="D. Nagaraj Thalluvandi is located at Ondipudur, Coimbatore. Our yard has served Coimbatore vendors for 30+ years. Cart pickup, returns, and inspection all happen at our Ondipudur location."
+                  ta="D. நாகராஜ் தளவண்டி ஒண்டிப்புதூர், கோயம்புத்தூரில் அமைந்துள்ளது. 30+ ஆண்டுகளாக இங்கிருந்து கோவை வியாபாரிகளுக்கு சேவை. வண்டி எடுக்கவும் திரும்ப கொடுக்கவும் நேரடியாக ஒண்டிப்புதூர் வரலாம்."
+                />
+              </p>
+            </details>
+
+            <details className="group p-6 open:bg-surface-container-low transition duration-200">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-bold text-on-surface">
+                <span className="font-display text-base md:text-lg uppercase tracking-wider text-on-surface faq-question-title">
+                  <Text en="How do I book a food cart?" ta="வண்டியை புக் செய்வது எப்படி?" />
+                </span>
+                <span className="text-xl text-primary group-open:hidden">+</span>
+                <span className="hidden text-xl text-primary group-open:inline">−</span>
+              </summary>
+              <p className="mt-3 text-sm md:text-base leading-relaxed text-on-surface-variant max-w-3xl">
+                <Text
+                  en="Browse through our premium food cart variants on the Explore page, fill out your booking details on our dedicated `/book` page, and continue to WhatsApp to finalize your booking with our team."
+                  ta="எங்கள் வண்டி வகைகள் பக்கத்தில் உங்களுக்கு தேவையான வண்டியைத் தேர்ந்தெடுத்து, உங்கள் விவரங்களை முன்பதிவு பக்கத்தில் பூர்த்தி செய்து, வாட்ஸ்அப் வழியாக எங்களுடன் தொடர்புகொண்டு முன்பதிவை உறுதி செய்யலாம்."
+                />
+              </p>
+            </details>
+
+            <details className="group p-6 open:bg-surface-container-low transition duration-200">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-bold text-on-surface">
+                <span className="font-display text-base md:text-lg uppercase tracking-wider text-on-surface faq-question-title">
+                  <Text en="What documents are required for booking?" ta="என்னென்ன ஆவணங்கள் தேவை?" />
+                </span>
+                <span className="text-xl text-primary group-open:hidden">+</span>
+                <span className="hidden text-xl text-primary group-open:inline">−</span>
+              </summary>
+              <p className="mt-3 text-sm md:text-base leading-relaxed text-on-surface-variant max-w-3xl">
+                <Text
+                  en="Please bring any one of Aadhaar Card, Ration Card, or PAN Card along with 1 Passport Size Photo. Any one of these primary proofs is sufficient."
+                  ta="கொண்டுவர வேண்டியது: ஆதார் கார்டு, ரேஷன் கார்டு அல்லது பான் கார்டு (இதில் ஏதேனும் ஒரு ஆதாரம்) மற்றும் 1 பாஸ்போர்ட் அளவு போட்டோ போதுமானது."
+                />
+              </p>
+            </details>
+
+            <details className="group p-6 open:bg-surface-container-low transition duration-200">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-bold text-on-surface">
+                <span className="font-display text-base md:text-lg uppercase tracking-wider text-on-surface faq-question-title">
+                  <Text en="What are the key rental rules?" ta="முக்கிய வாடகை விதிகள் என்னென்ன? " />
+                </span>
+                <span className="text-xl text-primary group-open:hidden">+</span>
+                <span className="hidden text-xl text-primary group-open:inline">−</span>
+              </summary>
+              <p className="mt-3 text-sm md:text-base leading-relaxed text-on-surface-variant max-w-3xl">
+                <Text
+                  en="Key terms include: 1. Cart must be rented in the active operator's name. 2. Renter handles transport (pickup/return). 3. Damages are checked and charged. 4. Minimum rental period is 1 month; early returns are still billed for 1 full month."
+                  ta="முக்கிய விதிகள்: 1. தொழில் செய்பவர் பெயரிலேயே வண்டி எடுக்க வேண்டும். 2. போக்குவரத்து தங்கள் பொறுப்பு. 3. சேதங்களுக்கு தகுந்த கட்டணம் வசூலிக்கப்படும். 4. குறைந்தபட்ச வாடகை காலம் 1 மாதம் (ஒரு மாதத்திற்குள் வண்டியைத் திரும்பக் கொடுத்தாலும் 1 மாத வாடகை வசூலிக்கப்படும்)."
+                />
+              </p>
+            </details>
+
+            <details className="group p-6 open:bg-surface-container-low transition duration-200">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-bold text-on-surface">
+                <span className="font-display text-base md:text-lg uppercase tracking-wider text-on-surface faq-question-title">
+                  <Text en="What is the minimum rental period for a thallu vandi in Coimbatore?" ta="கோவையில் தளவண்டி வாடகைக்கு குறைந்தபட்ச காலம் என்ன?" />
+                </span>
+                <span className="text-xl text-primary group-open:hidden">+</span>
+                <span className="hidden text-xl text-primary group-open:inline">−</span>
+              </summary>
+              <p className="mt-3 text-sm md:text-base leading-relaxed text-on-surface-variant max-w-3xl">
+                <Text
+                  en="The minimum rental period at Namma Thalluvandi is 1 month. If you return the cart before completing one month the full one month rent will still be charged. This ensures fair pricing for both parties."
+                  ta="குறைந்தபட்சம் 1 மாதம் வாடகை வைத்திருக்க வேண்டும். முன்னதாக திரும்பினாலும் 1 மாத வாடகை வசூலிக்கப்படும்."
+                />
+              </p>
+            </details>
+
+            <details className="group p-6 open:bg-surface-container-low transition duration-200">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-bold text-on-surface">
+                <span className="font-display text-base md:text-lg uppercase tracking-wider text-on-surface faq-question-title">
+                  <Text en="Do you deliver the cart to my location in Coimbatore?" ta="கோவையில் என் இடத்திற்கு வண்டி கொண்டு வருவீர்களா?" />
+                </span>
+                <span className="text-xl text-primary group-open:hidden">+</span>
+                <span className="hidden text-xl text-primary group-open:inline">−</span>
+              </summary>
+              <p className="mt-3 text-sm md:text-base leading-relaxed text-on-surface-variant max-w-3xl">
+                <Text
+                  en="Cart pickup and return from our yard at Ondipudur Coimbatore is the renter's responsibility. You will need to arrange your own transport to collect and return the cart. Our address is 6A Aruljothipuram Jallimedu Ondipudur Coimbatore."
+                  ta="வண்டியை எங்கள் ஒண்டிப்புதூர் கிளையிலிருந்து எடுத்துச் செல்வதும் திரும்ப ஒப்படைப்பதும் வாடகைதாரரின் பொறுப்பு."
+                />
+              </p>
+            </details>
+          </div>
+        </div>
+      </section>
     </main>
   );
 }
