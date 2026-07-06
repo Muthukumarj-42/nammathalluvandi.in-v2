@@ -18,7 +18,7 @@ ON CONFLICT (phone) DO NOTHING;
 -- 2. Seed Carts
 INSERT INTO public.carts (
     id, owner_id, type, condition, size, weight, stove_type, 
-    price_per_month, photos, description, latitude, longitude, status, verified
+    price_per_day, photos, description, latitude, longitude, status, verified
 ) VALUES
 (
     'e0000000-0000-0000-0000-000000000001',
@@ -28,7 +28,7 @@ INSERT INTO public.carts (
     '6ft x 4ft',
     '120kg',
     'Double Burner High-Pressure Stove',
-    2500,
+    80,
     ARRAY['/carts/premium-fast-food-cart-with-stove/photo-1.webp', '/carts/premium-fast-food-cart-with-stove/photo-2.webp'],
     'Elite fast food cart with double stove and stainless storage shelves. Great for tiffin center or Chinese fast food.',
     11.0028, -- Ondipudur, Coimbatore
@@ -44,7 +44,7 @@ INSERT INTO public.carts (
     '5ft x 3.5ft',
     '95kg',
     'None',
-    1800,
+    60,
     ARRAY['/carts/covered-premium-cart/photo-1.webp'],
     'Aluminium frame food cart with heavy-duty metal roof. Side flaps can close completely and be locked.',
     11.0183, -- Gandhipuram, Coimbatore
@@ -60,7 +60,7 @@ INSERT INTO public.carts (
     '4ft x 3ft',
     '80kg',
     'None',
-    2200,
+    70,
     ARRAY['/carts/mobile-snack-cart/photo-1.webp'],
     'Insulated cold container box built-in. Eye-catching yellow dome roof. Suitable for ice cream or kulfi business.',
     11.0267, -- Peelamedu, Coimbatore
@@ -76,7 +76,7 @@ INSERT INTO public.carts (
     '6ft x 4.5ft',
     '150kg',
     'Single Burner Commercial Stove',
-    3000,
+    100,
     ARRAY['/carts/juice-cart/photo-1.webp'],
     'Full stainless steel tea and coffee station. Comes with gas connection slot, wash basin, and wide front counter.',
     11.1085, -- Tiruppur Junction
@@ -92,7 +92,7 @@ INSERT INTO public.carts (
     '5ft x 3ft',
     '110kg',
     'Double Stove',
-    2400,
+    80,
     ARRAY['/carts/tea-coffee-cart/photo-1.webp'],
     'Compact fast food cart with double burner stove and side glass panels. Needs a minor shelf repair.',
     11.0006, -- Singanallur, Coimbatore
@@ -141,7 +141,7 @@ INSERT INTO public.whatsapp_messages (
     'd0000000-0000-0000-0000-000000000002',
     'outbound',
     '919876543210',
-    'Namma Thalluvandi V2: New Booking request NTV-0002. Price: ₹1800/month. Customer Ramesh needs it near Gandhipuram. Reply YES or NO.',
+    'Namma Thalluvandi V2: New Booking request NTV-0002. Price: ₹60/day. Customer Ramesh needs it near Gandhipuram. Reply YES or NO.',
     'delivered'
 )
 ON CONFLICT (id) DO NOTHING;
