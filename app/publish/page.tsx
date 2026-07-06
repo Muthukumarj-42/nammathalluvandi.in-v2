@@ -3,9 +3,9 @@
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { CheckCircle2, MapPin, Navigation, Store, LogIn, AlertCircle, CheckCircle } from "lucide-react";
+import { CheckCircle2, MapPin, Navigation, Store, LogIn, AlertCircle, CheckCircle, Upload, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { saveCart, updateCartAction, getCartByIdAction } from "@/app/actions";
+import { saveCart, updateCartAction, getCartByIdAction, uploadImagesAction } from "@/app/actions";
 import { reverseGeocode } from "@/lib/geocoding";
 import { useAuth } from "@/context/auth-context";
 
@@ -67,6 +67,44 @@ function PublishPageContent() {
   });
   const [phoneError, setPhoneError] = useState("");
 
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [previews, setPreviews] = useState<string[]>([]);
+  const [existingPhotos, setExistingPhotos] = useState<string[]>([]);
+
+  useEffect(() => {
+    return () => {
+      previews.forEach(url => URL.revokeObjectURL(url));
+    };
+  }, [previews]);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files) return;
+    const files = Array.from(e.target.files);
+    
+    const totalAllowed = 5;
+    const currentTotal = existingPhotos.length + selectedFiles.length;
+    if (currentTotal + files.length > totalAllowed) {
+      alert(lang === "ta" 
+        ? `அதிகபட்சம் ${totalAllowed} புகைப்படங்கள் மட்டுமே அனுமதிக்கப்படுகின்றன.` 
+        : `You can only upload up to ${totalAllowed} photos in total.`);
+      return;
+    }
+
+    const newPreviews = files.map(file => URL.createObjectURL(file));
+    setSelectedFiles(prev => [...prev, ...files]);
+    setPreviews(prev => [...prev, ...newPreviews]);
+  };
+
+  const removeSelectedFile = (index: number) => {
+    URL.revokeObjectURL(previews[index]);
+    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
+    setPreviews(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const removeExistingPhoto = (index: number) => {
+    setExistingPhotos(prev => prev.filter((_, i) => i !== index));
+  };
+
   // Pre-fill name/phone from vendor profile
   useEffect(() => {
     if (isVendor && vendorProfile && !editCartId) {
@@ -99,6 +137,7 @@ function PublishPageContent() {
           latitude: String(c.latitude ?? ""),
           longitude: String(c.longitude ?? ""),
         });
+        setExistingPhotos(c.photos || c.images || []);
       }
       setEditLoading(false);
     });
@@ -153,6 +192,21 @@ function PublishPageContent() {
       const latVal = formData.latitude.trim() !== "" ? Number(formData.latitude) : undefined;
       const lngVal = formData.longitude.trim() !== "" ? Number(formData.longitude) : undefined;
 
+      let finalPhotos = [...existingPhotos];
+
+      if (selectedFiles.length > 0) {
+        const uploadFormData = new FormData();
+        selectedFiles.forEach(file => {
+          uploadFormData.append("images", file);
+        });
+        const uploadRes = await uploadImagesAction(uploadFormData);
+        if (uploadRes.success && uploadRes.urls) {
+          finalPhotos = [...finalPhotos, ...uploadRes.urls];
+        } else {
+          throw new Error(uploadRes.error || "Failed to upload images");
+        }
+      }
+
       if (editCartId) {
         await updateCartAction(editCartId, {
           type: formData.cartType,
@@ -164,6 +218,7 @@ function PublishPageContent() {
           description: formData.details,
           latitude: latVal,
           longitude: lngVal,
+          photos: finalPhotos,
         });
         alert(lang === "ta" ? "வண்டி விவரங்கள் புதுப்பிக்கப்பட்டன!" : "Cart updated successfully!");
         router.push("/vendor/dashboard");
@@ -187,12 +242,15 @@ function PublishPageContent() {
           weight: formData.weight,
           stoveType: formData.stoveType,
           ownerId: user.id,
+          photos: finalPhotos,
         });
         setSubmitSuccess(true);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to save cart:", err);
-      alert(lang === "ta" ? "படிவம் சமர்ப்பிக்க முடியவில்லை. மீண்டும் முயற்சிக்கவும்." : "Failed to submit. Please try again.");
+      alert(lang === "ta" 
+        ? `படிவம் சமர்ப்பிக்க முடியவில்லை. பிழை: ${err.message}` 
+        : `Failed to submit. Error: ${err.message}`);
     } finally {
       setSubmitLoading(false);
     }
@@ -577,6 +635,71 @@ function PublishPageContent() {
                 {geoStatus === "loading" && <p className="text-[10px] text-amber-600 animate-pulse">Fetching GPS coordinates from browser...</p>}
                 {geoStatus === "success" && <p className="text-[10px] text-green-600 font-bold">Successfully populated GPS coordinates!</p>}
                 {geoStatus === "error" && <p className="text-[10px] text-red-500">Could not retrieve GPS coordinates automatically. Please input manually.</p>}
+              </div>
+
+              {/* Photo Upload Section */}
+              <div className="flex flex-col">
+                <label className="text-xs font-bold uppercase tracking-wider mb-2 block">
+                  <Text en="Cart Photos" ta="வண்டி புகைப்படங்கள்" />
+                </label>
+                
+                <div className="relative group border-2 border-dashed border-[#e5e0d8] hover:border-primary/60 transition rounded-xl p-6 bg-white flex flex-col items-center justify-center cursor-pointer text-center">
+                  <input
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                  />
+                  <Upload className="w-8 h-8 text-[#a39e93] group-hover:text-primary transition mb-2" />
+                  <span className="text-sm font-semibold text-ink">
+                    <Text en="Click or drag photos to upload" ta="புகைப்படங்களை பதிவேற்ற கிளிக் செய்யவும் அல்லது இழுத்து விடவும்" />
+                  </span>
+                  <span className="text-xs text-muted mt-1">
+                    <Text en="PNG, JPG, WEBP, or HEIC (Up to 5 photos)" ta="PNG, JPG, WEBP அல்லது HEIC (அதிகபட்சம் 5 புகைப்படங்கள்)" />
+                  </span>
+                </div>
+
+                {/* Previews Grid */}
+                {(existingPhotos.length > 0 || previews.length > 0) && (
+                  <div className="mt-4 grid grid-cols-3 sm:grid-cols-5 gap-2">
+                    {/* Existing Photos */}
+                    {existingPhotos.map((photo, idx) => (
+                      <div key={`existing-${idx}`} className="relative aspect-square border border-[#e5e0d8] rounded-xl overflow-hidden">
+                        <img src={photo} alt="Existing" className="w-full h-full object-cover" />
+                        <span className="absolute top-1 left-1 bg-amber-500 text-[8px] text-white px-1.5 py-0.5 rounded font-bold uppercase">
+                          <Text en="Saved" ta="சேமிக்கப்பட்டது" />
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => removeExistingPhoto(idx)}
+                          className="absolute top-1 right-1 p-1 bg-red-600 hover:bg-red-700 text-white rounded-full transition shadow"
+                          title="Remove Photo"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
+
+                    {/* New Previews */}
+                    {previews.map((preview, idx) => (
+                      <div key={`new-${idx}`} className="relative aspect-square border border-dashed border-primary/40 rounded-xl overflow-hidden">
+                        <img src={preview} alt="New Preview" className="w-full h-full object-cover" />
+                        <span className="absolute top-1 left-1 bg-primary text-[8px] text-white px-1.5 py-0.5 rounded font-bold uppercase">
+                          <Text en="New" ta="புதியது" />
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => removeSelectedFile(idx)}
+                          className="absolute top-1 right-1 p-1 bg-red-600 hover:bg-red-700 text-white rounded-full transition shadow"
+                          title="Remove Photo"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Description */}

@@ -1,5 +1,8 @@
 "use server";
 
+import { promises as fs } from "fs";
+import path from "path";
+
 import { 
   createBooking, 
   saveCart as dbSaveCart, 
@@ -23,6 +26,59 @@ import {
   Booking,
   Dispute
 } from "@/lib/db";
+
+export async function uploadImagesAction(formData: FormData) {
+  try {
+    const files = formData.getAll("images") as File[];
+    if (!files || files.length === 0) {
+      return { success: true, urls: [] };
+    }
+
+    const uploadedUrls: string[] = [];
+    const uploadDir = path.join(process.cwd(), "public", "uploads");
+
+    // Ensure directory exists
+    await fs.mkdir(uploadDir, { recursive: true });
+
+    for (const file of files) {
+      if (!file || !file.name || file.size === 0) continue;
+      const bytes = await file.arrayBuffer();
+      const buffer = Buffer.from(bytes);
+
+      // Create a unique filename
+      const ext = path.extname(file.name) || ".jpg";
+      let fileBuffer = buffer;
+      let finalExt = ext.toLowerCase();
+
+      // HEIC to JPEG conversion if the file is HEIC and package is available
+      if (finalExt === ".heic" || finalExt === ".heif") {
+        try {
+          const heicConvert = require("heic-convert");
+          const outputBuffer = await heicConvert({
+            buffer: fileBuffer,
+            format: 'JPEG',
+            quality: 0.85
+          });
+          fileBuffer = outputBuffer;
+          finalExt = ".jpg";
+        } catch (e) {
+          console.warn("heic-convert is not available, saving original heic file:", e);
+        }
+      }
+
+      const filename = `cart-${Date.now()}-${Math.random().toString(36).substring(2, 9)}${finalExt}`;
+      const filePath = path.join(uploadDir, filename);
+
+      await fs.writeFile(filePath, fileBuffer);
+      uploadedUrls.push(`/uploads/${filename}`);
+    }
+
+    return { success: true, urls: uploadedUrls };
+  } catch (err: any) {
+    console.error("Image upload server action failed:", err);
+    return { success: false, error: err.message, urls: [] };
+  }
+}
 
 export async function saveBooking(booking: {
   cartId: string | null;
@@ -83,6 +139,7 @@ export async function saveCart(cartData: {
   weight?: string;
   stoveType?: string;
   ownerId?: string; // When provided, skip phone-based user lookup
+  photos?: string[];
 }) {
   try {
     let ownerId = cartData.ownerId;
@@ -111,7 +168,7 @@ export async function saveCart(cartData: {
       weight: cartData.weight || "100kg",
       stove_type: cartData.stoveType || "None",
       price_per_day: cartData.pricePerDay || 80,
-      photos: ["/carts/covered-premium-cart/photo-1.webp"],
+      photos: cartData.photos && cartData.photos.length > 0 ? cartData.photos : ["/carts/covered-premium-cart/photo-1.webp"],
       description: cartData.descriptionEn || "Self-listed cart",
       latitude: lat,
       longitude: lng,
