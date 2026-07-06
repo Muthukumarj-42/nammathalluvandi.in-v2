@@ -93,38 +93,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           .single();
 
         if (profError || !prof) {
-          // New user — create profile + assign BUYER role
-          const { data: newProf } = await supabase
+          // Wait 500ms for the database trigger to complete creating the profile
+          await new Promise(resolve => setTimeout(resolve, 500));
+          const { data: retriedProf, error: retryError } = await supabase
             .from("profiles")
-            .upsert({
-              id: authUser.id,
-              email: authUser.email ?? "",
-              name:
-                authUser.user_metadata?.full_name ??
-                authUser.user_metadata?.name ??
-                authUser.email?.split("@")[0] ??
-                "User",
-              avatar: authUser.user_metadata?.avatar_url ?? null,
-              provider: authUser.app_metadata?.provider ?? "email",
-              status: "active",
-            })
-            .select()
+            .select("*")
+            .eq("id", authUser.id)
             .single();
 
-          prof = newProf;
-
-          // Assign BUYER role by default
-          const { data: buyerRole } = await supabase
-            .from("roles")
-            .select("id")
-            .eq("name", "BUYER")
-            .single();
-
-          if (buyerRole) {
-            await supabase
-              .from("user_roles")
-              .upsert({ user_id: authUser.id, role_id: buyerRole.id });
+          if (retryError || !retriedProf) {
+            console.error("Profile trigger did not complete. Error:", retryError);
+            throw new Error(retryError?.message || "Profile not created");
           }
+          prof = retriedProf;
         }
 
         if (prof) setProfile(prof as UserProfile);
