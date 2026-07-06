@@ -73,9 +73,7 @@ export function mapDbCartToCart(item: any): Cart {
   const stove = item.stove_type || "None";
   const condition = item.condition || "Used - Good";
 
-  const pricePerDay = item.price_per_day 
-    ? Number(item.price_per_day) 
-    : (Math.round(Number(item.price_per_month) / 30) || 80);
+  const pricePerDay = Number(item.price_per_day) || Number(item.price_per_month) || 80;
 
   return {
     id: item.id,

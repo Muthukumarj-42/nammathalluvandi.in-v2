@@ -90,7 +90,7 @@ function PublishPageContent() {
           phone: (vendorProfile as any)?.phone ?? "",
           cartType: c.type ?? "With Store",
           condition: c.condition ?? "New",
-          expectedRent: String(c.price_per_month ?? ""),
+          expectedRent: String(c.price_per_day ?? ""),
           location: c.location ?? "",
           size: c.size ?? "6ft x 4ft",
           weight: c.weight ?? "100kg",
@@ -160,7 +160,7 @@ function PublishPageContent() {
           size: formData.size,
           weight: formData.weight,
           stove_type: formData.stoveType,
-          price_per_month: Number(formData.expectedRent),
+          price_per_day: Number(formData.expectedRent),
           description: formData.details,
           latitude: latVal,
           longitude: lngVal,
@@ -172,7 +172,7 @@ function PublishPageContent() {
           nameEn: formData.cartType,
           nameTa: formData.cartType,
           type: formData.cartType,
-          pricePerDay: Number(formData.expectedRent) || 2000,
+          pricePerDay: Number(formData.expectedRent) || 80,
           depositAmount: 2000,
           availableCount: 1,
           descriptionEn: formData.details,
@@ -504,7 +504,7 @@ function PublishPageContent() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="flex flex-col">
                   <label htmlFor="expectedRent" className="text-xs font-bold uppercase tracking-wider mb-1 block">
-                    <Text en="Expected Monthly Rent (₹) *" ta="மாத வாடகை (₹) *" />
+                    <Text en="Expected Daily Rent (₹) *" ta="தினசரி வாடகை (₹) *" />
                   </label>
                   <input
                     type="number"
@@ -512,7 +512,7 @@ function PublishPageContent() {
                     required
                     value={formData.expectedRent}
                     onChange={handleChange}
-                    placeholder="e.g. 2500"
+                    placeholder="e.g. 80"
                     className="w-full h-12 border border-[#e5e0d8] focus:border-primary focus:ring-2 focus:ring-primary/40 rounded-xl px-4 bg-white text-base outline-none transition"
                   />
                 </div>

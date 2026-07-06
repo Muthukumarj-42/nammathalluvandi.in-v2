@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS public.carts (
     size TEXT,
     weight TEXT,
     stove_type TEXT,
-    price_per_month NUMERIC NOT NULL,
+    price_per_day NUMERIC NOT NULL,
     photos TEXT[] DEFAULT '{}',
     description TEXT,
     latitude DOUBLE PRECISION NOT NULL,

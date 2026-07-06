@@ -110,7 +110,7 @@ export async function saveCart(cartData: {
       size: cartData.size || "5ft x 3.5ft",
       weight: cartData.weight || "100kg",
       stove_type: cartData.stoveType || "None",
-      price_per_month: cartData.pricePerDay || 2000,
+      price_per_day: cartData.pricePerDay || 80,
       photos: ["/carts/covered-premium-cart/photo-1.webp"],
       description: cartData.descriptionEn || "Self-listed cart",
       latitude: lat,
@@ -205,7 +205,7 @@ export async function updateCartAction(id: string, data: {
   size?: string;
   weight?: string;
   stove_type?: string;
-  price_per_month?: number;
+  price_per_day?: number;
   description?: string;
   photos?: string[];
   latitude?: number;

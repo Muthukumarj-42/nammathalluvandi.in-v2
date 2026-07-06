@@ -247,7 +247,7 @@ function BrowseCartsPageContent() {
         (cart.condition || "").toLowerCase().includes(cond.toLowerCase())
       );
       
-      const dailyPrice = cart.pricePerDay || (cart.pricePerMonth ? Math.round(cart.pricePerMonth / 30) : 0);
+      const dailyPrice = cart.pricePerDay;
       const matchesPrice = dailyPrice <= maxPrice;
 
       // Handle location query filter
@@ -676,7 +676,7 @@ function BrowseCartsPageContent() {
                           Daily Rent
                         </span>
                         <span className="font-display text-sm md:text-2xl text-[#ffca45] block">
-                          ₹{cart.pricePerDay || (cart.pricePerMonth ? Math.round(cart.pricePerMonth / 30) : 0)}/day
+                          ₹{cart.pricePerDay}/day
                         </span>
                       </div>
                       <Button asChild className="bg-[#f97316] text-[#0a0a08] hover:bg-[#f97316]/95 border-none rounded-lg font-display uppercase tracking-widest text-[9px] md:text-xs py-1 px-3 md:py-2 md:px-6 h-7 md:h-9">

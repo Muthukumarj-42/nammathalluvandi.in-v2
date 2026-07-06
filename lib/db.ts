@@ -17,7 +17,7 @@ export interface DbCart {
   size?: string;
   weight?: string;
   stove_type?: string;
-  price_per_month: number;
+  price_per_day: number;
   photos: string[];
   description?: string;
   latitude: number;
@@ -79,7 +79,7 @@ let mockCarts: DbCart[] = [
     size: "6ft x 4ft",
     weight: "120kg",
     stove_type: "Double Burner High-Pressure Stove",
-    price_per_month: 2500,
+    price_per_day: 80,
     photos: ["/carts/premium-fast-food-cart-with-stove/photo-1.webp", "/carts/premium-fast-food-cart-with-stove/photo-2.webp"],
     description: "Elite fast food cart with double stove and stainless storage shelves. Great for tiffin center or Chinese fast food.",
     latitude: 11.0028, // Ondipudur, Coimbatore
@@ -95,7 +95,7 @@ let mockCarts: DbCart[] = [
     size: "5ft x 3.5ft",
     weight: "95kg",
     stove_type: "None",
-    price_per_month: 1800,
+    price_per_day: 60,
     photos: ["/carts/covered-premium-cart/photo-1.webp"],
     description: "Aluminium frame food cart with heavy-duty metal roof. Side flaps can close completely and be locked.",
     latitude: 11.0183, // Gandhipuram, Coimbatore
@@ -111,7 +111,7 @@ let mockCarts: DbCart[] = [
     size: "4ft x 3ft",
     weight: "80kg",
     stove_type: "None",
-    price_per_month: 2200,
+    price_per_day: 70,
     photos: ["/carts/mobile-snack-cart/photo-1.webp"],
     description: "Insulated cold container box built-in. Eye-catching yellow dome roof. Suitable for ice cream or kulfi business.",
     latitude: 11.0267, // Peelamedu, Coimbatore
@@ -127,7 +127,7 @@ let mockCarts: DbCart[] = [
     size: "6ft x 4.5ft",
     weight: "150kg",
     stove_type: "Single Burner Commercial Stove",
-    price_per_month: 3000,
+    price_per_day: 100,
     photos: ["/carts/juice-cart/photo-1.webp"],
     description: "Full stainless steel tea and coffee station. Comes with gas connection slot, wash basin, and wide front counter.",
     latitude: 11.1085, // Tiruppur Junction
@@ -143,7 +143,7 @@ let mockCarts: DbCart[] = [
     size: "5ft x 3ft",
     weight: "110kg",
     stove_type: "Double Stove",
-    price_per_month: 2400,
+    price_per_day: 80,
     photos: ["/carts/tea-coffee-cart/photo-1.webp"],
     description: "Compact fast food cart with double burner stove and side glass panels. Needs a minor shelf repair.",
     latitude: 11.0006, // Singanallur, Coimbatore
@@ -346,7 +346,7 @@ export async function updateCartStatus(id: string, status: DbCart["status"], ver
   return null;
 }
 
-export async function updateCart(id: string, data: Partial<Pick<DbCart, "type" | "condition" | "size" | "weight" | "stove_type" | "price_per_month" | "description" | "photos" | "latitude" | "longitude">>): Promise<DbCart | null> {
+export async function updateCart(id: string, data: Partial<Pick<DbCart, "type" | "condition" | "size" | "weight" | "stove_type" | "price_per_day" | "description" | "photos" | "latitude" | "longitude">>): Promise<DbCart | null> {
   if (isDbConfigured) {
     const { data: updated, error } = await supabase
       .from("carts")

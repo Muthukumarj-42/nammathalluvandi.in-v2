@@ -263,8 +263,8 @@ function AuthenticatedView() {
                         }`}>
                           {cart.status === "pending_review" ? "⏳ Pending Review" : cart.status === "live" ? "✓ Live" : cart.status}
                         </span>
-                        {cart.price_per_month && (
-                          <span className="text-[10px] text-on-surface-variant">₹{cart.price_per_month}/mo</span>
+                        {(cart.price_per_day || cart.price_per_month) && (
+                          <span className="text-[10px] text-on-surface-variant">₹{cart.price_per_day || cart.price_per_month}/day</span>
                         )}
                       </div>
                     </div>

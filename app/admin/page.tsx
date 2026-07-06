@@ -203,7 +203,7 @@ export default function AdminDashboard() {
         c.size || "",
         c.weight || "",
         c.stove_type || "",
-        c.price_per_month || "",
+        c.price_per_day || "",
         (c.description || "").replace(/,/g, ";"),
         c.latitude,
         c.longitude,
@@ -232,7 +232,7 @@ export default function AdminDashboard() {
       size: cart.size || "",
       weight: cart.weight || "",
       stove_type: cart.stove_type || "",
-      price_per_month: cart.price_per_month || "",
+      price_per_day: cart.price_per_day || "",
       description: cart.description || "",
     });
     setEditModal({ open: true, cart });
@@ -267,7 +267,7 @@ export default function AdminDashboard() {
       size: editForm.size,
       weight: editForm.weight,
       stove_type: editForm.stove_type,
-      price_per_month: Number(editForm.price_per_month),
+      price_per_day: Number(editForm.price_per_day),
       description: editForm.description,
     });
     setEditSaving(false);
@@ -521,7 +521,7 @@ export default function AdminDashboard() {
                                 <div><span className="text-[#f6ded3]/40">Size:</span> {cart.size || "—"}</div>
                                 <div><span className="text-[#f6ded3]/40">Weight:</span> {cart.weight || "—"}</div>
                                 <div><span className="text-[#f6ded3]/40">Stove:</span> {cart.stove_type || "None"}</div>
-                                <div><span className="text-[#f6ded3]/40">Rent:</span> ₹{cart.price_per_month}/mo</div>
+                                <div><span className="text-[#f6ded3]/40">Rent:</span> ₹{cart.price_per_day}/day</div>
                                 <div className="col-span-2"><span className="text-[#f6ded3]/40">Location:</span> {cart.latitude >= 11.08 ? "Tiruppur" : "Coimbatore"} ({Number(cart.latitude).toFixed(4)}, {Number(cart.longitude).toFixed(4)})</div>
                               </div>
 
@@ -602,7 +602,7 @@ export default function AdminDashboard() {
                                 </td>
                                 <td className="p-4">{cart.condition}</td>
                                 <td className="p-4">{owner ? owner.name : "Unknown"} <span className="block text-[10px] text-[#f6ded3]/50">{owner ? owner.phone : ""}</span></td>
-                                <td className="p-4 font-bold text-[#ffca45]">₹{cart.price_per_month || "—"}</td>
+                                <td className="p-4 font-bold text-[#ffca45]">₹{cart.price_per_day || "—"}</td>
                                 <td className="p-4 text-[10px]">
                                   {cart.latitude >= 11.08 ? "Tiruppur" : "Coimbatore"}
                                 </td>
@@ -1007,11 +1007,11 @@ export default function AdminDashboard() {
               </div>
 
               <div>
-                <label className="text-[10px] font-bold uppercase tracking-wider text-[#ffb690] mb-1 block">Monthly Price (₹)</label>
+                <label className="text-[10px] font-bold uppercase tracking-wider text-[#ffb690] mb-1 block">Daily Price (₹)</label>
                 <input
                   type="number"
-                  value={editForm.price_per_month}
-                  onChange={e => setEditForm((f: any) => ({ ...f, price_per_month: e.target.value }))}
+                  value={editForm.price_per_day}
+                  onChange={e => setEditForm((f: any) => ({ ...f, price_per_day: e.target.value }))}
                   className="w-full h-10 bg-[#0a0a08] border border-[#ffb690]/20 rounded-lg px-3 text-sm text-[#f6ded3] outline-none focus:border-[#f97316]"
                 />
               </div>

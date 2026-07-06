@@ -223,9 +223,7 @@ export default function HomePage() {
                 const typeArr: string[] = Array.isArray(cart.type) ? cart.type : [cart.type];
                 const tagLabel = i === 0 ? "BESTSELLER" : "POPULAR";
                 const tagColor = i === 0 ? "bg-[#f97316] text-[#0a0a08]" : "bg-[#ffca45] text-[#0a0a08]";
-                const pricePerDay = cart.price_per_day
-                  ? Number(cart.price_per_day)
-                  : Math.round(Number(cart.price_per_month) / 30) || 80;
+                const pricePerDay = Number(cart.price_per_day) || Number(cart.price_per_month) || 80;
                 return (
                   <div key={cart.id} className="group bg-surface border border-[#f97316]/25 hover:border-[#f97316]/60 transition-all duration-300 flex flex-col rounded-3xl overflow-hidden shadow-premium p-3 md:p-6 relative">
                     <div className="aspect-[16/9] bg-[#251913] relative shrink-0 flex items-center justify-center rounded-2xl overflow-hidden">
@@ -296,9 +294,7 @@ export default function HomePage() {
             <div className="grid grid-cols-2 md:grid-cols-2 gap-3 md:gap-6">
               {dbCarts.slice(2, 4).map((cart, i) => {
                 const image = Array.isArray(cart.photos) && cart.photos.length > 0 ? cart.photos[0] : null;
-                const pricePerDay = cart.price_per_day
-                  ? Number(cart.price_per_day)
-                  : Math.round(Number(cart.price_per_month) / 30) || 80;
+                const pricePerDay = Number(cart.price_per_day) || Number(cart.price_per_month) || 80;
                 return (
                   <div key={cart.id} className="bg-surface border border-outline-variant/30 flex flex-col p-3 md:p-4 rounded-3xl shadow-premium relative">
                     <div className="aspect-[16/10] bg-[#251913] relative shrink-0 flex items-center justify-center mb-2 md:mb-4 rounded-2xl overflow-hidden">
