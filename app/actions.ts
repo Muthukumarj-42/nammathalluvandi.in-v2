@@ -2,7 +2,8 @@
 
 import { promises as fs } from "fs";
 import path from "path";
-import { supabase, isDbConfigured } from "@/lib/supabase";
+import { isDbConfigured } from "@/lib/supabase";
+import { createClient as createServerSupabase } from "@/lib/supabase-server";
 
 import { 
   createBooking, 
@@ -40,6 +41,7 @@ export async function uploadImagesAction(formData: FormData) {
     // Attempt to upload to Supabase Storage first if database is configured
     if (isDbConfigured) {
       try {
+        const supabaseServer = await createServerSupabase();
         for (const file of files) {
           if (!file || !file.name || file.size === 0) continue;
           const bytes = await file.arrayBuffer();
@@ -66,7 +68,7 @@ export async function uploadImagesAction(formData: FormData) {
 
           const filename = `cart-${Date.now()}-${Math.random().toString(36).substring(2, 9)}${finalExt}`;
           
-          const { data, error } = await supabase.storage
+          const { data, error } = await supabaseServer.storage
             .from("carts")
             .upload(filename, fileBuffer, {
               contentType: mimeType,
@@ -76,7 +78,7 @@ export async function uploadImagesAction(formData: FormData) {
 
           if (error) throw error;
 
-          const { data: { publicUrl } } = supabase.storage
+          const { data: { publicUrl } } = supabaseServer.storage
             .from("carts")
             .getPublicUrl(filename);
 
