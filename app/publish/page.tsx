@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, Suspense, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { CheckCircle2, MapPin, Navigation, Store, LogIn, AlertCircle, CheckCircle, Upload, X } from "lucide-react";
@@ -71,11 +71,20 @@ function PublishPageContent() {
   const [previews, setPreviews] = useState<string[]>([]);
   const [existingPhotos, setExistingPhotos] = useState<string[]>([]);
 
+  const previewsRef = useRef<string[]>([]);
+  useEffect(() => {
+    previewsRef.current = previews;
+  }, [previews]);
+
   useEffect(() => {
     return () => {
-      previews.forEach(url => URL.revokeObjectURL(url));
+      previewsRef.current.forEach(url => {
+        if (url.startsWith("blob:")) {
+          URL.revokeObjectURL(url);
+        }
+      });
     };
-  }, [previews]);
+  }, []);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
@@ -208,7 +217,7 @@ function PublishPageContent() {
       }
 
       if (editCartId) {
-        await updateCartAction(editCartId, {
+        const res = await updateCartAction(editCartId, {
           type: formData.cartType,
           condition: formData.condition,
           size: formData.size,
@@ -220,10 +229,13 @@ function PublishPageContent() {
           longitude: lngVal,
           photos: finalPhotos,
         });
+        if (!res.success) {
+          throw new Error(res.error || "Failed to update cart");
+        }
         alert(lang === "ta" ? "வண்டி விவரங்கள் புதுப்பிக்கப்பட்டன!" : "Cart updated successfully!");
         router.push("/vendor/dashboard");
       } else {
-        await saveCart({
+        const res = await saveCart({
           nameEn: formData.cartType,
           nameTa: formData.cartType,
           type: formData.cartType,
@@ -244,6 +256,9 @@ function PublishPageContent() {
           ownerId: user.id,
           photos: finalPhotos,
         });
+        if (!res.success) {
+          throw new Error(res.error || "Failed to save cart");
+        }
         setSubmitSuccess(true);
       }
     } catch (err: any) {
