@@ -49,22 +49,7 @@ export async function uploadImagesAction(formData: FormData) {
           let finalExt = (path.extname(file.name) || ".jpg").toLowerCase();
           let mimeType = file.type || "image/jpeg";
 
-          // HEIC to JPEG conversion if the file is HEIC and package is available
-          if (finalExt === ".heic" || finalExt === ".heif") {
-            try {
-              const heicConvert = require("heic-convert");
-              const outputBuffer = await heicConvert({
-                buffer: fileBuffer,
-                format: 'JPEG',
-                quality: 0.85
-              });
-              fileBuffer = outputBuffer;
-              finalExt = ".jpg";
-              mimeType = "image/jpeg";
-            } catch (e) {
-              console.warn("heic-convert is not available, uploading original heic file:", e);
-            }
-          }
+          // Skip HEIC conversion on serverless to avoid WASM boot crashes
 
           const filename = `cart-${Date.now()}-${Math.random().toString(36).substring(2, 9)}${finalExt}`;
           
@@ -103,21 +88,7 @@ export async function uploadImagesAction(formData: FormData) {
       let fileBuffer = Buffer.from(bytes);
       let finalExt = (path.extname(file.name) || ".jpg").toLowerCase();
 
-      // HEIC to JPEG conversion
-      if (finalExt === ".heic" || finalExt === ".heif") {
-        try {
-          const heicConvert = require("heic-convert");
-          const outputBuffer = await heicConvert({
-            buffer: fileBuffer,
-            format: 'JPEG',
-            quality: 0.85
-          });
-          fileBuffer = outputBuffer;
-          finalExt = ".jpg";
-        } catch (e) {
-          console.warn("heic-convert not available for local fallback:", e);
-        }
-      }
+      // Skip HEIC conversion on serverless to avoid WASM boot crashes
 
       const filename = `cart-${Date.now()}-${Math.random().toString(36).substring(2, 9)}${finalExt}`;
       const filePath = path.join(uploadDir, filename);
