@@ -218,24 +218,127 @@ function getNextMockBookingCode(): string {
 // --------------------------------------------------
 export async function getUsers(): Promise<User[]> {
   if (isDbConfigured) {
-    const { data } = await supabase.from("users").select("*");
-    return data || [];
+    const { data: profiles, error } = await supabase
+      .from("profiles")
+      .select(`
+        id,
+        name,
+        email,
+        created_at,
+        user_roles (
+          role_id,
+          roles (
+            name
+          )
+        ),
+        vendor_profiles (
+          phone
+        )
+      `);
+    
+    if (error) {
+      console.error("Failed to fetch V2 users:", error);
+      return [];
+    }
+
+    return (profiles || []).map((p: any) => {
+      const roleNames = (p.user_roles || []).map((ur: any) => ur.roles?.name).filter(Boolean);
+      let mappedRole: "cv" | "bv" | "admin" = "bv";
+      if (roleNames.includes("ADMIN") || roleNames.includes("SUPER_ADMIN")) {
+        mappedRole = "admin";
+      } else if (roleNames.includes("VENDOR")) {
+        mappedRole = "cv";
+      }
+
+      let phone = "";
+      if (p.vendor_profiles) {
+        if (Array.isArray(p.vendor_profiles)) {
+          phone = p.vendor_profiles[0]?.phone || "";
+        } else {
+          phone = (p.vendor_profiles as any).phone || "";
+        }
+      }
+      if (!phone) {
+        phone = p.email || "";
+      }
+
+      return {
+        id: p.id,
+        role: mappedRole,
+        name: p.name || p.email?.split("@")[0] || "User",
+        phone: phone,
+        created_at: p.created_at
+      };
+    });
   }
   return mockUsers;
 }
 
 export async function getUser(id: string): Promise<User | null> {
   if (isDbConfigured) {
-    const { data } = await supabase.from("users").select("*").eq("id", id).single();
-    return data || null;
+    const { data: p, error } = await supabase
+      .from("profiles")
+      .select(`
+        id,
+        name,
+        email,
+        created_at,
+        user_roles (
+          role_id,
+          roles (
+            name
+          )
+        ),
+        vendor_profiles (
+          phone
+        )
+      `)
+      .eq("id", id)
+      .single();
+
+    if (error || !p) return null;
+
+    const roleNames = (p.user_roles || []).map((ur: any) => ur.roles?.name).filter(Boolean);
+    let mappedRole: "cv" | "bv" | "admin" = "bv";
+    if (roleNames.includes("ADMIN") || roleNames.includes("SUPER_ADMIN")) {
+      mappedRole = "admin";
+    } else if (roleNames.includes("VENDOR")) {
+      mappedRole = "cv";
+    }
+
+    let phone = "";
+    if (p.vendor_profiles) {
+      if (Array.isArray(p.vendor_profiles)) {
+        phone = p.vendor_profiles[0]?.phone || "";
+      } else {
+        phone = (p.vendor_profiles as any).phone || "";
+      }
+    }
+    if (!phone) {
+      phone = p.email || "";
+    }
+
+    return {
+      id: p.id,
+      role: mappedRole,
+      name: p.name || p.email?.split("@")[0] || "User",
+      phone: phone,
+      created_at: p.created_at
+    };
   }
   return mockUsers.find((u) => u.id === id) || null;
 }
 
 export async function getUserByPhone(phone: string): Promise<User | null> {
   if (isDbConfigured) {
-    const { data } = await supabase.from("users").select("*").eq("phone", phone).single();
-    return data || null;
+    const { data: vProf, error } = await supabase
+      .from("vendor_profiles")
+      .select("id")
+      .eq("phone", phone)
+      .maybeSingle();
+
+    if (error || !vProf) return null;
+    return getUser(vProf.id);
   }
   return mockUsers.find((u) => u.phone === phone) || null;
 }

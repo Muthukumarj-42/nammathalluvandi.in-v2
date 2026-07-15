@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { IconTent, IconIceCream, IconCoffee, IconRickshaw, IconSearchStove } from "@/components/ui/icons";
 import { getLiveCartsAction } from "@/app/actions";
 import { getLocalFallbackLocationName } from "@/lib/geocoding";
+import { mapDbCartToCart } from "@/lib/carts";
 
 function getCartLocationName(cart: any): string {
   return getLocalFallbackLocationName(cart.latitude || 11.0168, cart.longitude || 76.9558);
@@ -252,12 +253,13 @@ export default function HomePage() {
             </div>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-2 gap-3 md:gap-6">
-              {dbCarts.slice(0, 2).map((cart, i) => {
-                const image = Array.isArray(cart.photos) && cart.photos.length > 0 ? cart.photos[0] : null;
-                const typeArr: string[] = Array.isArray(cart.type) ? cart.type : [cart.type];
+              {dbCarts.slice(0, 2).map((dbCart, i) => {
+                const cart = mapDbCartToCart(dbCart);
+                const image = Array.isArray(cart.images) && cart.images.length > 0 ? cart.images[0] : null;
+                const typeArr = cart.type;
                 const tagLabel = i === 0 ? "BESTSELLER" : "POPULAR";
                 const tagColor = i === 0 ? "bg-[#f97316] text-[#0a0a08]" : "bg-[#ffca45] text-[#0a0a08]";
-                const pricePerDay = Number(cart.price_per_day) || Number(cart.price_per_month) || 80;
+                const pricePerDay = cart.pricePerDay;
                 return (
                   <div key={cart.id} className="group bg-surface border border-[#f97316]/25 hover:border-[#f97316]/60 transition-all duration-300 flex flex-col rounded-3xl overflow-hidden shadow-premium p-3 md:p-6 relative">
                     <div className="aspect-[16/9] bg-[#251913] relative shrink-0 flex items-center justify-center rounded-2xl overflow-hidden">
@@ -267,7 +269,7 @@ export default function HomePage() {
                       {image ? (
                         <img
                           src={image}
-                          alt={cart.type}
+                          alt={cart.nameEn}
                           className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105 rounded-xl"
                         />
                       ) : (
@@ -282,18 +284,24 @@ export default function HomePage() {
                           <span key={idx} className="text-[8px] font-bold bg-[#f97316]/10 text-[#f97316] border border-[#f97316]/20 px-1.5 py-0.5 rounded uppercase tracking-wide">{t}</span>
                         ))}
                       </div>
-                      <h4 className="font-display text-xs md:text-xl text-on-surface tracking-wider line-clamp-1">{cart.name_en || typeArr.join(", ")}</h4>
-                      <p className="font-body text-[10px] md:text-sm text-on-surface-variant mt-1.5 mb-3 md:mt-2 md:mb-6 flex-grow line-clamp-2">{cart.description || "Premium quality food cart available for rent."}</p>
+                      <h4 className="font-display text-xs md:text-xl text-on-surface tracking-wider line-clamp-1">
+                        <Text en={cart.nameEn} ta={cart.nameTa} />
+                      </h4>
+                      <p className="font-body text-[10px] md:text-sm text-on-surface-variant mt-1.5 mb-3 md:mt-2 md:mb-6 flex-grow line-clamp-2">
+                        <Text en={cart.descriptionEn || "Premium quality food cart available for rent."} ta={cart.descriptionTa || "உயர்தர உணவு வண்டி வாடகைக்கு கிடைக்கிறது."} />
+                      </p>
 
                       <div className="flex justify-between items-center pt-3 border-t border-outline-variant/10">
                         <div>
                           <span className="font-display text-sm md:text-2xl text-[#ffca45] block">₹{pricePerDay}/day</span>
                           <span className="text-[8px] md:text-[10px] uppercase tracking-wider text-on-surface-variant/60 block line-clamp-1">
-                            {getCartLocationName(cart)}
+                            {getCartLocationName(dbCart)}
                           </span>
                         </div>
                         <Button asChild className="bg-transparent border border-[#f97316] text-[#f97316] hover:bg-[#f97316]/10 rounded-xl px-2 py-1 md:px-6 md:py-2 h-7 md:h-auto font-display tracking-wider text-[9px] md:text-xs shrink-0 whitespace-nowrap">
-                          <Link href={`/cart/${cart.id}`} className="after:absolute after:inset-0 after:z-10 whitespace-nowrap">Details</Link>
+                          <Link href={`/cart/${cart.id}`} className="after:absolute after:inset-0 after:z-10 whitespace-nowrap">
+                            <Text en="Details" ta="விவரங்கள்" />
+                          </Link>
                         </Button>
                       </div>
                     </div>
@@ -326,9 +334,10 @@ export default function HomePage() {
             </div>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-2 gap-3 md:gap-6">
-              {dbCarts.slice(2, 4).map((cart, i) => {
-                const image = Array.isArray(cart.photos) && cart.photos.length > 0 ? cart.photos[0] : null;
-                const pricePerDay = Number(cart.price_per_day) || Number(cart.price_per_month) || 80;
+              {dbCarts.slice(2, 4).map((dbCart, i) => {
+                const cart = mapDbCartToCart(dbCart);
+                const image = Array.isArray(cart.images) && cart.images.length > 0 ? cart.images[0] : null;
+                const pricePerDay = cart.pricePerDay;
                 return (
                   <div key={cart.id} className="bg-surface border border-outline-variant/30 flex flex-col p-3 md:p-4 rounded-3xl shadow-premium relative">
                     <div className="aspect-[16/10] bg-[#251913] relative shrink-0 flex items-center justify-center mb-2 md:mb-4 rounded-2xl overflow-hidden">
@@ -336,7 +345,7 @@ export default function HomePage() {
                         {cart.condition?.includes("New") ? "NEW" : "PRE-OWNED"}
                       </span>
                       {image ? (
-                        <img src={image} alt={cart.type} className="w-full h-full object-contain rounded-xl" />
+                        <img src={image} alt={cart.nameEn} className="w-full h-full object-contain rounded-xl" />
                       ) : (
                         <svg viewBox="0 0 100 80" className="w-12 h-12 md:w-20 md:h-20 text-on-surface-variant/10" fill="currentColor">
                           <path d="M20 20 h60 v40 h-60 z M30 60 v10 M70 60 v10 M25 70 h50 M35 70 v5 M65 70 v5"/>
@@ -344,15 +353,17 @@ export default function HomePage() {
                       )}
                     </div>
                     <div className="flex flex-col flex-grow">
-                      <h4 className="font-display text-xs md:text-lg text-on-surface tracking-wider line-clamp-1">{cart.name_en || cart.type}</h4>
+                      <h4 className="font-display text-xs md:text-lg text-on-surface tracking-wider line-clamp-1">
+                        <Text en={cart.nameEn} ta={cart.nameTa} />
+                      </h4>
                       <span className="font-display text-sm md:text-xl text-[#ffca45] mt-1 mb-1 block">₹{pricePerDay}/day</span>
                       <p className="text-[10px] md:text-xs text-on-surface-variant mb-2 md:mb-4 flex items-center gap-1">
-                        📍 {getCartLocationName(cart)}
+                        📍 {getCartLocationName(dbCart)}
                       </p>
 
                       <Button asChild className="w-full bg-[#f97316] hover:bg-[#e2640e] text-[#0a0a08] border-none rounded-xl font-display uppercase tracking-widest text-[9px] md:text-xs py-1.5 md:py-2 h-8 md:h-10">
-                        <Link href={`/contact?cart=${cart.id}&name=${encodeURIComponent(cart.name_en || cart.type)}&ref=sale#enquiry-form`} scroll={false} className="after:absolute after:inset-0 after:z-10">
-                          Enquire Now
+                        <Link href={`/contact?cart=${cart.id}&name=${encodeURIComponent(cart.nameEn)}&ref=sale#enquiry-form`} scroll={false} className="after:absolute after:inset-0 after:z-10">
+                          <Text en="Enquire Now" ta="இப்போதே விசாரிக்கவும்" />
                         </Link>
                       </Button>
                     </div>

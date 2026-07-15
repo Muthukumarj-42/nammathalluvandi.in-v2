@@ -2,6 +2,7 @@
 
 import { promises as fs } from "fs";
 import path from "path";
+import { supabase, isDbConfigured } from "@/lib/supabase";
 
 import { 
   createBooking, 
@@ -35,22 +36,72 @@ export async function uploadImagesAction(formData: FormData) {
     }
 
     const uploadedUrls: string[] = [];
-    const uploadDir = path.join(process.cwd(), "public", "uploads");
 
-    // Ensure directory exists
+    // Attempt to upload to Supabase Storage first if database is configured
+    if (isDbConfigured) {
+      try {
+        for (const file of files) {
+          if (!file || !file.name || file.size === 0) continue;
+          const bytes = await file.arrayBuffer();
+          let fileBuffer = Buffer.from(bytes);
+          let finalExt = (path.extname(file.name) || ".jpg").toLowerCase();
+          let mimeType = file.type || "image/jpeg";
+
+          // HEIC to JPEG conversion if the file is HEIC and package is available
+          if (finalExt === ".heic" || finalExt === ".heif") {
+            try {
+              const heicConvert = require("heic-convert");
+              const outputBuffer = await heicConvert({
+                buffer: fileBuffer,
+                format: 'JPEG',
+                quality: 0.85
+              });
+              fileBuffer = outputBuffer;
+              finalExt = ".jpg";
+              mimeType = "image/jpeg";
+            } catch (e) {
+              console.warn("heic-convert is not available, uploading original heic file:", e);
+            }
+          }
+
+          const filename = `cart-${Date.now()}-${Math.random().toString(36).substring(2, 9)}${finalExt}`;
+          
+          const { data, error } = await supabase.storage
+            .from("carts")
+            .upload(filename, fileBuffer, {
+              contentType: mimeType,
+              cacheControl: "3600",
+              upsert: true
+            });
+
+          if (error) throw error;
+
+          const { data: { publicUrl } } = supabase.storage
+            .from("carts")
+            .getPublicUrl(filename);
+
+          uploadedUrls.push(publicUrl);
+        }
+
+        return { success: true, urls: uploadedUrls };
+      } catch (storageErr: any) {
+        console.warn("Supabase storage upload failed, attempting local fallback:", storageErr.message);
+        // Clear array to try local fallback
+        uploadedUrls.length = 0;
+      }
+    }
+
+    // Local filesystem fallback (works on localhost)
+    const uploadDir = path.join(process.cwd(), "public", "uploads");
     await fs.mkdir(uploadDir, { recursive: true });
 
     for (const file of files) {
       if (!file || !file.name || file.size === 0) continue;
       const bytes = await file.arrayBuffer();
-      const buffer = Buffer.from(bytes);
+      let fileBuffer = Buffer.from(bytes);
+      let finalExt = (path.extname(file.name) || ".jpg").toLowerCase();
 
-      // Create a unique filename
-      const ext = path.extname(file.name) || ".jpg";
-      let fileBuffer = buffer;
-      let finalExt = ext.toLowerCase();
-
-      // HEIC to JPEG conversion if the file is HEIC and package is available
+      // HEIC to JPEG conversion
       if (finalExt === ".heic" || finalExt === ".heif") {
         try {
           const heicConvert = require("heic-convert");
@@ -62,7 +113,7 @@ export async function uploadImagesAction(formData: FormData) {
           fileBuffer = outputBuffer;
           finalExt = ".jpg";
         } catch (e) {
-          console.warn("heic-convert is not available, saving original heic file:", e);
+          console.warn("heic-convert not available for local fallback:", e);
         }
       }
 

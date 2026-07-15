@@ -425,7 +425,7 @@ export function CartExplorer({
                           className="border-black/20 text-ink text-xs h-10"
                         >
                           <Link href={`/carts/${cart.id}`} className="after:absolute after:inset-0 after:z-10">
-                            DETAILS
+                            <Text en="DETAILS" ta="விவரங்கள்" />
                           </Link>
                         </Button>
                         <Button
@@ -433,7 +433,7 @@ export function CartExplorer({
                           className="bg-[#25D366] hover:bg-[#20ba5a] text-white text-xs h-10 relative z-20"
                         >
                           <Link href={`/book?cart=${cart.id}`}>
-                            BOOK CART
+                            <Text en="BOOK CART" ta="முன்பதிவு செய்க" />
                           </Link>
                         </Button>
                       </div>
@@ -531,7 +531,7 @@ export function CartExplorer({
                     <div className="flex items-start justify-between gap-4">
                       <div>
                         <h3 className="font-display text-3xl uppercase leading-tight text-ink">
-                          {cart.nameEn}
+                          <Text en={cart.nameEn} ta={cart.nameTa} />
                         </h3>
                       </div>
                       <Sparkles className="shrink-0 text-primary" size={20} />
@@ -554,7 +554,7 @@ export function CartExplorer({
                     <div className="mt-5 rounded-lg border border-black/10 bg-[#F8F6F2] p-4 grid grid-cols-2 gap-2">
                       <div>
                         <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted">
-                          Daily Price
+                          <Text en="Daily Price" ta="தினசரி வாடகை" />
                         </p>
                         <p className="mt-1 font-display text-3xl text-ink">
                           ₹{cart.pricePerDay}
@@ -562,7 +562,7 @@ export function CartExplorer({
                       </div>
                       <div>
                         <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted">
-                          Deposit
+                          <Text en="Deposit" ta="முன்பணம்" />
                         </p>
                         <p className="mt-1 font-display text-3xl text-ink">
                           ₹{cart.depositAmount}
@@ -571,22 +571,32 @@ export function CartExplorer({
                     </div>
 
                     <ul className="mt-5 space-y-2 text-sm text-muted flex-1">
-                      {cart.featuresEn
-                        .slice(0, 3)
-                        .map((feature: string, idx: number) => (
-                          <li key={idx} className="flex gap-2">
-                            <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
-                            <span>
-                              {feature}
-                            </span>
-                          </li>
-                        ))}
+                      <span className="en">
+                        {cart.featuresEn
+                          .slice(0, 3)
+                          .map((feature: string, idx: number) => (
+                            <li key={idx} className="flex gap-2">
+                              <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
+                              <span>{feature}</span>
+                            </li>
+                          ))}
+                      </span>
+                      <span className="ta tamil-text">
+                        {cart.featuresTa
+                          .slice(0, 3)
+                          .map((feature: string, idx: number) => (
+                            <li key={idx} className="flex gap-2">
+                              <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
+                              <span>{feature}</span>
+                            </li>
+                          ))}
+                      </span>
                     </ul>
 
                     <div className="mt-6 grid grid-cols-2 gap-3 pt-4 border-t border-black/5">
                       <Button asChild variant="dark">
                         <Link href={`/carts/${cart.id}`} className="after:absolute after:inset-0 after:z-10">
-                          Details
+                          <Text en="Details" ta="விவரங்கள்" />
                         </Link>
                       </Button>
                       <Button
@@ -595,7 +605,7 @@ export function CartExplorer({
                       >
                         <Link href={`/book?cart=${cart.id}`}>
                           <MessageCircle size={16} />{" "}
-                          Book
+                          <Text en="Book" ta="முன்பதிவு" />
                         </Link>
                       </Button>
                     </div>
