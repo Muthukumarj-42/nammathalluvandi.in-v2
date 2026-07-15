@@ -84,6 +84,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // ── Load profile + roles for a given user ──────────────────────────────────
   const loadUserData = useCallback(
     async (authUser: User) => {
+      setLoading(true);
       try {
         // 1. Load or create profile
         let { data: prof, error: profError } = await supabase
@@ -147,6 +148,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       } catch (err) {
         console.error("Failed to load user data:", err);
+      } finally {
+        setLoading(false);
       }
     },
     [supabase]
