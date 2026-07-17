@@ -14,8 +14,10 @@ import {
   updateBookingStatusAction,
   escalateBookingAction,
   updateDisputeStatusAction,
+  updateCartAction,
 } from "@/app/actions";
 import { cn } from "@/lib/utils";
+import { createClient } from "@/lib/supabase-browser";
 
 const FALLBACK_PHOTO = "/carts/covered-premium-cart/photo-1.webp";
 
@@ -59,6 +61,7 @@ function getCartVendorInfo(cart: any, vendors: any[], users: any[]) {
 type Tab = "pending" | "carts" | "vendors" | "bookings" | "disputes" | "whatsapp";
 
 export default function AdminDashboard() {
+  const supabase = createClient();
   const [authorized, setAuthorized] = useState(false);
   const [passcode, setPasscode] = useState("");
   const [passcodeError, setPasscodeError] = useState("");
@@ -81,6 +84,18 @@ export default function AdminDashboard() {
   const [search, setSearch] = useState("");
   const [toast, setToast] = useState("");
   const [viewingPhotos, setViewingPhotos] = useState<string[] | null>(null);
+
+  const [editingCart, setEditingCart] = useState<any | null>(null);
+  const [editForm, setEditForm] = useState({
+    cart_type: "",
+    condition: "",
+    daily_rent: "",
+    area: "",
+    description: "",
+    verified: false,
+    photos: [] as string[],
+  });
+  const [editSaving, setEditSaving] = useState(false);
 
   const [confirmModal, setConfirmModal] = useState<{
     open: boolean;
@@ -250,6 +265,149 @@ export default function AdminDashboard() {
     });
   };
 
+  // ── Edit cart modal ──
+  const openEditModal = (cart: any) => {
+    setEditingCart(cart);
+    setEditForm({
+      cart_type: cart.cart_type || cart.type || "",
+      condition: cart.condition || "",
+      daily_rent: String(cart.daily_rent || cart.price_per_day || ""),
+      area: cart.area || "",
+      description: cart.description || "",
+      verified: cart.verified || false,
+      photos: cart.photos || [],
+    });
+  };
+
+  const closeEditModal = () => {
+    setEditingCart(null);
+    setEditSaving(false);
+  };
+
+  const handleRemovePhoto = (index: number) => {
+    setEditForm((f) => ({
+      ...f,
+      photos: f.photos.filter((_, i) => i !== index),
+    }));
+  };
+
+  const handleAddPhotos = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+
+    let currentPhotos = [...editForm.photos];
+    for (const file of files) {
+      if (currentPhotos.length >= 5) break;
+
+      const filename = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.]/g, "_")}`;
+      const path = `${editingCart?.id}/${filename}`;
+
+      const { data, error } = await supabase.storage.from("carts").upload(path, file);
+
+      if (!error && data) {
+        const { data: urlData } = supabase.storage.from("carts").getPublicUrl(data.path);
+        currentPhotos.push(urlData.publicUrl);
+      }
+    }
+    setEditForm((f) => ({
+      ...f,
+      photos: currentPhotos,
+    }));
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingCart) return;
+    setEditSaving(true);
+
+    const res = await updateCartAction(editingCart.id, {
+      type: editForm.cart_type,
+      condition: editForm.condition,
+      price_per_day: Number(editForm.daily_rent),
+      area: editForm.area,
+      description: editForm.description,
+      verified: editForm.verified,
+      photos: editForm.photos,
+    });
+
+    if (!res.success) {
+      showToast("Error saving changes: " + res.error);
+    } else {
+      showToast("Cart updated ✅");
+      closeEditModal();
+      fetchAllData();
+    }
+    setEditSaving(false);
+  };
+
+  // ── CSV export ──
+  const handleExport = () => {
+    let rows: string[][] = [];
+    let filename = "";
+
+    if (activeTab === "carts" || activeTab === "pending") {
+      const data = activeTab === "pending" ? pendingCarts : liveCarts;
+      filename = `ntv-carts-${Date.now()}.csv`;
+      rows = [
+        ["ID", "Type", "Condition", "Daily Rent", "Area", "District", "Verified", "Status", "Created"],
+        ...data.map((c) => [
+          c.id,
+          c.cart_type || c.type || "",
+          c.condition || "",
+          String(c.daily_rent || c.price_per_day || ""),
+          c.area || "",
+          c.district || "",
+          String(c.verified || false),
+          c.status || "",
+          c.created_at || "",
+        ]),
+      ];
+    } else if (activeTab === "vendors") {
+      filename = `ntv-vendors-${Date.now()}.csv`;
+      rows = [
+        ["ID", "Name", "WhatsApp", "Area", "District", "Cart Count", "Status", "Joined"],
+        ...vendors.map((v) => [
+          v.id,
+          v.full_name || v.shop_name || "",
+          v.whatsapp_number || v.phone || "",
+          v.area || "",
+          v.district || "",
+          String(v.cart_count || ""),
+          v.status || "",
+          v.created_at || "",
+        ]),
+      ];
+    } else if (activeTab === "bookings") {
+      filename = `ntv-bookings-${Date.now()}.csv`;
+      rows = [
+        ["Booking Code", "Status", "Cart ID", "Created", "Escalation Count"],
+        ...bookings.map((b) => [
+          b.booking_code || "",
+          b.status || "",
+          b.cart_id || "",
+          b.created_at || "",
+          String(b.escalation_count || 0),
+        ]),
+      ];
+    } else {
+      showToast("Nothing to export on this tab");
+      return;
+    }
+
+    const csv = rows
+      .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","))
+      .join("\n");
+
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+
+    showToast(`Exported ${rows.length - 1} rows`);
+  };
+
   // ── Derived data ──
   const pendingCarts = carts.filter((c) => c.status === "pending_review");
   const liveCarts = carts.filter((c) => c.status === "live");
@@ -349,12 +507,20 @@ export default function AdminDashboard() {
             <h1 className="font-display text-2xl font-bold text-on-surface">NTV Admin</h1>
             <p className="text-xs text-on-surface-variant">Namma Thalluvandi Control Panel</p>
           </div>
-          <button
-            onClick={handleRefresh}
-            className="px-4 py-2 rounded-xl bg-surface border border-outline-variant/30 text-on-surface text-sm font-medium hover:bg-surface-container transition"
-          >
-            ↻ Refresh
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={handleExport}
+              className="px-4 py-2 rounded-xl bg-surface border border-outline-variant/30 text-on-surface text-sm font-medium hover:bg-surface-container transition"
+            >
+              ↓ Export
+            </button>
+            <button
+              onClick={handleRefresh}
+              className="px-4 py-2 rounded-xl bg-surface border border-outline-variant/30 text-on-surface text-sm font-medium hover:bg-surface-container transition"
+            >
+              ↻ Refresh
+            </button>
+          </div>
         </div>
 
         {/* Stats Row */}
@@ -579,6 +745,12 @@ export default function AdminDashboard() {
                           className="px-3 py-1.5 rounded-lg bg-error/10 text-error text-xs font-medium hover:bg-error/20 transition"
                         >
                           Pause
+                        </button>
+                        <button
+                          onClick={() => openEditModal(cart)}
+                          className="px-3 py-1.5 rounded-lg bg-surface-container text-on-surface text-xs font-medium hover:bg-surface-container/80 transition"
+                        >
+                          Edit
                         </button>
                         <a
                           href={`/carts/${cart.id}`}
@@ -854,6 +1026,146 @@ export default function AdminDashboard() {
             {viewingPhotos.map((url) => (
               <img key={url} src={url} className="h-3/4 object-contain rounded-xl flex-shrink-0" alt="Cart" />
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* Edit cart modal */}
+      {editingCart && (
+        <div
+          className="fixed inset-0 bg-black/50 z-50 flex items-end md:items-center justify-center"
+          onClick={closeEditModal}
+        >
+          <div
+            className="bg-surface w-full md:max-w-lg rounded-t-3xl md:rounded-2xl p-6 max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="font-display text-xl font-bold text-on-surface">Edit Cart</h2>
+              <button onClick={closeEditModal} className="text-on-surface-variant text-2xl leading-none">
+                ✕
+              </button>
+            </div>
+
+            {/* Photo management */}
+            <div className="mb-6">
+              <p className="text-sm font-semibold text-on-surface mb-3">Cart Photos</p>
+
+              <div className="flex gap-2 overflow-x-auto pb-2 mb-3">
+                {editForm.photos.map((url, i) => (
+                  <div key={i} className="relative flex-shrink-0">
+                    <img src={url} className="w-20 h-20 rounded-xl object-cover" alt="Cart" />
+                    <button
+                      onClick={() => handleRemovePhoto(i)}
+                      className="absolute -top-1 -right-1 w-5 h-5 bg-error text-white rounded-full text-xs flex items-center justify-center font-bold leading-none"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ))}
+
+                {editForm.photos.length < 5 && (
+                  <label className="w-20 h-20 rounded-xl border-2 border-dashed border-outline-variant/40 bg-surface-container flex flex-col items-center justify-center cursor-pointer flex-shrink-0 hover:border-primary/40 transition">
+                    <span className="text-2xl text-on-surface-variant">+</span>
+                    <span className="text-xs text-on-surface-variant mt-1">Add</span>
+                    <input type="file" accept="image/*" multiple className="hidden" onChange={handleAddPhotos} />
+                  </label>
+                )}
+              </div>
+
+              <p className="text-xs text-on-surface-variant">Tap ✕ to remove a photo. Tap + to add new ones. Max 5 photos.</p>
+            </div>
+
+            {/* Cart details */}
+            <div className="space-y-4 mb-6">
+              <div>
+                <label className="block text-sm font-semibold text-on-surface mb-1.5">Cart Type</label>
+                <select
+                  value={editForm.cart_type}
+                  onChange={(e) => setEditForm((f) => ({ ...f, cart_type: e.target.value }))}
+                  className="w-full px-4 py-3 rounded-xl bg-surface border border-outline-variant/30 text-on-surface text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 transition"
+                >
+                  <option value="With Store">With Store / Stove Cart</option>
+                  <option value="With Roof">With Roof / Covered Cart</option>
+                  <option value="Ice Cream">Ice Cream Cart</option>
+                  <option value="Tea Stall">Tea &amp; Coffee Cart</option>
+                  <option value="E-Rickshaw">E-Rickshaw Food Cart</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-on-surface mb-1.5">Condition</label>
+                <select
+                  value={editForm.condition}
+                  onChange={(e) => setEditForm((f) => ({ ...f, condition: e.target.value }))}
+                  className="w-full px-4 py-3 rounded-xl bg-surface border border-outline-variant/30 text-on-surface text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 transition"
+                >
+                  <option value="New">Brand New</option>
+                  <option value="Used - Very Good">Used — Very Good</option>
+                  <option value="Used - Good">Used — Good</option>
+                  <option value="Used - Fair">Used — Fair</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-on-surface mb-1.5">Daily Rent (₹)</label>
+                <input
+                  type="number"
+                  value={editForm.daily_rent}
+                  onChange={(e) => setEditForm((f) => ({ ...f, daily_rent: e.target.value }))}
+                  className="w-full px-4 py-3 rounded-xl bg-surface border border-outline-variant/30 text-on-surface text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 transition"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-on-surface mb-1.5">Area / Location</label>
+                <input
+                  type="text"
+                  value={editForm.area}
+                  placeholder="e.g. Ondipudur, Coimbatore"
+                  onChange={(e) => setEditForm((f) => ({ ...f, area: e.target.value }))}
+                  className="w-full px-4 py-3 rounded-xl bg-surface border border-outline-variant/30 text-on-surface text-sm placeholder:text-on-surface-variant/40 focus:outline-none focus:ring-2 focus:ring-primary/40 transition"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-on-surface mb-1.5">Description</label>
+                <textarea
+                  rows={3}
+                  value={editForm.description}
+                  onChange={(e) => setEditForm((f) => ({ ...f, description: e.target.value }))}
+                  className="w-full px-4 py-3 rounded-xl bg-surface border border-outline-variant/30 text-on-surface text-sm placeholder:text-on-surface-variant/40 focus:outline-none focus:ring-2 focus:ring-primary/40 transition resize-none"
+                />
+              </div>
+
+              <div className="flex items-center justify-between p-4 rounded-xl bg-surface-container">
+                <div>
+                  <p className="text-sm font-semibold text-on-surface">Verified Status</p>
+                  <p className="text-xs text-on-surface-variant">Show verified badge on listing</p>
+                </div>
+                <button
+                  onClick={() => setEditForm((f) => ({ ...f, verified: !f.verified }))}
+                  className={`w-12 h-6 rounded-full transition-colors ${
+                    editForm.verified ? "bg-primary" : "bg-outline-variant/40"
+                  }`}
+                >
+                  <div
+                    className={`w-5 h-5 rounded-full bg-white shadow transition-transform mx-0.5 ${
+                      editForm.verified ? "translate-x-6" : "translate-x-0"
+                    }`}
+                  />
+                </button>
+              </div>
+            </div>
+
+            <button
+              onClick={handleSaveEdit}
+              disabled={editSaving}
+              className="w-full py-4 rounded-xl bg-primary text-on-primary font-bold text-sm uppercase tracking-widest hover:bg-primary-container transition disabled:opacity-50"
+            >
+              {editSaving ? "Saving..." : "SAVE CHANGES"}
+            </button>
           </div>
         </div>
       )}

@@ -455,7 +455,7 @@ export async function updateCartStatus(id: string, status: DbCart["status"], ver
   return null;
 }
 
-export async function updateCart(id: string, data: Partial<Pick<DbCart, "type" | "condition" | "size" | "weight" | "stove_type" | "price_per_day" | "min_rental_period" | "available_from" | "equipment" | "description" | "photos" | "latitude" | "longitude" | "area" | "district" | "vendor_id">>): Promise<DbCart | null> {
+export async function updateCart(id: string, data: Partial<Pick<DbCart, "type" | "condition" | "size" | "weight" | "stove_type" | "price_per_day" | "min_rental_period" | "available_from" | "equipment" | "description" | "photos" | "latitude" | "longitude" | "area" | "district" | "vendor_id" | "verified">>): Promise<DbCart | null> {
   if (isDbConfigured) {
     const { data: updated, error } = await supabase
       .from("carts")

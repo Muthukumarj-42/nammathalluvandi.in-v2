@@ -386,6 +386,7 @@ export async function updateCartAction(id: string, data: {
   area?: string;
   district?: string;
   vendor_id?: string;
+  verified?: boolean;
 }) {
   try {
     const updated = await dbUpdateCart(id, data);
