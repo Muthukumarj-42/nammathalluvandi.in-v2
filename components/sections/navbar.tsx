@@ -20,15 +20,8 @@ function UserMenu() {
   const { user, profile, roles, isAdmin, isVendor, signOut } = useAuth();
   const [open, setOpen] = useState(false);
 
-  if (!user) {
-    return (
-      <Button asChild className="bg-[#f97316] text-[#0a0a08] hover:bg-[#f97316]/95 border-none rounded-xl font-display text-xs lg:text-sm tracking-[0.08em] lg:tracking-[0.12em] uppercase shrink-0 h-9 lg:h-11 px-3 lg:px-5">
-        <Link href="/login">
-          <span className="en">Login</span>
-          <span className="ta tamil-text">உள்நுழை</span>
-        </Link>
-      </Button>
-    );
+  if (!user || !(isVendor || isAdmin)) {
+    return null;
   }
 
   const initials = (profile?.name ?? "U")
@@ -136,6 +129,8 @@ function UserMenu() {
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
+  const { isVendor, isAdmin } = useAuth();
+  const showVendorActions = isVendor || isAdmin;
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -143,6 +138,11 @@ export function Navbar() {
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  const visibleNav = nav.filter(([label, tamil, href]) => {
+    if (href === "/publish") return showVendorActions;
+    return true;
+  });
 
   return (
     <>
@@ -174,7 +174,7 @@ export function Navbar() {
           </Link>
 
           <nav className="hidden items-center gap-3 lg:gap-5 xl:gap-8 md:flex shrink-0">
-            {nav.map(([label, tamil, href]) => (
+            {visibleNav.map(([label, tamil, href]) => (
               <Link key={href} href={href} scroll={!href.includes("#")} className={`font-display text-xs lg:text-sm tracking-[0.08em] lg:tracking-[0.12em] uppercase transition hover:text-primary-container whitespace-nowrap ${pathname === href ? "text-primary-container" : "text-on-surface-variant"}`}>
                 <span className="en">{label}</span>
                 <span className="ta tamil-text">{tamil}</span>

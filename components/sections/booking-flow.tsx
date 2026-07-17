@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { getCart, type Cart } from "@/lib/carts";
 import { saveBooking } from "@/app/actions";
 import { reverseGeocode } from "@/lib/geocoding";
+import { useAuth } from "@/context/auth-context";
+import { createClient } from "@/lib/supabase-browser";
 
 const TAMIL_DICTIONARY: Record<string, string> = {
   // Pronouns / Particles
@@ -265,6 +267,68 @@ export function BookingFlow() {
   const [todayDate, setTodayDate] = useState("");
   const [imgError, setImgError] = useState(false);
 
+  const { user } = useAuth();
+  const supabase = createClient();
+
+  const [email, setEmail] = useState("");
+  const [otp, setOtp] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
+  const [emailVerified, setEmailVerified] = useState(false);
+  const [otpLoading, setOtpLoading] = useState(false);
+  const [otpError, setOtpError] = useState("");
+
+  useEffect(() => {
+    if (user && user.email) {
+      setEmail(user.email);
+      setEmailVerified(true);
+    }
+  }, [user]);
+
+  const handleSendBookingOtp = async () => {
+    if (!email.trim()) return;
+    setOtpLoading(true);
+    setOtpError("");
+    try {
+      const { error } = await supabase.auth.signInWithOtp({
+        email: email.trim().toLowerCase(),
+      });
+      if (error) {
+        setOtpError(error.message);
+      } else {
+        setOtpSent(true);
+      }
+    } catch (err: any) {
+      setOtpError(err.message || "Failed to send OTP.");
+    } finally {
+      setOtpLoading(false);
+    }
+  };
+
+  const handleVerifyBookingOtp = async () => {
+    if (!otp.trim()) return;
+    setOtpLoading(true);
+    setOtpError("");
+    try {
+      const { data, error } = await supabase.auth.verifyOtp({
+        email: email.trim().toLowerCase(),
+        token: otp.trim(),
+        type: "email",
+      });
+      if (error) {
+        setOtpError(error.message);
+      } else if (data.session) {
+        setEmailVerified(true);
+        setOtpSent(false);
+      } else {
+        setOtpError("Verification failed.");
+      }
+    } catch (err: any) {
+      setOtpError(err.message || "Failed to verify OTP.");
+    } finally {
+      setOtpLoading(false);
+    }
+  };
+
 
   // Form State
   const [formData, setFormData] = useState({
@@ -429,6 +493,7 @@ export function BookingFlow() {
   };
 
   const isFormValid =
+    emailVerified &&
     formData.name.trim() !== "" &&
     formData.phone.replace(/\D/g, "").length === 10 &&
     formData.date !== "" &&
@@ -613,6 +678,87 @@ export function BookingFlow() {
                 <span className="en">Your Details</span>
                 <span className="ta tamil-text text-2xl">உங்கள் விவரங்கள்</span>
               </h2>
+
+              {/* Email Verification Section */}
+              {emailVerified ? (
+                <div className="flex flex-col">
+                  <label className="text-sm font-semibold mb-1 block">
+                    <span className="en">Email Address *</span>
+                    <span className="ta tamil-text">மின்னஞ்சல் முகவரி *</span>
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="email"
+                      disabled
+                      value={email}
+                      className="flex-1 h-12 border border-green-200 bg-green-50/50 rounded-xl px-4 text-base outline-none text-[#075200] font-semibold"
+                    />
+                    <span className="h-12 px-4 rounded-xl bg-green-100 border border-green-200 text-[#075200] flex items-center justify-center font-bold text-xs shrink-0">
+                      ✅ Verified
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex flex-col space-y-2">
+                  <label className="text-sm font-semibold mb-1 block">
+                    <span className="en">Email Verification *</span>
+                    <span className="ta tamil-text">மின்னஞ்சல் சரிபார்ப்பு *</span>
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="email"
+                      disabled={otpSent}
+                      placeholder="your.email@example.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="flex-1 h-12 border border-[#e5e0d8] focus:border-[#f97316] focus:ring-2 focus:ring-[#f97316]/40 rounded-xl px-4 bg-white text-base outline-none transition"
+                    />
+                    {!otpSent ? (
+                      <button
+                        type="button"
+                        disabled={otpLoading || !email.trim()}
+                        onClick={handleSendBookingOtp}
+                        className="h-12 px-4 bg-[#f97316] text-[#0a0a08] font-bold rounded-xl text-xs hover:bg-[#e2640e] transition disabled:opacity-50 shrink-0"
+                      >
+                        {otpLoading ? "Sending…" : "Send OTP"}
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => { setOtpSent(false); setOtp(""); }}
+                        className="h-12 px-4 bg-gray-100 border border-gray-200 text-gray-500 font-bold rounded-xl text-xs hover:bg-gray-200 transition shrink-0"
+                      >
+                        Change
+                      </button>
+                    )}
+                  </div>
+                  
+                  {otpSent && (
+                    <div className="flex gap-2 items-center bg-orange-50 border border-orange-200 rounded-xl p-3 mt-2">
+                      <input
+                        type="text"
+                        maxLength={6}
+                        placeholder="6-digit code"
+                        value={otp}
+                        onChange={(e) => setOtp(e.target.value)}
+                        className="w-32 h-10 border border-[#e5e0d8] rounded-lg px-2 text-center text-sm font-semibold tracking-widest outline-none bg-white"
+                      />
+                      <button
+                        type="button"
+                        disabled={otpLoading || otp.trim().length !== 6}
+                        onClick={handleVerifyBookingOtp}
+                        className="h-10 px-4 bg-[#25D366] text-white font-bold rounded-lg text-xs hover:bg-[#20ba5a] transition disabled:opacity-50 shrink-0"
+                      >
+                        {otpLoading ? "Verifying…" : "Verify Code"}
+                      </button>
+                    </div>
+                  )}
+
+                  {otpError && (
+                    <p className="text-red-500 text-xs mt-1 font-semibold">{otpError}</p>
+                  )}
+                </div>
+              )}
 
               {/* Field 1: Name */}
               <div className="flex flex-col">

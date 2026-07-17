@@ -15,7 +15,8 @@ function Text({ en, ta }: { en: string; ta: string }) {
 
 export default function MobileNav() {
   const pathname = usePathname();
-  const { user, profile } = useAuth();
+  const { user, profile, isVendor, isAdmin } = useAuth();
+  const showVendorActions = isVendor || isAdmin;
 
   const initials = (profile?.name ?? "U")
     .split(" ")
@@ -58,23 +59,25 @@ export default function MobileNav() {
           </span>
         </Link>
 
-        {/* Sell/List Button - Elevated Circular */}
-        <div className="flex flex-col items-center justify-start w-16 relative">
-          <Link
-            href="/publish"
-            className="absolute -top-5 flex flex-col items-center justify-center"
-          >
-            <div className="w-12 h-12 bg-primary-container text-on-primary-container rounded-full flex items-center justify-center shadow-md border-4 border-surface transition-transform active:scale-95">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
-                <line x1="12" y1="5" x2="12" y2="19" />
-                <line x1="5" y1="12" x2="19" y2="12" />
-              </svg>
-            </div>
-            <span className={`text-[10px] font-bold mt-1 ${pathname === "/publish" ? "text-primary" : "text-on-surface-variant/60"}`}>
-              <Text en="List" ta="பதிவிட" />
-            </span>
-          </Link>
-        </div>
+        {/* Sell/List Button - Elevated Circular (Only for Vendors/Admins) */}
+        {showVendorActions && (
+          <div className="flex flex-col items-center justify-start w-16 relative">
+            <Link
+              href="/publish"
+              className="absolute -top-5 flex flex-col items-center justify-center"
+            >
+              <div className="w-12 h-12 bg-primary-container text-on-primary-container rounded-full flex items-center justify-center shadow-md border-4 border-surface transition-transform active:scale-95">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
+                  <line x1="12" y1="5" x2="12" y2="19" />
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+              </div>
+              <span className={`text-[10px] font-bold mt-1 ${pathname === "/publish" ? "text-primary" : "text-on-surface-variant/60"}`}>
+                <Text en="List" ta="பதிவிட" />
+              </span>
+            </Link>
+          </div>
+        )}
 
         <Link
           href="/contact#enquiry-form"
@@ -89,26 +92,28 @@ export default function MobileNav() {
           </span>
         </Link>
 
-        <Link
-          href="/profile"
-          className={`flex flex-col items-center justify-center gap-1 text-[10px] font-bold w-16 transition-colors ${pathname === "/profile" ? "text-primary" : "text-on-surface-variant/60 hover:text-primary"}`}
-        >
-          {user && profile?.avatar ? (
-            <img src={profile.avatar} alt={profile.name} className="w-5 h-5 rounded-full object-cover border border-white/20" />
-          ) : user ? (
-            <div className="w-5 h-5 rounded-full bg-gradient-to-br from-[#f97316] to-[#dc2626] flex items-center justify-center text-white text-[8px] font-bold">
-              {initials}
-            </div>
-          ) : (
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-              <circle cx="12" cy="7" r="4" />
-            </svg>
-          )}
-          <span>
-            <Text en={user ? "Profile" : "Login"} ta={user ? "சுயவிவரம்" : "உள்நுழை"} />
-          </span>
-        </Link>
+        {showVendorActions && (
+          <Link
+            href="/profile"
+            className={`flex flex-col items-center justify-center gap-1 text-[10px] font-bold w-16 transition-colors ${pathname === "/profile" ? "text-primary" : "text-on-surface-variant/60 hover:text-primary"}`}
+          >
+            {user && profile?.avatar ? (
+              <img src={profile.avatar} alt={profile.name} className="w-5 h-5 rounded-full object-cover border border-white/20" />
+            ) : user ? (
+              <div className="w-5 h-5 rounded-full bg-gradient-to-br from-[#f97316] to-[#dc2626] flex items-center justify-center text-white text-[8px] font-bold">
+                {initials}
+              </div>
+            ) : (
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
+              </svg>
+            )}
+            <span>
+              <Text en="Profile" ta="சுயவிவரம்" />
+            </span>
+          </Link>
+        )}
       </div>
     </nav>
   );

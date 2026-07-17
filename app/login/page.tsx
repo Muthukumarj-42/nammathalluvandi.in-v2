@@ -51,9 +51,10 @@ function LoginForm() {
   const redirect = searchParams.get("redirect") ?? defaultRedirect;
   const urlError = searchParams.get("error");
 
-  const [mode, setMode] = useState<"choose" | "email" | "sent">("choose");
+  const [mode, setMode] = useState<"choose" | "email" | "otp">("choose");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+  const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(urlError ?? "");
 
@@ -105,8 +106,8 @@ function LoginForm() {
     }
   };
 
-  // ── Magic Link ──────────────────────────────────────────────────────────────
-  const handleMagicLink = async (e: React.FormEvent) => {
+  // ── Send Email OTP ──────────────────────────────────────────────────────────
+  const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim()) return;
     if (!isDbConfigured) {
@@ -117,18 +118,45 @@ function LoginForm() {
     setError("");
 
     const supabase = createClient();
-    const { error: magicError } = await supabase.auth.signInWithOtp({
+    const { error: otpError } = await supabase.auth.signInWithOtp({
       email: email.trim().toLowerCase(),
-      options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirect)}`,
-      },
     });
 
     setLoading(false);
-    if (magicError) {
-      setError(magicError.message);
+    if (otpError) {
+      setError(otpError.message);
     } else {
-      setMode("sent");
+      setMode("otp");
+    }
+  };
+
+  // ── Verify Email OTP ────────────────────────────────────────────────────────
+  const handleVerifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!otp.trim()) return;
+    setLoading(true);
+    setError("");
+
+    try {
+      const supabase = createClient();
+      const { data, error: verifyError } = await supabase.auth.verifyOtp({
+        email: email.trim().toLowerCase(),
+        token: otp.trim(),
+        type: "email",
+      });
+
+      if (verifyError) {
+        setError(verifyError.message);
+        setLoading(false);
+      } else if (data.session) {
+        window.location.href = redirect;
+      } else {
+        setError("Verification succeeded, but session could not be established.");
+        setLoading(false);
+      }
+    } catch (err: any) {
+      setError(err.message || "An unexpected error occurred.");
+      setLoading(false);
     }
   };
 
@@ -342,7 +370,7 @@ function LoginForm() {
               <T en="Enter your email" ta="உங்கள் மின்னஞ்சலை உள்ளிடவும்" />
             </h2>
             <p className="text-sm text-gray-400 mb-6">
-              <T en="We'll send you a magic link to sign in instantly." ta="உடனடியாக உள்நுழைய ஒரு இணைப்பு அனுப்புவோம்." />
+              <T en="We'll send you a 6-digit verification code to sign in." ta="உள்நுழைய உங்கள் மின்னஞ்சலுக்கு 6-இலக்க சரிபார்ப்புக் குறியீட்டை அனுப்புவோம்." />
             </p>
 
             {error && (
@@ -351,7 +379,7 @@ function LoginForm() {
               </div>
             )}
 
-            <form onSubmit={handleMagicLink} className="space-y-4">
+            <form onSubmit={handleSendOtp} className="space-y-4">
               <div>
                 <label htmlFor="email-input" className="block text-sm font-medium text-gray-600 mb-2">
                   <T en="Email address" ta="மின்னஞ்சல் முகவரி" />
@@ -368,7 +396,7 @@ function LoginForm() {
                 />
               </div>
               <button
-                id="send-magic-link-btn"
+                id="send-otp-btn"
                 type="submit"
                 disabled={loading || !email.trim()}
                 className="w-full py-3.5 rounded-xl bg-gradient-to-r from-[#075200] to-[#116d03] text-white font-bold text-sm hover:from-[#116d03] hover:to-[#075200] transition-all duration-200 shadow-md shadow-green-100 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
@@ -379,43 +407,79 @@ function LoginForm() {
                       <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" className="opacity-25"/>
                       <path d="M4 12a8 8 0 018-8" stroke="currentColor" strokeWidth="3" strokeLinecap="round" className="opacity-75"/>
                     </svg>
-                    <T en="Sending…" ta="அனுப்புகிறோம்…" />
+                    <T en="Sending OTP…" ta="OTP அனுப்புகிறோம்…" />
                   </span>
                 ) : (
-                  <T en="Send Magic Link" ta="இணைப்பு அனுப்பு" />
+                  <T en="Send OTP Code" ta="OTP குறியீடு அனுப்பு" />
                 )}
               </button>
             </form>
           </>
         )}
 
-        {mode === "sent" && (
-          <div className="text-center py-4">
-            <div className="w-16 h-16 rounded-full bg-green-50 border border-green-200 flex items-center justify-center mx-auto mb-5">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-8 h-8 text-green-500">
-                <path d="M20 6 9 17l-5-5" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </div>
-            <h2 className="text-xl font-bold text-gray-900 mb-2">
-              <T en="Check your inbox!" ta="உங்கள் inbox பாருங்கள்!" />
-            </h2>
-            <p className="text-sm text-gray-500 mb-2">
-              <T en="We sent a magic link to" ta="இணைப்பை அனுப்பினோம்:" />
-            </p>
-            <p className="text-sm font-semibold text-[#f97316] mb-6">{email}</p>
-            <p className="text-xs text-gray-400 leading-relaxed mb-6">
-              <T
-                en="Click the link in the email to sign in. The link expires in 60 minutes."
-                ta="மின்னஞ்சலில் உள்ள இணைப்பை கிளிக் செய்யவும். இணைப்பு 60 நிமிடங்களில் காலாவதியாகும்."
-              />
-            </p>
+        {mode === "otp" && (
+          <>
             <button
-              onClick={() => { setMode("email"); setError(""); }}
-              className="text-sm text-gray-400 hover:text-gray-600 transition-colors underline underline-offset-2"
+              onClick={() => { setMode("email"); setError(""); setOtp(""); }}
+              className="flex items-center gap-2 text-gray-400 hover:text-gray-600 text-sm mb-6 transition-colors"
             >
-              <T en="Use a different email" ta="வேறு மின்னஞ்சல் பயன்படுத்து" />
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
+                <path d="M19 12H5M5 12l7 7M5 12l7-7" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              <T en="Back" ta="பின்செல்" />
             </button>
-          </div>
+
+            <h2 className="text-xl font-bold text-gray-900 mb-1">
+              <T en="Enter OTP code" ta="OTP குறியீட்டை உள்ளிடவும்" />
+            </h2>
+            <p className="text-sm text-gray-400 mb-6">
+              <T en="We sent a 6-digit code to" ta="இதற்கு 6-இலக்க குறியீட்டை அனுப்பியுள்ளோம்:" />{" "}
+              <span className="font-semibold text-[#f97316]">{email}</span>
+            </p>
+
+            {error && (
+              <div className="mb-4 px-4 py-3 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm">
+                {error}
+              </div>
+            )}
+
+            <form onSubmit={handleVerifyOtp} className="space-y-4">
+              <div>
+                <label htmlFor="otp-input" className="block text-sm font-medium text-gray-600 mb-2">
+                  <T en="6-Digit OTP Code" ta="6-இலக்க OTP குறியீடு" />
+                </label>
+                <input
+                  id="otp-input"
+                  type="text"
+                  maxLength={6}
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value)}
+                  placeholder="e.g. 123456"
+                  required
+                  autoFocus
+                  className="w-full px-4 py-3.5 rounded-xl bg-gray-50 border border-gray-200 text-gray-900 placeholder-gray-400 text-sm font-semibold tracking-[0.2em] text-center focus:outline-none focus:ring-2 focus:ring-[#075200]/40 focus:border-[#075200] transition-all"
+                />
+              </div>
+              <button
+                id="verify-otp-btn"
+                type="submit"
+                disabled={loading || otp.trim().length !== 6}
+                className="w-full py-3.5 rounded-xl bg-gradient-to-r from-[#075200] to-[#116d03] text-white font-bold text-sm hover:from-[#116d03] hover:to-[#075200] transition-all duration-200 shadow-md shadow-green-100 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loading ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
+                      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" className="opacity-25"/>
+                      <path d="M4 12a8 8 0 018-8" stroke="currentColor" strokeWidth="3" strokeLinecap="round" className="opacity-75"/>
+                    </svg>
+                    <T en="Verifying OTP…" ta="OTP சரிபார்க்கிறது…" />
+                  </span>
+                ) : (
+                  <T en="Verify & Sign In" ta="சரிபார்த்து உள்நுழையவும்" />
+                )}
+              </button>
+            </form>
+          </>
         )}
       </div>
 
