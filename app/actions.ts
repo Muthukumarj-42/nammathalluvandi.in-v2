@@ -104,6 +104,83 @@ export async function uploadImagesAction(formData: FormData) {
   }
 }
 
+export async function uploadVendorPhotoAction(formData: FormData) {
+  try {
+    const file = formData.get("photo") as File | null;
+    if (!file || !file.name || file.size === 0) {
+      return { success: true, url: null };
+    }
+
+    if (!isDbConfigured) {
+      return { success: true, url: null };
+    }
+
+    const supabaseServer = await createServerSupabase();
+    const bytes = await file.arrayBuffer();
+    const fileBuffer = Buffer.from(bytes);
+    const ext = (path.extname(file.name) || ".jpg").toLowerCase();
+    const filename = `vendor-${Date.now()}-${Math.random().toString(36).substring(2, 9)}${ext}`;
+
+    const { error } = await supabaseServer.storage
+      .from("vendor-profiles")
+      .upload(filename, fileBuffer, {
+        contentType: file.type || "image/jpeg",
+        cacheControl: "3600",
+        upsert: true,
+      });
+
+    if (error) throw error;
+
+    const { data: { publicUrl } } = supabaseServer.storage
+      .from("vendor-profiles")
+      .getPublicUrl(filename);
+
+    return { success: true, url: publicUrl };
+  } catch (err: any) {
+    console.error("uploadVendorPhotoAction failed:", err);
+    // Non-fatal — profile photo is optional, save the rest of the profile anyway.
+    return { success: true, url: null, error: err.message };
+  }
+}
+
+export async function getVendorProfilesAction() {
+  try {
+    if (!isDbConfigured) return { success: true, data: [] };
+    const supabaseServer = await createServerSupabase();
+    const { data, error } = await supabaseServer
+      .from("vendor_profiles")
+      .select("*")
+      .order("created_at", { ascending: false });
+    if (error) throw error;
+    return { success: true, data: data || [] };
+  } catch (err: any) {
+    console.error("getVendorProfilesAction failed:", err);
+    return { success: false, error: err.message, data: [] };
+  }
+}
+
+// Marks a vendor profile as blocked (reuses the existing "rejected" status
+// value — no schema change needed). NOTE: this only flags the row; it does
+// not currently stop the vendor from listing carts, since the isVendor
+// check in context/auth-context.tsx no longer looks at vendor_profiles.status.
+export async function blockVendorAction(id: string) {
+  try {
+    if (!isDbConfigured) return { success: false, error: "Database not configured" };
+    const supabaseServer = await createServerSupabase();
+    const { data, error } = await supabaseServer
+      .from("vendor_profiles")
+      .update({ status: "rejected" })
+      .eq("id", id)
+      .select()
+      .single();
+    if (error) throw error;
+    return { success: true, data };
+  } catch (err: any) {
+    console.error("blockVendorAction failed:", err);
+    return { success: false, error: err.message };
+  }
+}
+
 export async function saveBooking(booking: {
   cartId: string | null;
   name: string;
@@ -162,6 +239,12 @@ export async function saveCart(cartData: {
   size?: string;
   weight?: string;
   stoveType?: string;
+  minRentalPeriod?: string;
+  availableFrom?: string;
+  equipment?: string[];
+  area?: string;
+  district?: string;
+  vendorId?: string;
   ownerId?: string; // When provided, skip phone-based user lookup
   photos?: string[];
 }) {
@@ -186,16 +269,22 @@ export async function saveCart(cartData: {
 
     const data = await dbSaveCart({
       owner_id: ownerId,
+      vendor_id: cartData.vendorId,
       type: cartData.type || cartData.nameEn || "With Store",
       condition: cartData.condition || "Used - Good",
       size: cartData.size || "5ft x 3.5ft",
       weight: cartData.weight || "100kg",
       stove_type: cartData.stoveType || "None",
       price_per_day: cartData.pricePerDay || 80,
+      min_rental_period: cartData.minRentalPeriod,
+      available_from: cartData.availableFrom,
+      equipment: cartData.equipment,
       photos: cartData.photos && cartData.photos.length > 0 ? cartData.photos : ["/carts/covered-premium-cart/photo-1.webp"],
       description: cartData.descriptionEn || "Self-listed cart",
       latitude: lat,
       longitude: lng,
+      area: cartData.area,
+      district: cartData.district,
       status: "pending_review",
       verified: false,
     });
@@ -287,10 +376,16 @@ export async function updateCartAction(id: string, data: {
   weight?: string;
   stove_type?: string;
   price_per_day?: number;
+  min_rental_period?: string;
+  available_from?: string;
+  equipment?: string[];
   description?: string;
   photos?: string[];
   latitude?: number;
   longitude?: number;
+  area?: string;
+  district?: string;
+  vendor_id?: string;
 }) {
   try {
     const updated = await dbUpdateCart(id, data);

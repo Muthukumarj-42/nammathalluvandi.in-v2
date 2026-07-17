@@ -33,7 +33,18 @@ export interface VendorProfile {
   id: string;
   shop_name: string | null;
   business_category: string | null;
-  status: "pending" | "approved" | "rejected";
+  phone?: string | null;
+  // New intake fields (redesigned /vendor/register form)
+  full_name?: string | null;
+  whatsapp_number?: string | null;
+  profile_photo_url?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  area?: string | null;
+  district?: string | null;
+  cart_count?: string | null;
+  about_text?: string | null;
+  status: "pending" | "approved" | "pending_review" | "rejected";
 }
 
 interface AuthContextValue {

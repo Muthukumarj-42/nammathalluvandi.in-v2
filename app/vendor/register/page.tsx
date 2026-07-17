@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Store, ChevronRight, CheckCircle, AlertCircle } from "lucide-react";
+import { Store, ChevronRight, AlertCircle, Camera } from "lucide-react";
 import { createClient } from "@/lib/supabase-browser";
 import { useAuth } from "@/context/auth-context";
+import { uploadVendorPhotoAction } from "@/app/actions";
 
 function T({ en, ta }: { en: string; ta: string }) {
   return (
@@ -16,55 +17,117 @@ function T({ en, ta }: { en: string; ta: string }) {
   );
 }
 
-const CATEGORIES = [
-  { value: "tea_coffee", en: "Tea & Coffee", ta: "தேநீர் & காபி" },
-  { value: "juice", en: "Juice & Beverages", ta: "ஜூஸ் & பானங்கள்" },
-  { value: "fast_food", en: "Fast Food", ta: "ஃபாஸ்ட் ஃபுட்" },
-  { value: "snacks", en: "Snacks & Chaat", ta: "சிற்றுண்டி & சாட்" },
-  { value: "fruits", en: "Fruits & Vegetables", ta: "பழங்கள் & காய்கறிகள்" },
-  { value: "others", en: "Others", ta: "மற்றவை" },
-];
+const CART_COUNT_OPTIONS = ["1", "2-3", "4-5", "5+"];
 
-interface FormData {
-  shop_name: string;
-  business_category: string;
-  description: string;
-  phone: string;
-  address: string;
-  upi: string;
-  gst: string;
+interface FormState {
+  fullName: string;
+  whatsappNumber: string;
+  cartCount: string;
+  aboutText: string;
 }
 
-const EMPTY: FormData = {
-  shop_name: "",
-  business_category: "",
-  description: "",
-  phone: "",
-  address: "",
-  upi: "",
-  gst: "",
+const EMPTY_FORM: FormState = {
+  fullName: "",
+  whatsappNumber: "",
+  cartCount: "",
+  aboutText: "",
 };
+
+type GeoState = {
+  status: "idle" | "loading" | "success" | "error";
+  latitude: number | null;
+  longitude: number | null;
+  area: string;
+  district: string;
+};
+
+const EMPTY_GEO: GeoState = { status: "idle", latitude: null, longitude: null, area: "", district: "" };
 
 export default function VendorRegisterPage() {
   const router = useRouter();
-  const { user, profile, isVendor, refreshProfile } = useAuth();
-  const [form, setForm] = useState<FormData>(EMPTY);
+  const { user, vendorProfile, refreshProfile } = useAuth();
+
+  const [form, setForm] = useState<FormState>(EMPTY_FORM);
+  const [geo, setGeo] = useState<GeoState>(EMPTY_GEO);
+  const [confirmed, setConfirmed] = useState(false);
+
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const previewRef = useRef<string | null>(null);
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
 
   const supabase = createClient();
 
-  const set = (key: keyof FormData) => (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  useEffect(() => {
+    previewRef.current = photoPreview;
+  }, [photoPreview]);
+
+  useEffect(() => {
+    return () => {
+      if (previewRef.current) URL.revokeObjectURL(previewRef.current);
+    };
+  }, []);
+
+  const set = (key: keyof FormState) => (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => setForm((f) => ({ ...f, [key]: e.target.value }));
+
+  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) {
+      setError("Profile photo must be under 2MB.");
+      return;
+    }
+    if (photoPreview) URL.revokeObjectURL(photoPreview);
+    setPhotoFile(file);
+    setPhotoPreview(URL.createObjectURL(file));
+  };
+
+  // GPS detection is only ever triggered by this click handler — never during render.
+  const handleDetectLocation = () => {
+    if (typeof navigator === "undefined" || !navigator.geolocation) {
+      setGeo((g) => ({ ...g, status: "error" }));
+      return;
+    }
+    setGeo((g) => ({ ...g, status: "loading" }));
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const latitude = position.coords.latitude;
+        const longitude = position.coords.longitude;
+        try {
+          const res = await fetch(
+            `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
+          );
+          const json = await res.json();
+          const area = json.locality || json.city || "";
+          const district = json.principalSubdivision || json.city || "";
+          setGeo({ status: "success", latitude, longitude, area, district });
+        } catch {
+          setGeo({ status: "success", latitude, longitude, area: "", district: "" });
+        }
+      },
+      () => setGeo((g) => ({ ...g, status: "error" })),
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  };
+
+  const isFormValid =
+    form.fullName.trim() !== "" &&
+    form.whatsappNumber.trim() !== "" &&
+    form.cartCount !== "" &&
+    geo.status === "success" &&
+    confirmed;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) { router.push("/login?redirect=/vendor/register"); return; }
-
-    if (!form.shop_name.trim() || !form.business_category || !form.phone.trim() || !form.address.trim()) {
-      setError("Please fill in all required fields.");
+    if (!isFormValid) {
+      setError("Please fill in all required fields, detect your location, and confirm the checkbox.");
       return;
     }
 
@@ -72,17 +135,30 @@ export default function VendorRegisterPage() {
     setError("");
 
     try {
+      let profilePhotoUrl: string | null = null;
+      if (photoFile) {
+        const fd = new FormData();
+        fd.append("photo", photoFile);
+        const uploadRes = await uploadVendorPhotoAction(fd);
+        profilePhotoUrl = uploadRes.success ? (uploadRes.url ?? null) : null;
+      }
+
+      // NOTE: requires supabase/migrations/002_vendor_and_cart_listing_redesign.sql
+      // to have been run — it adds full_name/whatsapp_number/profile_photo_url/
+      // latitude/longitude/area/district/cart_count/about_text to vendor_profiles.
       const { error: insertError } = await supabase
         .from("vendor_profiles")
         .upsert({
           id: user.id,
-          shop_name: form.shop_name.trim(),
-          business_category: form.business_category,
-          description: form.description.trim(),
-          phone: form.phone.trim(),
-          address: form.address.trim(),
-          upi: form.upi.trim(),
-          gst: form.gst.trim() || null,
+          full_name: form.fullName.trim(),
+          whatsapp_number: form.whatsappNumber.trim(),
+          profile_photo_url: profilePhotoUrl,
+          latitude: geo.latitude,
+          longitude: geo.longitude,
+          area: geo.area,
+          district: geo.district,
+          cart_count: form.cartCount,
+          about_text: form.aboutText.trim(),
           status: "approved",
         });
 
@@ -97,20 +173,20 @@ export default function VendorRegisterPage() {
   };
 
   // Already a vendor
-  if (isVendor) {
+  if (vendorProfile && !success) {
     return (
-      <main className="min-h-screen bg-surface pb-24 pt-20 flex items-center justify-center px-4">
+      <main className="min-h-screen bg-background pt-24 pb-16 px-4 flex items-center justify-center">
         <div className="max-w-sm w-full text-center">
-          <div className="w-16 h-16 rounded-full bg-amber-900/30 border border-amber-700/40 flex items-center justify-center mx-auto mb-4">
-            <Store size={28} className="text-amber-400" />
+          <div className="w-16 h-16 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto mb-4">
+            <Store size={28} className="text-primary" />
           </div>
-          <h1 className="text-xl font-bold text-on-surface mb-2">
+          <h1 className="font-display text-xl font-bold text-on-surface mb-2">
             <T en="You're already a Vendor!" ta="நீங்கள் ஏற்கனவே விற்பனையாளர்!" />
           </h1>
           <p className="text-sm text-on-surface-variant mb-6">
             <T en="Access your vendor dashboard to manage your carts." ta="உங்கள் வண்டிகளை நிர்வகிக்க டாஷ்போர்டை பயன்படுத்துங்கள்." />
           </p>
-          <Link href="/vendor/dashboard" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-on-primary font-bold text-sm hover:bg-primary/90 transition">
+          <Link href="/vendor/dashboard" className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-primary text-on-primary font-bold text-sm uppercase tracking-widest hover:bg-primary-container transition">
             <T en="Go to Dashboard" ta="டாஷ்போர்டுக்கு செல்" />
             <ChevronRight size={16} />
           </Link>
@@ -119,46 +195,15 @@ export default function VendorRegisterPage() {
     );
   }
 
-  // Success state
-  if (success) {
-    return (
-      <main className="min-h-screen bg-surface pb-24 pt-20 flex items-center justify-center px-4">
-        <div className="max-w-sm w-full text-center">
-          <div className="w-16 h-16 rounded-full bg-green-900/30 border border-green-700/40 flex items-center justify-center mx-auto mb-4">
-            <CheckCircle size={28} className="text-green-400" />
-          </div>
-          <h1 className="text-2xl font-bold text-on-surface mb-2">
-            <T en="Vendor Profile Created!" ta="விற்பனையாளர் சுயவிவரம் உருவாக்கப்பட்டது!" />
-          </h1>
-          <p className="text-sm text-on-surface-variant leading-relaxed mb-6">
-            <T
-              en="You're all set! You can now list your carts on Thalluvandi."
-              ta="நீங்கள் தயாராகிவிட்டீர்கள்! இப்போது உங்கள் வண்டிகளை Thalluvandil பதிவிடலாம்."
-            />
-          </p>
-          <div className="flex flex-col gap-3">
-            <Link href="/publish" className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-on-primary font-bold text-sm hover:bg-primary/90 transition">
-              <T en="List Your First Cart" ta="முதல் வண்டியை பதிவிடுங்கள்" />
-              <ChevronRight size={16} />
-            </Link>
-            <Link href="/vendor/dashboard" className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-surface-container text-on-surface font-semibold text-sm hover:bg-surface-dim transition border border-outline-variant/20">
-              <T en="Go to Dashboard" ta="டாஷ்போர்டுக்கு செல்" />
-            </Link>
-          </div>
-        </div>
-      </main>
-    );
-  }
-
   // Not logged in
   if (!user) {
     return (
-      <main className="min-h-screen bg-surface pb-24 pt-20 flex items-center justify-center px-4">
+      <main className="min-h-screen bg-background pt-24 pb-16 px-4 flex items-center justify-center">
         <div className="max-w-sm w-full text-center">
-          <h1 className="text-xl font-bold text-on-surface mb-3">
+          <h1 className="font-display text-xl font-bold text-on-surface mb-3">
             <T en="Sign in to continue" ta="தொடர உள்நுழையவும்" />
           </h1>
-          <Link href="/login?redirect=/vendor/register" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-on-primary font-bold text-sm">
+          <Link href="/login?redirect=/vendor/register" className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-primary text-on-primary font-bold text-sm uppercase tracking-widest hover:bg-primary-container transition">
             <T en="Login / Register" ta="உள்நுழை / பதிவு செய்" />
           </Link>
         </div>
@@ -166,182 +211,192 @@ export default function VendorRegisterPage() {
     );
   }
 
-  return (
-    <main className="min-h-screen bg-surface pb-24 pt-20">
-      {/* Header */}
-      <section className="bg-primary px-6 pt-12 pb-8 text-on-primary rounded-b-2xl shadow-sm mb-6">
-        <div className="flex items-center gap-3 mb-2">
-          <div className="w-10 h-10 rounded-xl bg-primary-container/30 flex items-center justify-center">
-            <Store size={20} className="text-on-primary" />
-          </div>
-          <div>
-            <h1 className="text-xl font-bold font-display tracking-tight">
-              <T en="Become a Vendor" ta="விற்பனையாளராகுங்கள்" />
-            </h1>
-            <p className="text-on-primary/60 text-xs">
-              <T en="List your carts on Thalluvandi" ta="Thalluvandil உங்கள் வண்டிகளை பதிவிடுங்கள்" />
-            </p>
-          </div>
+  // Success — just submitted this session
+  if (success) {
+    return (
+      <main className="min-h-screen bg-background pt-24 pb-16 px-4 flex items-center justify-center">
+        <div className="max-w-sm w-full text-center py-12">
+          <div className="text-5xl mb-4">✅</div>
+          <h2 className="font-display text-2xl font-bold text-on-surface mb-2">Profile Created!</h2>
+          <p className="text-on-surface-variant text-sm mb-6">
+            You're all set! You can now list your carts on Thalluvandi. Booking enquiries will be sent to your WhatsApp on {form.whatsappNumber}.
+          </p>
+          <Link href="/publish" className="text-primary text-sm font-semibold underline">
+            List your first cart →
+          </Link>
         </div>
-      </section>
+      </main>
+    );
+  }
 
-      <div className="max-w-xl mx-auto px-4">
+  return (
+    <main className="min-h-screen bg-background pt-24 pb-16 px-4">
+      <div className="w-full max-w-[600px] mx-auto">
+        <div className="text-center mb-8">
+          <h1 className="font-display text-3xl font-bold text-on-surface mb-2">Create Vendor Profile</h1>
+          <p className="text-on-surface-variant text-sm">Free · Takes 2 minutes · Reach 700+ active renters</p>
+        </div>
+
         {error && (
-          <div className="mb-4 flex items-start gap-3 p-4 rounded-xl bg-red-900/20 border border-red-700/30 text-red-300 text-sm">
+          <div className="mb-4 flex items-start gap-3 p-4 rounded-xl bg-error/5 border border-error/20 text-error text-sm">
             <AlertCircle size={18} className="shrink-0 mt-0.5" />
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Business Info */}
-          <fieldset className="bg-surface-container rounded-2xl border border-outline-variant/20 overflow-hidden shadow-sm">
-            <legend className="px-4 pt-4 pb-0 text-xs font-bold text-on-surface-variant uppercase tracking-wider">
-              <T en="Business Information" ta="வணிக தகவல்" />
-            </legend>
-            <div className="p-4 space-y-4">
-              <div>
-                <label className="block text-sm font-semibold text-on-surface mb-1.5">
-                  <T en="Shop Name" ta="கடை பெயர்" /> <span className="text-red-400">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={form.shop_name}
-                  onChange={set("shop_name")}
-                  placeholder="e.g., Ravi's Juice Corner"
-                  required
-                  className="w-full px-4 py-3 rounded-xl bg-surface border border-outline-variant/30 text-on-surface text-sm placeholder-on-surface-variant/40 focus:outline-none focus:ring-2 focus:ring-primary/40 transition"
-                />
-              </div>
+        <form onSubmit={handleSubmit}>
+          {/* Section 1 — Personal Details */}
+          <div className="bg-surface rounded-2xl p-5 border border-outline-variant/20 mb-4">
+            <h2 className="font-display text-base font-bold text-on-surface mb-4">Personal Details</h2>
 
-              <div>
-                <label className="block text-sm font-semibold text-on-surface mb-1.5">
-                  <T en="Business Category" ta="வணிக வகை" /> <span className="text-red-400">*</span>
-                </label>
-                <select
-                  value={form.business_category}
-                  onChange={set("business_category")}
-                  required
-                  className="w-full px-4 py-3 rounded-xl bg-surface border border-outline-variant/30 text-on-surface text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 transition"
-                >
-                  <option value="">
-                    <T en="Select a category" ta="வகையை தேர்ந்தெடு" />
-                  </option>
-                  {CATEGORIES.map((c) => (
-                    <option key={c.value} value={c.value}>
-                      {c.en}
-                    </option>
-                  ))}
-                </select>
-              </div>
+            <div className="mb-4">
+              <label className="block text-sm font-semibold text-on-surface mb-1.5">Your Full Name *</label>
+              <input
+                type="text"
+                required
+                value={form.fullName}
+                onChange={set("fullName")}
+                placeholder="e.g. Nagaraj D"
+                className="w-full px-4 py-3 rounded-xl bg-surface border border-outline-variant/30 text-on-surface text-sm placeholder:text-on-surface-variant/40 focus:outline-none focus:ring-2 focus:ring-primary/40 transition"
+              />
+              <p className="text-xs text-on-surface-variant mt-1">This is shown to renters after booking is confirmed only</p>
+            </div>
 
-              <div>
-                <label className="block text-sm font-semibold text-on-surface mb-1.5">
-                  <T en="Description" ta="விளக்கம்" />
-                </label>
-                <textarea
-                  value={form.description}
-                  onChange={set("description")}
-                  placeholder="Tell us about your business…"
-                  rows={3}
-                  className="w-full px-4 py-3 rounded-xl bg-surface border border-outline-variant/30 text-on-surface text-sm placeholder-on-surface-variant/40 focus:outline-none focus:ring-2 focus:ring-primary/40 transition resize-none"
-                />
+            <div className="mb-4">
+              <label className="block text-sm font-semibold text-on-surface mb-1.5">WhatsApp Number *</label>
+              <input
+                type="tel"
+                required
+                maxLength={13}
+                value={form.whatsappNumber}
+                onChange={set("whatsappNumber")}
+                placeholder="+91 XXXXX XXXXX"
+                className="w-full px-4 py-3 rounded-xl bg-surface border border-outline-variant/30 text-on-surface text-sm placeholder:text-on-surface-variant/40 focus:outline-none focus:ring-2 focus:ring-primary/40 transition"
+              />
+              <p className="text-xs text-on-surface-variant mt-1">All booking enquiries will be sent to this number</p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-on-surface mb-1.5">Profile Photo</label>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/png,image/jpeg"
+                className="hidden"
+                onChange={handlePhotoChange}
+              />
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="w-full py-6 rounded-xl border-2 border-dashed border-outline-variant/40 bg-surface-container flex flex-col items-center justify-center gap-2 hover:border-primary/40 transition"
+              >
+                {photoPreview ? (
+                  <img src={photoPreview} alt="Profile preview" className="w-16 h-16 rounded-full object-cover" />
+                ) : (
+                  <Camera className="w-7 h-7 text-primary" />
+                )}
+                <span className="text-sm font-semibold text-on-surface">Tap to upload photo</span>
+                <span className="text-xs text-on-surface-variant">JPG, PNG up to 2MB</span>
+              </button>
+              <p className="text-xs text-on-surface-variant mt-1">Builds trust with renters</p>
+            </div>
+          </div>
+
+          {/* Section 2 — Your Location */}
+          <div className="bg-surface rounded-2xl p-5 border border-outline-variant/20 mb-4">
+            <h2 className="font-display text-base font-bold text-on-surface mb-1">Your Location</h2>
+            <p className="text-xs text-on-surface-variant mb-4">
+              Your exact location is never shown to renters. Used only to match you with nearby cart seekers.
+            </p>
+
+            <button
+              type="button"
+              onClick={handleDetectLocation}
+              disabled={geo.status === "loading"}
+              className="w-full py-4 rounded-xl border-2 border-dashed border-primary/40 bg-surface-container text-primary font-semibold text-sm flex items-center justify-center gap-2 hover:bg-primary/5 transition disabled:opacity-60"
+            >
+              📍 {geo.status === "loading" ? "Detecting…" : "Detect My Location"}
+            </button>
+
+            {geo.status === "success" && (
+              <div className="rounded-xl bg-primary/5 border border-primary/20 p-4 mt-3">
+                <div className="flex items-center gap-2 text-primary font-semibold text-sm mb-1">✅ Location Detected</div>
+                <p className="text-on-surface-variant text-xs">{geo.area || "Area"}, {geo.district || "District"}</p>
+              </div>
+            )}
+
+            {geo.status === "error" && (
+              <div className="rounded-xl bg-error/5 border border-error/20 p-4 mt-3">
+                <p className="text-error text-sm">❌ Could not detect location. Please allow location access and try again.</p>
+              </div>
+            )}
+          </div>
+
+          {/* Section 3 — Your Carts */}
+          <div className="bg-surface rounded-2xl p-5 border border-outline-variant/20 mb-4">
+            <h2 className="font-display text-base font-bold text-on-surface mb-4">Your Carts</h2>
+
+            <div className="mb-4">
+              <label className="block text-sm font-semibold text-on-surface mb-1.5">How many carts do you have? *</label>
+              <div className="flex flex-wrap gap-2">
+                {CART_COUNT_OPTIONS.map((opt) => (
+                  <button
+                    key={opt}
+                    type="button"
+                    onClick={() => setForm((f) => ({ ...f, cartCount: opt }))}
+                    className={
+                      form.cartCount === opt
+                        ? "bg-primary text-on-primary rounded-full px-5 py-2 text-sm font-semibold"
+                        : "bg-surface border border-outline-variant rounded-full px-5 py-2 text-sm text-on-surface-variant cursor-pointer hover:border-primary/50 transition"
+                    }
+                  >
+                    {opt}
+                  </button>
+                ))}
               </div>
             </div>
-          </fieldset>
 
-          {/* Contact & Location */}
-          <fieldset className="bg-surface-container rounded-2xl border border-outline-variant/20 overflow-hidden shadow-sm">
-            <legend className="px-4 pt-4 pb-0 text-xs font-bold text-on-surface-variant uppercase tracking-wider">
-              <T en="Contact & Location" ta="தொடர்பு & இடம்" />
-            </legend>
-            <div className="p-4 space-y-4">
-              <div>
-                <label className="block text-sm font-semibold text-on-surface mb-1.5">
-                  <T en="Phone Number" ta="தொலைபேசி எண்" /> <span className="text-red-400">*</span>
-                </label>
-                <input
-                  type="tel"
-                  value={form.phone}
-                  onChange={set("phone")}
-                  placeholder="+91 98765 43210"
-                  required
-                  className="w-full px-4 py-3 rounded-xl bg-surface border border-outline-variant/30 text-on-surface text-sm placeholder-on-surface-variant/40 focus:outline-none focus:ring-2 focus:ring-primary/40 transition"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-on-surface mb-1.5">
-                  <T en="Business Address" ta="வணிக முகவரி" /> <span className="text-red-400">*</span>
-                </label>
-                <textarea
-                  value={form.address}
-                  onChange={set("address")}
-                  placeholder="Street, Area, City, PIN"
-                  rows={2}
-                  required
-                  className="w-full px-4 py-3 rounded-xl bg-surface border border-outline-variant/30 text-on-surface text-sm placeholder-on-surface-variant/40 focus:outline-none focus:ring-2 focus:ring-primary/40 transition resize-none"
-                />
-              </div>
+            <div>
+              <label className="block text-sm font-semibold text-on-surface mb-1.5">About You</label>
+              <textarea
+                rows={3}
+                value={form.aboutText}
+                onChange={set("aboutText")}
+                placeholder="e.g. I have 2 food carts available in Ondipudur. 30 years experience in cart rental business."
+                className="w-full px-4 py-3 rounded-xl bg-surface border border-outline-variant/30 text-on-surface text-sm placeholder:text-on-surface-variant/40 focus:outline-none focus:ring-2 focus:ring-primary/40 transition resize-none"
+              />
+              <p className="text-xs text-on-surface-variant mt-1">This is private — only seen by NTV admin</p>
             </div>
-          </fieldset>
+          </div>
 
-          {/* Payment */}
-          <fieldset className="bg-surface-container rounded-2xl border border-outline-variant/20 overflow-hidden shadow-sm">
-            <legend className="px-4 pt-4 pb-0 text-xs font-bold text-on-surface-variant uppercase tracking-wider">
-              <T en="Payment Details" ta="கட்டண விவரங்கள்" />
-            </legend>
-            <div className="p-4 space-y-4">
-              <div>
-                <label className="block text-sm font-semibold text-on-surface mb-1.5">
-                  <T en="UPI ID" ta="UPI ஐடி" />
-                </label>
-                <input
-                  type="text"
-                  value={form.upi}
-                  onChange={set("upi")}
-                  placeholder="yourname@upi"
-                  className="w-full px-4 py-3 rounded-xl bg-surface border border-outline-variant/30 text-on-surface text-sm placeholder-on-surface-variant/40 focus:outline-none focus:ring-2 focus:ring-primary/40 transition"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-on-surface mb-1.5">
-                  <T en="GST Number" ta="GST எண்" />{" "}
-                  <span className="text-on-surface-variant text-xs font-normal">(<T en="Optional" ta="விரும்பினால்" />)</span>
-                </label>
-                <input
-                  type="text"
-                  value={form.gst}
-                  onChange={set("gst")}
-                  placeholder="22AAAAA0000A1Z5"
-                  className="w-full px-4 py-3 rounded-xl bg-surface border border-outline-variant/30 text-on-surface text-sm placeholder-on-surface-variant/40 focus:outline-none focus:ring-2 focus:ring-primary/40 transition"
-                />
-              </div>
-            </div>
-          </fieldset>
-
-          <p className="text-xs text-on-surface-variant px-1 leading-relaxed">
-            <T
-              en="Create your vendor profile to start listing carts. Your profile will be active immediately."
-              ta="வண்டிகளை பதிவிட உங்கள் விற்பனையாளர் சுயவிவரத்தை உருவாக்கவும். உங்கள் சுயவிவரம் உடனடியாக செயல்படும்."
+          {/* Section 4 — Confirmation */}
+          <label className="flex items-start gap-2 px-1 mb-6 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={confirmed}
+              onChange={(e) => setConfirmed(e.target.checked)}
+              className="accent-primary w-4 h-4 mt-0.5"
             />
-          </p>
+            <span className="text-sm text-on-surface">
+              I confirm all details provided are accurate and I own/operate the listed carts.
+            </span>
+          </label>
 
           <button
-            id="vendor-submit-btn"
             type="submit"
-            disabled={loading}
-            className="w-full py-4 rounded-2xl bg-gradient-to-r from-[#f97316] to-[#ea580c] text-white font-bold text-base hover:from-[#fb923c] hover:to-[#f97316] transition-all duration-200 shadow-lg shadow-orange-900/20 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={!isFormValid || loading}
+            className="w-full py-4 rounded-xl bg-primary text-on-primary font-bold text-sm uppercase tracking-widest hover:bg-primary-container transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? (
               <span className="flex items-center justify-center gap-2">
-                <svg className="animate-spin w-5 h-5" viewBox="0 0 24 24" fill="none">
-                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" className="opacity-25"/>
-                  <path d="M4 12a8 8 0 018-8" stroke="currentColor" strokeWidth="3" strokeLinecap="round" className="opacity-75"/>
+                <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" className="opacity-25" />
+                  <path d="M4 12a8 8 0 018-8" stroke="currentColor" strokeWidth="3" strokeLinecap="round" className="opacity-75" />
                 </svg>
-                <T en="Creating Profile…" ta="சுயவிவரம் உருவாக்குகிறோம்…" />
+                Creating profile...
               </span>
             ) : (
-              <T en="Create Vendor Profile" ta="விற்பனையாளர் சுயவிவரத்தை உருவாக்கு" />
+              "CREATE VENDOR PROFILE"
             )}
           </button>
         </form>

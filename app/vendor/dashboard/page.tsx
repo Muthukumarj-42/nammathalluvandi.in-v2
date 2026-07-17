@@ -103,7 +103,7 @@ export default function VendorDashboardPage() {
 
   if (!user || !isVendor) return null;
 
-  const shopName = vendorProfile?.shop_name ?? profile?.name ?? "My Shop";
+  const shopName = vendorProfile?.full_name ?? vendorProfile?.shop_name ?? profile?.name ?? "My Shop";
 
   return (
     <main className="min-h-screen bg-[#0a0a08] pb-24 pt-14 md:pt-20 text-[#f6ded3] relative overflow-hidden">

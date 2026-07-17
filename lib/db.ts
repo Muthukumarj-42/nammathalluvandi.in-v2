@@ -12,16 +12,22 @@ export interface User {
 export interface DbCart {
   id: string;
   owner_id: string;
+  vendor_id?: string | null;
   type: string;
   condition: string;
   size?: string;
   weight?: string;
   stove_type?: string;
   price_per_day: number;
+  min_rental_period?: string | null;
+  available_from?: string | null;
+  equipment?: string[];
   photos: string[];
   description?: string;
   latitude: number;
   longitude: number;
+  area?: string | null;
+  district?: string | null;
   status: "pending_review" | "live" | "rented" | "inactive";
   verified: boolean;
   created_at?: string;
@@ -449,7 +455,7 @@ export async function updateCartStatus(id: string, status: DbCart["status"], ver
   return null;
 }
 
-export async function updateCart(id: string, data: Partial<Pick<DbCart, "type" | "condition" | "size" | "weight" | "stove_type" | "price_per_day" | "description" | "photos" | "latitude" | "longitude">>): Promise<DbCart | null> {
+export async function updateCart(id: string, data: Partial<Pick<DbCart, "type" | "condition" | "size" | "weight" | "stove_type" | "price_per_day" | "min_rental_period" | "available_from" | "equipment" | "description" | "photos" | "latitude" | "longitude" | "area" | "district" | "vendor_id">>): Promise<DbCart | null> {
   if (isDbConfigured) {
     const { data: updated, error } = await supabase
       .from("carts")
