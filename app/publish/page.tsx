@@ -73,12 +73,38 @@ async function detectGpsLocation(): Promise<{ latitude: number; longitude: numbe
         const longitude = position.coords.longitude;
         try {
           const res = await fetch(
-            `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=10`,
+            {
+              headers: {
+                "User-Agent": "NammaThalluvandi/1.0"
+              }
+            }
           );
           const json = await res.json();
-          resolve({ latitude, longitude, area: json.locality || json.city || "", district: json.principalSubdivision || json.city || "" });
+          const addr = json.address || {};
+          
+          let district = addr.state_district || addr.county || addr.district || addr.city || addr.state || "";
+          district = district.replace(/\s+district/i, "").trim();
+
+          let area = addr.suburb || addr.town || addr.village || addr.city_district || addr.locality || addr.county || "";
+          area = area.replace(/\s+taluk/i, "").trim();
+
+          resolve({ latitude, longitude, area, district });
         } catch {
-          resolve({ latitude, longitude, area: "", district: "" });
+          try {
+            const res = await fetch(
+              `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
+            );
+            const json = await res.json();
+            resolve({
+              latitude,
+              longitude,
+              area: json.locality || json.city || "",
+              district: json.principalSubdivision || json.city || ""
+            });
+          } catch {
+            resolve({ latitude, longitude, area: "", district: "" });
+          }
         }
       },
       () => resolve(null),

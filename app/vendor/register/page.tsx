@@ -101,14 +101,35 @@ export default function VendorRegisterPage() {
         const longitude = position.coords.longitude;
         try {
           const res = await fetch(
-            `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=10`,
+            {
+              headers: {
+                "User-Agent": "NammaThalluvandi/1.0"
+              }
+            }
           );
           const json = await res.json();
-          const area = json.locality || json.city || "";
-          const district = json.principalSubdivision || json.city || "";
+          const addr = json.address || {};
+          
+          let district = addr.state_district || addr.county || addr.district || addr.city || addr.state || "";
+          district = district.replace(/\s+district/i, "").trim();
+
+          let area = addr.suburb || addr.town || addr.village || addr.city_district || addr.locality || addr.county || "";
+          area = area.replace(/\s+taluk/i, "").trim();
+
           setGeo({ status: "success", latitude, longitude, area, district });
         } catch {
-          setGeo({ status: "success", latitude, longitude, area: "", district: "" });
+          try {
+            const res = await fetch(
+              `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
+            );
+            const json = await res.json();
+            const area = json.locality || json.city || "";
+            const district = json.principalSubdivision || json.city || "";
+            setGeo({ status: "success", latitude, longitude, area, district });
+          } catch {
+            setGeo({ status: "success", latitude, longitude, area: "", district: "" });
+          }
         }
       },
       () => setGeo((g) => ({ ...g, status: "error" })),
