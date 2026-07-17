@@ -105,19 +105,39 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           .single();
 
         if (profError || !prof) {
-          // Wait 500ms for the database trigger to complete creating the profile
-          await new Promise(resolve => setTimeout(resolve, 500));
-          const { data: retriedProf, error: retryError } = await supabase
+          // If the database trigger has not created the profile yet (or failed),
+          // let's attempt to insert it directly from client side.
+          const { data: insertedProf, error: insertError } = await supabase
             .from("profiles")
-            .select("*")
-            .eq("id", authUser.id)
+            .insert({
+              id: authUser.id,
+              name: authUser.user_metadata?.full_name || authUser.email?.split("@")[0] || "User",
+              email: authUser.email || "",
+              avatar: authUser.user_metadata?.avatar_url || "",
+              provider: authUser.app_metadata?.provider || "email",
+              status: "active"
+            })
+            .select()
             .single();
 
-          if (retryError || !retriedProf) {
-            console.error("Profile trigger did not complete. Error:", retryError);
-            throw new Error(retryError?.message || "Profile not created");
+          if (insertError) {
+            console.warn("Could not insert profile manually (probably exists already). Retrying read:", insertError);
+            // Wait 500ms for the database trigger to complete creating the profile
+            await new Promise(resolve => setTimeout(resolve, 500));
+            const { data: retriedProf, error: retryError } = await supabase
+              .from("profiles")
+              .select("*")
+              .eq("id", authUser.id)
+              .single();
+
+            if (retryError || !retriedProf) {
+              console.error("Profile trigger did not complete. Error:", retryError);
+              throw new Error(retryError?.message || "Profile not created");
+            }
+            prof = retriedProf;
+          } else {
+            prof = insertedProf;
           }
-          prof = retriedProf;
         }
 
         if (prof) setProfile(prof as UserProfile);
