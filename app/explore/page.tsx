@@ -44,6 +44,8 @@ function BrowseCartsPageContent() {
   const [dbCarts, setDbCarts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [lang, setLang] = useState<"en" | "ta">("en");
+  const [activeTypeFilter, setActiveTypeFilter] = useState("All");
+  const [sortBy, setSortBy] = useState("nearest");
 
   // Sync language toggle dynamically
   useEffect(() => {
@@ -108,7 +110,10 @@ function BrowseCartsPageContent() {
         const res = await getLiveCartsAction();
         console.log("[DIAGNOSTIC] getLiveCartsAction response:", res);
         if (res.success && res.data) {
-          const mapped = res.data.map(mapDbCartToCart);
+          const mapped = res.data.map((item: any) => ({
+            ...mapDbCartToCart(item),
+            createdAt: item.created_at || item.createdAt || null,
+          }));
           setDbCarts(mapped);
         }
       } catch (err) {
@@ -132,7 +137,7 @@ function BrowseCartsPageContent() {
 
   // Request browser geolocation to sort carts by closest distance
   const handleEnableLocationSort = (forceReDetect = false) => {
-    if (!navigator.geolocation) {
+    if (typeof window === "undefined" || typeof navigator === "undefined" || !navigator.geolocation) {
       setLocationErrorMsg("Geolocation is not supported by your browser.");
       return;
     }
@@ -243,10 +248,23 @@ function BrowseCartsPageContent() {
                (cart.nameEn && cart.nameEn.toLowerCase().includes(keyword.toLowerCase()));
       });
 
-      const matchesCondition = selectedConditions.length === 0 || selectedConditions.some(cond => 
+      const matchesCondition = selectedConditions.length === 0 || selectedConditions.some(cond =>
         (cart.condition || "").toLowerCase().includes(cond.toLowerCase())
       );
-      
+
+      const chipKeywordMap: Record<string, string> = {
+        "With Store": "stove",
+        "With Roof": "roof",
+        "Ice Cream": "ice cream",
+        "Tea & Coffee": "tea",
+        "E-Rickshaw": "rickshaw",
+      };
+      const matchesActiveTypeFilter = activeTypeFilter === "All" || (() => {
+        const keyword = chipKeywordMap[activeTypeFilter] || activeTypeFilter.toLowerCase();
+        return cartTypeStr.toLowerCase().includes(keyword) ||
+               (cart.nameEn && cart.nameEn.toLowerCase().includes(keyword));
+      })();
+
       const dailyPrice = cart.pricePerDay;
       const matchesPrice = dailyPrice <= maxPrice;
 
@@ -265,22 +283,45 @@ function BrowseCartsPageContent() {
         }
       }
 
-      return matchesSearch && matchesType && matchesCondition && matchesPrice && matchesLocation;
+      return matchesSearch && matchesType && matchesCondition && matchesPrice && matchesLocation && matchesActiveTypeFilter;
     });
 
-    // If geolocation is available, sort list by distance (nearest first)
-    if (userCoords) {
-      return list.map(cart => {
-        const dist = calculateHaversineDistance(userCoords, {
-          latitude: cart.latitude || 11.0168,
-          longitude: cart.longitude || 76.9558
+    // Attach distance when geolocation is available
+    let result = userCoords
+      ? list.map(cart => {
+          const dist = calculateHaversineDistance(userCoords, {
+            latitude: cart.latitude || 11.0168,
+            longitude: cart.longitude || 76.9558
+          });
+          return { ...cart, distanceKm: Number(dist.toFixed(2)) };
+        })
+      : list;
+
+    // Client-side sort of the already-fetched data (no new API calls)
+    switch (sortBy) {
+      case "price-asc":
+        result = [...result].sort((a, b) => a.pricePerDay - b.pricePerDay);
+        break;
+      case "price-desc":
+        result = [...result].sort((a, b) => b.pricePerDay - a.pricePerDay);
+        break;
+      case "newest":
+        result = [...result].sort((a, b) => {
+          const da = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+          const db = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+          return db - da;
         });
-        return { ...cart, distanceKm: Number(dist.toFixed(2)) };
-      }).sort((a, b) => (a.distanceKm || 0) - (b.distanceKm || 0));
+        break;
+      case "nearest":
+      default:
+        if (userCoords) {
+          result = [...result].sort((a, b) => (a.distanceKm || 0) - (b.distanceKm || 0));
+        }
+        break;
     }
 
-    return list;
-  }, [dbCarts, search, selectedTypes, selectedConditions, maxPrice, userCoords, searchParams]);
+    return result;
+  }, [dbCarts, search, selectedTypes, selectedConditions, maxPrice, userCoords, searchParams, activeTypeFilter, sortBy]);
 
   return (
     <main className="min-h-screen bg-[#0a0a08] pb-20 md:pb-10 pt-14 md:pt-20 text-[#f6ded3]">
@@ -539,30 +580,50 @@ function BrowseCartsPageContent() {
 
         {/* Cards Grid */}
         <section>
-          <div className="flex flex-wrap justify-between items-center gap-4 mb-6">
-            <span className="font-display text-xs tracking-wider text-[#f6ded3]/60 uppercase">
-              <Text 
-                en={`${filteredCarts.length} carts matching your query`} 
-                ta={`உங்கள் தேடலுக்கு ${filteredCarts.length} வண்டிகள் உள்ளன`} 
-              />
-            </span>
+          {/* Type filter chips */}
+          <div className="flex items-center gap-2 overflow-x-auto scrollbar-none pb-1 mb-4">
+            {["All", "With Store", "With Roof", "Ice Cream", "Tea & Coffee", "E-Rickshaw"].map(chip => {
+              const isActive = activeTypeFilter === chip;
+              return (
+                <button
+                  key={chip}
+                  onClick={() => setActiveTypeFilter(chip)}
+                  className={`shrink-0 whitespace-nowrap px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wide transition-colors ${
+                    isActive
+                      ? "bg-green-800 text-white border border-green-800"
+                      : "bg-white text-green-800 border border-green-800 hover:bg-green-50"
+                  }`}
+                >
+                  {chip}
+                </button>
+              );
+            })}
+          </div>
 
-            {/* Quick action location sort */}
-            <div className="flex items-center gap-2">
+          <div className="flex flex-wrap justify-between items-center gap-4 mb-6">
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="font-display text-xs tracking-wider text-[#f6ded3]/60 uppercase">
+                <Text
+                  en={`${filteredCarts.length} carts matching your query`}
+                  ta={`உங்கள் தேடலுக்கு ${filteredCarts.length} வண்டிகள் உள்ளன`}
+                />
+              </span>
+
+              {/* Location chip (kept separate from type filter chips) */}
               {userCoords ? (
                 <div className="flex items-center gap-2 text-xs text-green-500 font-bold bg-[#160c06] border border-green-500/20 px-3 py-1.5 rounded-xl">
                   <MapPin className="w-3.5 h-3.5" />
                   <span>
                     {detectedLocationName ? (
-                      <Text 
-                        en={`Near ${detectedLocationName}`} 
-                        ta={`${detectedLocationName} அருகே`} 
+                      <Text
+                        en={`Near ${detectedLocationName}`}
+                        ta={`${detectedLocationName} அருகே`}
                       />
                     ) : (
                       <Text en="Nearest first" ta="அருகிலுள்ளவை முதலில்" />
                     )}
                   </span>
-                  <button 
+                  <button
                     onClick={() => {
                       setUserCoords(null);
                       setDetectedLocationName(null);
@@ -574,7 +635,7 @@ function BrowseCartsPageContent() {
                   </button>
                 </div>
               ) : (
-                <Button 
+                <Button
                   onClick={() => handleEnableLocationSort(false)}
                   disabled={geoSorting}
                   className="h-8 bg-[#251913] hover:bg-[#ffb690]/10 border border-[#ffb690]/25 text-[#ffb690] text-[10px] font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 rounded-lg px-3"
@@ -588,6 +649,18 @@ function BrowseCartsPageContent() {
                 </Button>
               )}
             </div>
+
+            {/* Sort dropdown */}
+            <select
+              value={sortBy}
+              onChange={e => setSortBy(e.target.value)}
+              className="h-8 bg-[#251913] border border-[#ffb690]/25 text-[#ffb690] text-[10px] font-bold uppercase tracking-wider rounded-lg px-3 outline-none focus:border-[#f97316]"
+            >
+              <option value="nearest">Nearest First</option>
+              <option value="price-asc">Price: Low to High</option>
+              <option value="price-desc">Price: High to Low</option>
+              <option value="newest">Newest First</option>
+            </select>
           </div>
 
           {loading ? (
@@ -616,76 +689,85 @@ function BrowseCartsPageContent() {
               </button>
             </div>
           ) : (
-            <div className={`grid grid-cols-2 md:grid-cols-2 ${showFilterPanel ? "xl:grid-cols-2" : "lg:grid-cols-3 xl:grid-cols-4"} gap-3 md:gap-6`}>
-              {filteredCarts.map(cart => (
-                <div key={cart.id} className="group bg-[#160c06] border border-[#ffb690]/15 hover:border-[#f97316]/50 transition-all duration-300 flex flex-col p-2.5 md:p-4 rounded-xl relative">
-                  
-                  <div className="aspect-[16/10] bg-[#251913] relative shrink-0 flex items-center justify-center mb-2 md:mb-4 rounded-lg overflow-hidden">
-                    {cart.distanceKm !== undefined && (
-                      <div className="absolute bottom-2 left-2 z-20 bg-[#f97316] text-[#0a0a08] font-bold text-[8px] md:text-[9px] px-1.5 py-0.5 rounded-full flex items-center gap-0.5 shadow-md">
-                        📍 {cart.distanceKm} km
-                      </div>
-                    )}
-                    <span className={`absolute top-2 right-2 z-10 text-[8px] font-display tracking-widest px-2 py-0.5 font-bold rounded-full ${cart.condition === "New" ? "bg-[#f97316] text-[#0a0a08]" : "bg-[#ffca45] text-[#0a0a08]"}`}>
-                      {(cart.condition || "Used - Good").toUpperCase()}
-                    </span>
-                    {cart.images && cart.images[0] ? (
-                      <img 
-                        src={cart.images[0]} 
-                        alt={cart.nameEn}
-                        className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105"
-                      />
-                    ) : (
-                      <svg viewBox="0 0 100 80" className="w-12 h-12 md:w-20 md:h-20 text-[#ffb690]/10" fill="currentColor">
-                        <path d="M20 20 h60 v40 h-60 z M30 60 v10 M70 60 v10 M25 70 h50 M35 70 v5 M65 70 v5"/>
-                      </svg>
-                    )}
-                  </div>
-                  
-                  <div className="flex flex-col flex-grow">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-[8px] md:text-[9px] uppercase tracking-widest bg-[#0a0a08] text-[#ffb690] px-1.5 py-0.5 border border-[#ffb690]/20 rounded-md">
-                        {((Array.isArray(cart.type) ? cart.type[0] : cart.type) || "CART").toUpperCase()}
+            <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
+              {filteredCarts.map(cart => {
+                const conditionLabel = (cart.condition || "Used - Good").toUpperCase();
+                const conditionClasses =
+                  conditionLabel === "NEW"
+                    ? "bg-green-500 text-white"
+                    : conditionLabel === "USED - VERY GOOD"
+                      ? "bg-yellow-400 text-gray-900"
+                      : "bg-orange-400 text-white";
+
+                const typeLabel = ((Array.isArray(cart.type) ? cart.type[0] : cart.type) || "Cart");
+
+                const descriptionText = lang === "ta" ? (cart.descriptionTa || cart.descriptionEn) : cart.descriptionEn;
+                const showDescription = !!descriptionText && descriptionText.trim().toLowerCase() !== "self-listed cart";
+
+                return (
+                  <div key={cart.id} className="group bg-white border border-gray-200 hover:shadow-lg transition-shadow duration-300 flex flex-col rounded-xl overflow-hidden relative h-full">
+
+                    {/* Photo section */}
+                    <div className="relative w-full h-[200px] bg-gray-100 shrink-0 flex items-center justify-center overflow-hidden">
+                      <span className={`absolute top-2 left-2 z-10 text-[10px] font-bold uppercase tracking-wide px-2 py-1 rounded-full ${conditionClasses}`}>
+                        {conditionLabel}
                       </span>
-                      {cart.verified && (
-                        <span className="text-[8px] md:text-[9px] text-[#25D366] font-bold uppercase tracking-wider">✓ Verified</span>
+                      {cart.distanceKm !== undefined && (
+                        <span className="absolute bottom-2 left-2 z-10 bg-green-800 text-white text-xs font-medium px-2 py-1 rounded-full flex items-center gap-1">
+                          📍 {cart.distanceKm.toFixed(2)} km
+                        </span>
+                      )}
+                      {cart.images && cart.images[0] ? (
+                        <img
+                          src={cart.images[0]}
+                          alt={cart.nameEn}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <svg viewBox="0 0 100 80" className="w-16 h-16 text-gray-300" fill="currentColor">
+                          <path d="M20 20 h60 v40 h-60 z M30 60 v10 M70 60 v10 M25 70 h50 M35 70 v5 M65 70 v5"/>
+                        </svg>
                       )}
                     </div>
 
-                    <h3 className="font-display text-sm md:text-xl text-[#fffdf7] tracking-wider uppercase mb-1 line-clamp-1 mt-1">
-                      {cart.nameEn}
-                    </h3>
-                    <div className="h-8 md:h-10 overflow-hidden">
-                      <p 
-                        className="text-[10px] md:text-xs text-[#f6ded3]/70 leading-4 md:leading-5 explore-description"
-                        style={{
-                          display: "-webkit-box",
-                          WebkitLineClamp: 2,
-                          WebkitBoxOrient: "vertical",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis"
-                        }}
-                      >
-                        {lang === "ta" ? (cart.descriptionTa || cart.descriptionEn) : cart.descriptionEn}
-                      </p>
-                    </div>
-                    
-                    <div className="mt-auto pt-2 md:pt-4 border-t border-[#ffb690]/10 flex flex-col xs:flex-row justify-between items-stretch xs:items-end gap-2">
-                      <div>
-                        <span className="text-[8px] md:text-[9px] uppercase tracking-wider text-[#f6ded3]/40 block">
-                          Daily Rent
+                    {/* Card content */}
+                    <div className="flex flex-col flex-grow p-2 md:p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-[11px] font-semibold uppercase tracking-wide border border-green-700 text-green-700 px-2 py-0.5 rounded-full">
+                          {typeLabel}
                         </span>
-                        <span className="font-display text-sm md:text-2xl text-[#ffca45] block">
+                        {cart.verified && (
+                          <span className="text-xs text-green-600 font-bold">✓ Verified</span>
+                        )}
+                      </div>
+
+                      {showDescription && (
+                        <p
+                          className="text-xs md:text-sm text-gray-500 mb-2"
+                          style={{
+                            display: "-webkit-box",
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: "vertical",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis"
+                          }}
+                        >
+                          {descriptionText}
+                        </p>
+                      )}
+
+                      <div className="mt-auto">
+                        <span className="text-lg md:text-2xl font-bold text-green-800 block mb-3">
                           ₹{cart.pricePerDay}/day
                         </span>
+                        <Button asChild className="w-full bg-green-800 hover:bg-green-900 text-white font-bold rounded-lg h-10 text-xs md:text-sm">
+                          <Link href={`/carts/${cart.id}`} className="after:absolute after:inset-0 after:z-10">VIEW DETAILS</Link>
+                        </Button>
                       </div>
-                      <Button asChild className="bg-[#f97316] text-[#0a0a08] hover:bg-[#f97316]/95 border-none rounded-lg font-display uppercase tracking-widest text-[9px] md:text-xs py-1 px-3 md:py-2 md:px-6 h-7 md:h-9">
-                        <Link href={`/carts/${cart.id}`} className="after:absolute after:inset-0 after:z-10">Details</Link>
-                      </Button>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
 
