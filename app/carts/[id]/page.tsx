@@ -2,6 +2,8 @@ import { notFound } from "next/navigation";
 import { getCart } from "@/lib/carts";
 import CartDetailClient from "@/app/cart/[id]/CartDetailClient";
 
+export const dynamic = "force-dynamic";
+
 interface PageProps {
   params: Promise<{ id: string }>;
 }
