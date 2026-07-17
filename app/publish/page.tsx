@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useEffect, Suspense, useRef } from "react";
+import { useState, useEffect, Suspense, useRef, useMemo } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { LogIn, AlertCircle, Store, X } from "lucide-react";
-import { saveCart, updateCartAction, getCartByIdAction, uploadImagesAction } from "@/app/actions";
+import { saveCart, updateCartAction, getCartByIdAction } from "@/app/actions";
 import { useAuth } from "@/context/auth-context";
+import { createClient } from "@/lib/supabase-browser";
 
 const CART_TYPE_OPTIONS = [
   { value: "With Store", label: "With Store / Stove Cart" },
@@ -90,6 +91,7 @@ function PublishPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const editCartId = searchParams.get("edit");
+  const supabase = useMemo(() => createClient(), []);
 
   const { user, isVendor, vendorProfile, loading: authLoading } = useAuth();
 
@@ -234,14 +236,27 @@ function PublishPageContent() {
     try {
       let finalPhotos = [...existingPhotos];
       if (selectedFiles.length > 0) {
-        const uploadFormData = new FormData();
-        selectedFiles.forEach((file) => uploadFormData.append("images", file));
-        const uploadRes = await uploadImagesAction(uploadFormData);
-        if (uploadRes.success && uploadRes.urls) {
-          finalPhotos = [...finalPhotos, ...uploadRes.urls];
-        } else {
-          throw new Error(uploadRes.error || "Failed to upload images");
+        const uploadedUrls: string[] = [];
+        for (const file of selectedFiles) {
+          const fileExt = file.name.substring(file.name.lastIndexOf('.')) || ".jpg";
+          const filename = `cart-${Date.now()}-${Math.random().toString(36).substring(2, 9)}${fileExt}`;
+          
+          const { data, error: uploadErr } = await supabase.storage
+            .from("carts")
+            .upload(filename, file);
+
+          if (uploadErr) {
+            throw new Error(`Failed to upload ${file.name}: ${uploadErr.message}`);
+          }
+
+          if (data) {
+            const { data: urlData } = supabase.storage
+              .from("carts")
+              .getPublicUrl(filename);
+            uploadedUrls.push(urlData.publicUrl);
+          }
         }
+        finalPhotos = [...finalPhotos, ...uploadedUrls];
       }
 
       if (editCartId) {
