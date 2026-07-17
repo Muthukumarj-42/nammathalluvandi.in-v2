@@ -432,7 +432,7 @@ export function CartExplorer({
                           asChild
                           className="bg-[#25D366] hover:bg-[#20ba5a] text-white text-xs h-10 relative z-20"
                         >
-                          <Link href={`/book?cart=${cart.id}`}>
+                          <Link href={`/book?cart=${cart.uniqueCode || cart.id}`}>
                             <Text en="BOOK CART" ta="முன்பதிவு செய்க" />
                           </Link>
                         </Button>
@@ -603,7 +603,7 @@ export function CartExplorer({
                         asChild
                         className="bg-[#25D366] hover:bg-[#20ba5a] text-white relative z-20"
                       >
-                        <Link href={`/book?cart=${cart.id}`}>
+                        <Link href={`/book?cart=${cart.uniqueCode || cart.id}`}>
                           <MessageCircle size={16} />{" "}
                           <Text en="Book" ta="முன்பதிவு" />
                         </Link>

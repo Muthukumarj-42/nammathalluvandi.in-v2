@@ -338,7 +338,7 @@ export default function CartDetailClient({ cart }: CartDetailClientProps) {
       <div className="fixed left-0 right-0 z-40 bg-transparent py-4 bottom-[calc(60px+env(safe-area-inset-bottom))] md:bottom-4 pointer-events-none">
         <div className="site-container max-w-7xl mx-auto px-4 md:px-8 flex justify-center">
           <Link
-            href={`/book?cart=${cart.id}`}
+            href={`/book?cart=${cart.uniqueCode || cart.id}`}
             className="w-full max-w-md h-12 bg-[#f97316] hover:bg-[#e2640e] text-[#0a0a08] font-bold font-display text-xs md:text-sm tracking-widest uppercase active:scale-95 transition-all flex items-center justify-center gap-2 rounded-xl shadow-lg pointer-events-auto"
           >
             <Plus size={18} className="stroke-[3]" />
