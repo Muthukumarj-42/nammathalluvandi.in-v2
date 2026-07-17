@@ -761,7 +761,7 @@ function BrowseCartsPageContent() {
                           ₹{cart.pricePerDay}/day
                         </span>
                         <Button asChild className="w-full bg-green-800 hover:bg-green-900 text-white font-bold rounded-lg h-10 text-xs md:text-sm">
-                          <Link href={`/carts/${cart.id}`} className="after:absolute after:inset-0 after:z-10">VIEW DETAILS</Link>
+                          <Link href={`/carts/${cart.uniqueCode || cart.id}`} className="after:absolute after:inset-0 after:z-10">VIEW DETAILS</Link>
                         </Button>
                       </div>
                     </div>

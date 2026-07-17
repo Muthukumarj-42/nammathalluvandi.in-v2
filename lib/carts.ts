@@ -21,6 +21,7 @@ export interface Cart {
   latitude?: number;
   longitude?: number;
   verified?: boolean;
+  uniqueCode?: string | null;
 }
 
 export const filters = [
@@ -99,14 +100,15 @@ export function mapDbCartToCart(item: any): Cart {
     ]),
     images: Array.isArray(item.photos) && item.photos.length > 0 ? item.photos : 
             (Array.isArray(item.images) && item.images.length > 0 ? item.images : ["/carts/covered-premium-cart/photo-1.webp"]),
-    whatsappMessageTa: item.whatsapp_message_ta || item.whatsappMessageTa || `வணக்கம், நான் ${nameTaFinal} வாடகைக்கு எடுக்க விரும்புகிறேன்.`,
+    whatsappMessageTa: item.whatsapp_message_ta || item.whatsappMessageTa || `வணக்கம், நான் ${nameTaFinal} (வண்டி ஐடி: ${item.unique_code || item.uniqueCode || item.id}) வாடகைக்கு எடுக்க விரும்புகிறேன்.`,
     descriptionEn: item.description_en || item.descriptionEn || item.description || "",
     descriptionTa: item.description_ta || item.descriptionTa || item.description || "",
     condition: condition,
     pricePerMonth: pricePerDay * 30,
     latitude: Number(item.latitude) || 11.0168,
     longitude: Number(item.longitude) || 76.9558,
-    verified: item.verified || false
+    verified: item.verified || false,
+    uniqueCode: item.unique_code || item.uniqueCode || null
   };
 }
 

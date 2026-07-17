@@ -183,7 +183,7 @@ export default function VendorDashboardPage() {
                 return (
                   <Link
                     key={cart.id}
-                    href={`/carts/${cart.id}`}
+                    href={`/carts/${cart.uniqueCode || cart.id}`}
                     className="flex items-center justify-between p-5 bg-[#160c06] border border-[#ffb690]/15 hover:border-[#f97316]/50 rounded-2xl transition duration-300 group"
                   >
                     <div className="flex items-center gap-4">
@@ -196,7 +196,14 @@ export default function VendorDashboardPage() {
                         )}
                       </div>
                       <div>
-                        <p className="font-semibold text-sm text-[#fffdf7] group-hover:text-[#f97316] transition-colors">{displayName}</p>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <p className="font-semibold text-sm text-[#fffdf7] group-hover:text-[#f97316] transition-colors">{displayName}</p>
+                          {cart.uniqueCode && (
+                            <span className="text-[9px] font-bold bg-[#f97316]/10 text-[#f97316] border border-[#f97316]/20 px-1.5 py-0.5 rounded uppercase tracking-wide">
+                              {cart.uniqueCode}
+                            </span>
+                          )}
+                        </div>
                         <p className="text-xs text-[#f6ded3]/60 mt-1">
                           <T en="Daily Rent" ta="தினசரி வாடகை" />:{" "}
                           <span className="text-[#ffca45] font-semibold font-display">₹{cart.pricePerDay}/day</span>

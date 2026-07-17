@@ -43,8 +43,8 @@ export interface VendorProfile {
   area?: string | null;
   district?: string | null;
   cart_count?: string | null;
-  about_text?: string | null;
   status: "pending" | "approved" | "pending_review" | "rejected";
+  unique_code?: string | null;
 }
 
 interface AuthContextValue {

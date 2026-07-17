@@ -30,6 +30,7 @@ export interface DbCart {
   district?: string | null;
   status: "pending_review" | "live" | "rented" | "inactive";
   verified: boolean;
+  unique_code?: string | null;
   created_at?: string;
 }
 
@@ -397,10 +398,17 @@ export async function getAllCarts(): Promise<DbCart[]> {
 
 export async function getCartById(id: string): Promise<DbCart | null> {
   if (isDbConfigured) {
-    const { data } = await supabase.from("carts").select("*").eq("id", id).single();
-    return data || null;
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+    const query = supabase.from("carts").select("*");
+    if (isUuid) {
+      const { data } = await query.eq("id", id).maybeSingle();
+      return data || null;
+    } else {
+      const { data } = await query.eq("unique_code", id).maybeSingle();
+      return data || null;
+    }
   }
-  return mockCarts.find((c) => c.id === id) || null;
+  return mockCarts.find((c) => c.id === id || c.unique_code === id) || null;
 }
 
 export async function saveCart(cart: Omit<DbCart, "id" | "verified" | "status"> & { id?: string; status?: DbCart["status"]; verified?: boolean }): Promise<DbCart> {
@@ -420,10 +428,31 @@ export async function saveCart(cart: Omit<DbCart, "id" | "verified" | "status"> 
     mockCarts[existingIndex] = updated;
     return updated;
   } else {
+    let uniqueCode = cart.unique_code;
+    if (!uniqueCode) {
+      const getRtoCodeForDistrict = (districtName: string | null | undefined): number => {
+        if (!districtName) return 99;
+        const d = districtName.toLowerCase().trim();
+        if (d.includes("chennai")) return 1;
+        if (d.includes("coimbatore")) return 37;
+        if (d.includes("erode")) return 33;
+        if (d.includes("tiruppur") || d.includes("tirupur")) return 39;
+        if (d.includes("salem")) return 27;
+        if (d.includes("trichy") || d.includes("tiruchirappalli")) return 45;
+        if (d.includes("madurai")) return 58;
+        if (d.includes("thanjavur")) return 49;
+        return 99;
+      };
+      const rto = getRtoCodeForDistrict(cart.district);
+      const count = mockCarts.filter((c) => c.unique_code && c.unique_code.startsWith(`ntv-${rto}`)).length;
+      uniqueCode = `ntv-${rto}${String(count + 1).padStart(4, "0")}`;
+    }
+
     const created: DbCart = {
       id: cart.id || `e-${Math.random().toString(36).substr(2, 9)}`,
       verified: cart.verified || false,
       status: cart.status || "pending_review",
+      unique_code: uniqueCode,
       ...cart,
       created_at: new Date().toISOString(),
     };

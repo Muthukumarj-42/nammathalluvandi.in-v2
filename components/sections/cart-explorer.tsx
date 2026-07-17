@@ -424,7 +424,7 @@ export function CartExplorer({
                           variant="outline"
                           className="border-black/20 text-ink text-xs h-10"
                         >
-                          <Link href={`/carts/${cart.id}`} className="after:absolute after:inset-0 after:z-10">
+                          <Link href={`/carts/${cart.uniqueCode || cart.id}`} className="after:absolute after:inset-0 after:z-10">
                             <Text en="DETAILS" ta="விவரங்கள்" />
                           </Link>
                         </Button>
@@ -483,7 +483,7 @@ export function CartExplorer({
                 >
                   {/* 16:9 Aspect Video Area - FIX 8 */}
                   <Link
-                    href={`/carts/${cart.id}`}
+                    href={`/carts/${cart.uniqueCode || cart.id}`}
                     className="block relative aspect-video overflow-hidden bg-[#fff7ed] z-0"
                   >
                     <CartImage
@@ -595,7 +595,7 @@ export function CartExplorer({
 
                     <div className="mt-6 grid grid-cols-2 gap-3 pt-4 border-t border-black/5">
                       <Button asChild variant="dark">
-                        <Link href={`/carts/${cart.id}`} className="after:absolute after:inset-0 after:z-10">
+                        <Link href={`/carts/${cart.uniqueCode || cart.id}`} className="after:absolute after:inset-0 after:z-10">
                           <Text en="Details" ta="விவரங்கள்" />
                         </Link>
                       </Button>

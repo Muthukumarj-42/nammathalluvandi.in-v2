@@ -467,7 +467,8 @@ export function BookingFlow() {
     }
 
     // Build message dynamically strictly in Tamil as required
-    const message = `வணக்கம், நான் ${cart.nameTa} வாடகைக்கு எடுக்க விரும்புகிறேன் (வி2 வண்டிகள் தேடல்).
+    const code = cart.uniqueCode || cart.id;
+    const message = `வணக்கம், நான் ${cart.nameTa} (வண்டி ஐடி: ${code}) வாடகைக்கு எடுக்க விரும்புகிறேன்.
 
 பெயர்: ${translatedName}
 தொலைபேசி: ${formData.phone.trim()}
