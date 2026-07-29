@@ -375,6 +375,39 @@ export default function HomePage() {
         </div>
       </div>
 
+      {/* Vendor CTA Section */}
+      <section className="py-12 md:py-16 bg-surface border-t border-outline-variant/20">
+        <div className="site-container max-w-6xl mx-auto px-4">
+          <div className="bg-surface-container-low border border-outline-variant/20 rounded-3xl p-8 md:p-12 flex flex-col md:flex-row items-center justify-between gap-8 shadow-sm">
+            <div className="max-w-2xl">
+              <span className="inline-block px-3.5 py-1.5 rounded-full bg-[#f97316]/10 border border-[#f97316]/20 text-[#f97316] font-bold text-xs uppercase tracking-widest mb-4">
+                <Text en="For Cart Owners" ta="வண்டி உரிமையாளர்களுக்கு" />
+              </span>
+              <h2 className="font-display text-3xl md:text-4xl font-black uppercase leading-tight text-on-surface tracking-wide">
+                <Text
+                  en="Do you have carts? List them on Namma Thalluvandi!"
+                  ta="உங்களிடம் வண்டிகள் உள்ளதா? நம்ம தள்ளுவண்டியில் பதிவிடுங்கள்!"
+                />
+              </h2>
+              <p className="mt-4 text-sm md:text-base text-on-surface-variant leading-relaxed">
+                <Text
+                  en="Reach thousands of local vendors looking for push carts and modern food carts. Create your vendor profile today and start listing your carts to boost your rental business."
+                  ta="வாடகைக்கு வண்டிகள் தேடும் ஆயிரக்கணக்கான வியாபாரிகளை சென்றடையுங்கள். இன்றே உங்கள் விற்பனையாளர் சுயவிவரத்தை உருவாக்கி, உங்கள் வண்டிகளைப் பதிவிட்டு வாடகை வருவாயை அதிகரிக்கவும்."
+                />
+              </p>
+            </div>
+            <div className="shrink-0 w-full md:w-auto">
+              <Button asChild className="w-full md:w-auto bg-[#f97316] hover:bg-[#e2640e] text-[#0a0a08] border-none font-display font-black text-sm uppercase tracking-widest px-8 py-6 rounded-2xl transition duration-300 active:scale-95 shadow-md shadow-[#f97316]/10">
+                <Link href="/login?redirect=/vendor/register">
+                  <Text en="Create Vendor Profile" ta="சுயவிவரம் உருவாக்கவும்" />
+                  <ChevronRight className="ml-2 w-5 h-5 animate-pulse" />
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Custom Manufacturing Section */}
       <section className="py-12 md:py-16 bg-surface border-t border-outline-variant/20">
         <div className="site-container max-w-6xl mx-auto">
@@ -479,39 +512,6 @@ export default function HomePage() {
                   </li>
                 </ul>
               </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Vendor CTA Section */}
-      <section className="py-12 md:py-16 bg-surface border-t border-outline-variant/20">
-        <div className="site-container max-w-6xl mx-auto px-4">
-          <div className="bg-surface-container-low border border-outline-variant/20 rounded-3xl p-8 md:p-12 flex flex-col md:flex-row items-center justify-between gap-8 shadow-sm">
-            <div className="max-w-2xl">
-              <span className="inline-block px-3.5 py-1.5 rounded-full bg-[#f97316]/10 border border-[#f97316]/20 text-[#f97316] font-bold text-xs uppercase tracking-widest mb-4">
-                <Text en="For Cart Owners" ta="வண்டி உரிமையாளர்களுக்கு" />
-              </span>
-              <h2 className="font-display text-3xl md:text-4xl font-black uppercase leading-tight text-on-surface tracking-wide">
-                <Text
-                  en="Do you have carts? List them on Namma Thalluvandi!"
-                  ta="உங்களிடம் வண்டிகள் உள்ளதா? நம்ம தள்ளுவண்டியில் பதிவிடுங்கள்!"
-                />
-              </h2>
-              <p className="mt-4 text-sm md:text-base text-on-surface-variant leading-relaxed">
-                <Text
-                  en="Reach thousands of local vendors looking for push carts and modern food carts. Create your vendor profile today and start listing your carts to boost your rental business."
-                  ta="வாடகைக்கு வண்டிகள் தேடும் ஆயிரக்கணக்கான வியாபாரிகளை சென்றடையுங்கள். இன்றே உங்கள் விற்பனையாளர் சுயவிவரத்தை உருவாக்கி, உங்கள் வண்டிகளைப் பதிவிட்டு வாடகை வருவாயை அதிகரிக்கவும்."
-                />
-              </p>
-            </div>
-            <div className="shrink-0 w-full md:w-auto">
-              <Button asChild className="w-full md:w-auto bg-[#f97316] hover:bg-[#e2640e] text-[#0a0a08] border-none font-display font-black text-sm uppercase tracking-widest px-8 py-6 rounded-2xl transition duration-300 active:scale-95 shadow-md shadow-[#f97316]/10">
-                <Link href="/login?redirect=/vendor/register">
-                  <Text en="Create Vendor Profile" ta="சுயவிவரம் உருவாக்கவும்" />
-                  <ChevronRight className="ml-2 w-5 h-5 animate-pulse" />
-                </Link>
-              </Button>
             </div>
           </div>
         </div>
