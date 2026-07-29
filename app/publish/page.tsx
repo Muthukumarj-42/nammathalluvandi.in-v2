@@ -9,41 +9,61 @@ import { useAuth } from "@/context/auth-context";
 import { createClient } from "@/lib/supabase-browser";
 
 const CART_TYPE_OPTIONS = [
-  { value: "With Store", label: "With Store / Stove Cart" },
-  { value: "With Roof", label: "With Roof / Covered Cart" },
-  { value: "Ice Cream", label: "Ice Cream Cart" },
-  { value: "Tea Stall", label: "Tea & Coffee Cart" },
-  { value: "E-Rickshaw", label: "E-Rickshaw Food Cart" },
-  { value: "Other", label: "Custom / Other" },
+  { value: "With Store", en: "With Store / Stove Cart", ta: "அடுப்புடன் கூடிய வண்டி / ஸ்டவ் வண்டி" },
+  { value: "With Roof", en: "With Roof / Covered Cart", ta: "மேற்கூரையுடன் கூடிய வண்டி / மூடப்பட்ட வண்டி" },
+  { value: "Ice Cream", en: "Ice Cream Cart", ta: "ஐஸ்கிரீம் வண்டி" },
+  { value: "Tea Stall", en: "Tea & Coffee Cart", ta: "டீ & காபி கடை வண்டி" },
+  { value: "E-Rickshaw", en: "E-Rickshaw Food Cart", ta: "இ-ரிக்ஷா உணவு வண்டி" },
+  { value: "Other", en: "Custom / Other", ta: "தனிப்பயனாக்கப்பட்ட வண்டி / இதர" },
 ];
 
 const CONDITION_OPTIONS = [
-  { value: "New", label: "Brand New" },
-  { value: "Used - Very Good", label: "Used — Very Good" },
-  { value: "Used - Good", label: "Used — Good" },
-  { value: "Fair", label: "Used — Fair" },
+  { value: "New", en: "Brand New", ta: "புதியது" },
+  { value: "Used - Very Good", en: "Used — Very Good", ta: "பயன்படுத்தப்பட்டது — மிக நன்று" },
+  { value: "Used - Good", en: "Used — Good", ta: "பயன்படுத்தப்பட்டது — நன்று" },
+  { value: "Fair", en: "Used — Fair", ta: "பயன்படுத்தப்பட்டது — சுமார்" },
 ];
 
-const SIZE_OPTIONS = ["Small (3 ft)", "Medium (4 ft)", "Large (5 ft)", "Extra Large (6 ft)"];
-const STOVE_OPTIONS = ["None", "Single Burner", "Double Burner", "Triple Burner"];
+const SIZE_OPTIONS = [
+  { value: "Small (3 ft)", en: "Small (3 ft)", ta: "சிறிய (3 அடி)" },
+  { value: "Medium (4 ft)", en: "Medium (4 ft)", ta: "நடுத்தர (4 அடி)" },
+  { value: "Large (5 ft)", en: "Large (5 ft)", ta: "பெரிய (5 அடி)" },
+  { value: "Extra Large (6 ft)", en: "Extra Large (6 ft)", ta: "மிகப் பெரிய (6 அடி)" },
+];
+
+const STOVE_OPTIONS = [
+  { value: "None", en: "None", ta: "இல்லை" },
+  { value: "Single Burner", en: "Single Burner", ta: "ஒற்றை அடுப்பு" },
+  { value: "Double Burner", en: "Double Burner", ta: "இரட்டை அடுப்பு" },
+  { value: "Triple Burner", en: "Triple Burner", ta: "மூன்று அடுப்பு" },
+];
 
 const RENTAL_PERIOD_OPTIONS = [
-  { value: "daily", label: "Daily" },
-  { value: "weekly", label: "Weekly" },
-  { value: "1_month", label: "1 Month" },
-  { value: "3_months", label: "3 Months" },
+  { value: "daily", en: "Daily", ta: "தினசரி" },
+  { value: "weekly", en: "Weekly", ta: "வாராந்திர" },
+  { value: "1_month", en: "1 Month", ta: "1 மாதம்" },
+  { value: "3_months", en: "3 Months", ta: "3 மாதங்கள்" },
 ];
 
 const EQUIPMENT_OPTIONS = [
-  "⛽ Gas Cylinder Connection",
-  "💧 Water Tank",
-  "⚡ Electrical Connection",
-  "📦 Storage Shelves",
-  "🔒 Lockable Cabinet",
-  "🛞 Wheel Brake System",
-  "☂️ Roof / Rain Cover",
-  "🧊 Ice Storage Compartment",
+  { value: "⛽ Gas Cylinder Connection", en: "⛽ Gas Cylinder Connection", ta: "⛽ கேஸ் சிலிண்டர் இணைப்பு" },
+  { value: "💧 Water Tank", en: "💧 Water Tank", ta: "💧 தண்ணீர் தொட்டி" },
+  { value: "⚡ Electrical Connection", en: "⚡ Electrical Connection", ta: "⚡ மின்சார இணைப்பு" },
+  { value: "📦 Storage Shelves", en: "📦 Storage Shelves", ta: "📦 சேமிப்பு அலமாரிகள்" },
+  { value: "🔒 Lockable Cabinet", en: "🔒 Lockable Cabinet", ta: "🔒 பூட்டக்கூடிய அமைச்சரவை" },
+  { value: "🛞 Wheel Brake System", en: "🛞 Wheel Brake System", ta: "🛞 சக்கர பிரேக் சிஸ்டம்" },
+  { value: "☂️ Roof / Rain Cover", en: "☂️ Roof / Rain Cover", ta: "☂️ மேற்கூரை / மழை உறை" },
+  { value: "🧊 Ice Storage Compartment", en: "🧊 Ice Storage Compartment", ta: "🧊 ஐஸ் சேமிப்பு பெட்டி" },
 ];
+
+function T({ en, ta }: { en: string; ta: string }) {
+  return (
+    <>
+      <span className="en">{en}</span>
+      <span className="ta tamil-text">{ta}</span>
+    </>
+  );
+}
 
 const inputClass =
   "w-full px-4 py-3 rounded-xl bg-surface border border-outline-variant/30 text-on-surface text-sm placeholder:text-on-surface-variant/40 focus:outline-none focus:ring-2 focus:ring-primary/40 transition";
@@ -120,6 +140,27 @@ function PublishPageContent() {
   const supabase = useMemo(() => createClient(), []);
 
   const { user, isVendor, vendorProfile, loading: authLoading } = useAuth();
+  const [lang, setLang] = useState<"en" | "ta">("en");
+
+  // Sync React language state dynamically with DOM mutations (data-lang toggle)
+  useEffect(() => {
+    const currentLang =
+      document.documentElement.dataset.lang === "ta" ? "ta" : "en";
+    setLang(currentLang);
+
+    const observer = new MutationObserver(() => {
+      const updatedLang =
+        document.documentElement.dataset.lang === "ta" ? "ta" : "en";
+      setLang(updatedLang);
+    });
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["data-lang"],
+    });
+
+    return () => observer.disconnect();
+  }, []);
 
   const [editLoading, setEditLoading] = useState(false);
   const [submitLoading, setSubmitLoading] = useState(false);
@@ -305,9 +346,13 @@ function PublishPageContent() {
         if (!res.success) throw new Error(res.error || "Failed to update cart");
         router.push("/vendor/dashboard");
       } else {
+        const selectedCartType = CART_TYPE_OPTIONS.find((o) => o.value === formData.cartType);
+        const nameEn = selectedCartType?.en || formData.cartType;
+        const nameTa = selectedCartType?.ta || formData.cartType;
+
         const res = await saveCart({
-          nameEn: formData.cartType,
-          nameTa: formData.cartType,
+          nameEn,
+          nameTa,
           type: formData.cartType,
           pricePerDay: Number(formData.dailyRent) || 80,
           depositAmount: 2000,
@@ -378,12 +423,17 @@ function PublishPageContent() {
           <div className="w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto mb-5">
             <LogIn className="w-8 h-8 text-primary" />
           </div>
-          <h1 className="font-display text-2xl font-bold text-on-surface mb-3">Sign In to List Your Cart</h1>
+          <h1 className="font-display text-2xl font-bold text-on-surface mb-3">
+            <T en="Sign In to List Your Cart" ta="உங்கள் வண்டியைப் பட்டியலிட உள்நுழையவும்" />
+          </h1>
           <p className="text-on-surface-variant text-sm mb-8">
-            You need an account to list your cart on Thalluvandi. Sign in or create an account to continue.
+            <T
+              en="You need an account to list your cart on Thalluvandi. Sign in or create an account to continue."
+              ta="நம்ம தள்ளுவண்டியில் வண்டியைப் பட்டியலிட உங்களுக்கு ஒரு கணக்கு இருக்க வேண்டும். தொடர உள்நுழையவும்."
+            />
           </p>
           <Link href="/login?redirect=/publish" className="inline-flex items-center justify-center gap-2 w-full py-4 rounded-xl bg-primary text-on-primary font-bold text-sm uppercase tracking-widest hover:bg-primary-container transition">
-            <LogIn className="w-4 h-4" /> Login / Register
+            <LogIn className="w-4 h-4" /> <T en="Login / Register" ta="உள்நுழைய / பதிவு செய்ய" />
           </Link>
         </div>
       </main>
@@ -398,15 +448,20 @@ function PublishPageContent() {
           <div className="w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto mb-5">
             <Store className="w-8 h-8 text-primary" />
           </div>
-          <h1 className="font-display text-2xl font-bold text-on-surface mb-3">Create Vendor Profile First</h1>
+          <h1 className="font-display text-2xl font-bold text-on-surface mb-3">
+            <T en="Create Vendor Profile First" ta="முதலில் விற்பனையாளர் சுயவிவரத்தை உருவாக்கவும்" />
+          </h1>
           <div className="flex items-start gap-3 p-4 rounded-xl bg-surface-container border border-outline-variant/20 text-left mb-6">
             <AlertCircle className="w-5 h-5 text-on-surface-variant shrink-0 mt-0.5" />
             <p className="text-sm text-on-surface-variant leading-relaxed">
-              To list a cart, you first need to create your vendor profile. It only takes 2 minutes.
+              <T
+                en="To list a cart, you first need to create your vendor profile. It only takes 2 minutes."
+                ta="வண்டியைப் பட்டியலிட, முதலில் உங்கள் விற்பனையாளர் சுயவிவரத்தை உருவாக்க வேண்டும். இதற்கு 2 நிமிடங்கள் மட்டுமே ஆகும்."
+              />
             </p>
           </div>
           <Link href="/vendor/register" className="inline-flex items-center justify-center gap-2 w-full py-4 rounded-xl bg-primary text-on-primary font-bold text-sm uppercase tracking-widest hover:bg-primary-container transition">
-            <Store className="w-4 h-4" /> Create Vendor Profile
+            <Store className="w-4 h-4" /> <T en="Create Vendor Profile" ta="விற்பனையாளர் சுயவிவரத்தை உருவாக்கவும்" />
           </Link>
         </div>
       </main>
@@ -419,17 +474,25 @@ function PublishPageContent() {
       <main className="min-h-screen bg-background pt-24 pb-16 px-4 flex items-center justify-center">
         <div className="max-w-sm w-full text-center py-12">
           <div className="text-5xl mb-4">🛒</div>
-          <h2 className="font-display text-2xl font-bold text-on-surface mb-2">Listing Submitted!</h2>
-          <p className="text-on-surface-variant text-sm mb-2">Your cart will be reviewed and listed within 24 hours.</p>
-          <p className="text-on-surface-variant text-sm mb-6">Booking enquiries will be sent directly to your WhatsApp.</p>
+          <h2 className="font-display text-2xl font-bold text-on-surface mb-2">
+            <T en="Listing Submitted!" ta="விவரங்கள் சமர்ப்பிக்கப்பட்டது!" />
+          </h2>
+          <p className="text-on-surface-variant text-sm mb-2">
+            <T en="Your cart will be reviewed and listed within 24 hours." ta="உங்கள் வண்டி 24 மணி நேரத்திற்குள் சரிபார்க்கப்பட்டு நேரலையில் பட்டியலிடப்படும்." />
+          </p>
+          <p className="text-on-surface-variant text-sm mb-6">
+            <T en="Booking enquiries will be sent directly to your WhatsApp." ta="முன்பதிவு விசாரணைகள் நேரடியாக உங்கள் வாட்ஸ்அப்பிற்கு அனுப்பப்படும்." />
+          </p>
           <div className="flex flex-col gap-3">
             <button
               onClick={resetForm}
               className="w-full py-3 rounded-xl bg-primary text-on-primary font-bold text-sm uppercase tracking-widest hover:bg-primary-container transition"
             >
-              LIST ANOTHER CART
+              <T en="LIST ANOTHER CART" ta="மற்றொரு வண்டியைப் பட்டியலிடவும்" />
             </button>
-            <Link href="/explore" className="text-primary text-sm font-semibold text-center">Browse all carts →</Link>
+            <Link href="/explore" className="text-primary text-sm font-semibold text-center">
+              <T en="Browse all carts →" ta="அனைத்து வண்டிகளையும் பார்க்க →" />
+            </Link>
           </div>
         </div>
       </main>
@@ -456,10 +519,18 @@ function PublishPageContent() {
       <div className="w-full max-w-[600px] mx-auto">
         <div className="text-center mb-8">
           <h1 className="font-display text-3xl font-bold text-on-surface mb-2">
-            {editCartId ? "Edit Cart Listing" : "List Your Cart"}
+            {editCartId ? (
+              <T en="Edit Cart Listing" ta="வண்டி விவரங்களை மாற்றியமைக்கவும்" />
+            ) : (
+              <T en="List Your Cart" ta="உங்கள் வண்டியைப் பட்டியலிடுங்கள்" />
+            )}
           </h1>
           <p className="text-on-surface-variant text-sm">
-            {editCartId ? "Update your listing details" : "Free · Reviewed within 24 hours"}
+            {editCartId ? (
+              <T en="Update your listing details" ta="உங்கள் வண்டியின் விவரங்களைப் புதுப்பிக்கவும்" />
+            ) : (
+              <T en="Free · Reviewed within 24 hours" ta="இலவசம் · 24 மணி நேரத்திற்குள் சரிபார்க்கப்படும்" />
+            )}
           </p>
         </div>
 
@@ -475,7 +546,7 @@ function PublishPageContent() {
           <div>
             <p className="font-semibold text-on-surface text-sm">{vendorName}</p>
             <p className="text-xs text-on-surface-variant">
-              📍 {vendorArea && vendorDistrict ? `${vendorArea} · ${vendorDistrict}` : "Location not set"}
+              📍 {vendorArea && vendorDistrict ? `${vendorArea} · ${vendorDistrict}` : <T en="Location not set" ta="இருப்பிடம் அமைக்கப்படவில்லை" />}
             </p>
           </div>
         </div>
@@ -490,59 +561,61 @@ function PublishPageContent() {
         <form onSubmit={handleSubmit}>
           {/* Section 1 — Cart Details */}
           <div className={sectionClass}>
-            <h2 className="font-display text-base font-bold text-on-surface mb-4">Cart Details</h2>
+            <h2 className="font-display text-base font-bold text-on-surface mb-4">
+              <T en="Cart Details" ta="வண்டியின் விவரங்கள்" />
+            </h2>
 
             <div className="mb-4">
-              <label className={labelClass}>Cart Type *</label>
+              <label className={labelClass}><T en="Cart Type *" ta="வண்டி வகை *" /></label>
               <select
                 value={formData.cartType}
                 onChange={(e) => setFormData((f) => ({ ...f, cartType: e.target.value }))}
                 className={selectClass}
               >
-                <option value="">Select cart type...</option>
+                <option value="">{lang === "ta" ? "வண்டி வகையைத் தேர்ந்தெடுக்கவும்..." : "Select cart type..."}</option>
                 {CART_TYPE_OPTIONS.map((o) => (
-                  <option key={o.value} value={o.value}>{o.label}</option>
+                  <option key={o.value} value={o.value}>{lang === "ta" ? o.ta : o.en}</option>
                 ))}
               </select>
             </div>
 
             <div className="mb-4">
-              <label className={labelClass}>Condition *</label>
+              <label className={labelClass}><T en="Condition *" ta="நிலைமை *" /></label>
               <select
                 value={formData.condition}
                 onChange={(e) => setFormData((f) => ({ ...f, condition: e.target.value }))}
                 className={selectClass}
               >
-                <option value="">Select condition...</option>
+                <option value="">{lang === "ta" ? "நிலைமையைத் தேர்ந்தெடுக்கவும்..." : "Select condition..."}</option>
                 {CONDITION_OPTIONS.map((o) => (
-                  <option key={o.value} value={o.value}>{o.label}</option>
+                  <option key={o.value} value={o.value}>{lang === "ta" ? o.ta : o.en}</option>
                 ))}
               </select>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className={labelClass}>Cart Size</label>
+                <label className={labelClass}><T en="Cart Size" ta="வண்டியின் அளவு" /></label>
                 <select
                   value={formData.size}
                   onChange={(e) => setFormData((f) => ({ ...f, size: e.target.value }))}
                   className={selectClass}
                 >
-                  <option value="">Select size...</option>
+                  <option value="">{lang === "ta" ? "அளவைத் தேர்ந்தெடுக்கவும்..." : "Select size..."}</option>
                   {SIZE_OPTIONS.map((s) => (
-                    <option key={s} value={s}>{s}</option>
+                    <option key={s.value} value={s.value}>{lang === "ta" ? s.ta : s.en}</option>
                   ))}
                 </select>
               </div>
               <div>
-                <label className={labelClass}>Stove Type</label>
+                <label className={labelClass}><T en="Stove Type" ta="அடுப்பு வகை" /></label>
                 <select
                   value={formData.stoveType}
                   onChange={(e) => setFormData((f) => ({ ...f, stoveType: e.target.value }))}
                   className={selectClass}
                 >
                   {STOVE_OPTIONS.map((s) => (
-                    <option key={s} value={s}>{s}</option>
+                    <option key={s.value} value={s.value}>{lang === "ta" ? s.ta : s.en}</option>
                   ))}
                 </select>
               </div>
@@ -551,23 +624,30 @@ function PublishPageContent() {
 
           {/* Section 2 — Pricing & Availability */}
           <div className={sectionClass}>
-            <h2 className="font-display text-base font-bold text-on-surface mb-4">Pricing & Availability</h2>
+            <h2 className="font-display text-base font-bold text-on-surface mb-4">
+              <T en="Pricing & Availability" ta="வாடகை & கிடைக்கும் விவரங்கள்" />
+            </h2>
 
             <div className="mb-4">
-              <label className={labelClass}>Daily Rent (₹) *</label>
+              <label className={labelClass}><T en="Daily Rent (₹) *" ta="தினசரி வாடகை (₹) *" /></label>
               <input
                 type="number"
                 min={0}
                 value={formData.dailyRent}
                 onChange={(e) => setFormData((f) => ({ ...f, dailyRent: e.target.value }))}
-                placeholder="e.g. 80"
+                placeholder={lang === "ta" ? "உதாரணமாக: 80" : "e.g. 80"}
                 className={inputClass}
               />
-              <p className={helperClass}>💡 Similar carts in your area rent for ₹60 – ₹120/day</p>
+              <p className={helperClass}>
+                <T
+                  en="💡 Similar carts in your area rent for ₹60 – ₹120/day"
+                  ta="💡 உங்கள் பகுதியில் இதே போன்ற வண்டிகள் ₹60 - ₹120/நாள் வரை வாடகைக்கு விடப்படுகின்றன"
+                />
+              </p>
             </div>
 
             <div className="mb-4">
-              <label className={labelClass}>Minimum Rental Period *</label>
+              <label className={labelClass}><T en="Minimum Rental Period *" ta="குறைந்தபட்ச வாடகை காலம் *" /></label>
               <div className="flex flex-wrap gap-2">
                 {RENTAL_PERIOD_OPTIONS.map((o) => (
                   <button
@@ -580,7 +660,7 @@ function PublishPageContent() {
                         : "bg-surface border border-outline-variant rounded-full px-5 py-2 text-sm text-on-surface-variant cursor-pointer hover:border-primary/50 transition"
                     }
                   >
-                    {o.label}
+                    {lang === "ta" ? o.ta : o.en}
                   </button>
                 ))}
               </div>
@@ -600,21 +680,27 @@ function PublishPageContent() {
 
           {/* Section 3 — Equipment */}
           <div className={sectionClass}>
-            <h2 className="font-display text-base font-bold text-on-surface mb-1">Equipment Included</h2>
-            <p className={`${helperClass} mb-3`}>Tap everything that applies to your cart</p>
+            <h2 className="font-display text-base font-bold text-on-surface mb-1">
+              <T en="Equipment Included" ta="வண்டியிலுள்ள உபகரணங்கள்" />
+            </h2>
+            <p className={`${helperClass} mb-3`}>
+              <T en="Tap everything that applies to your cart" ta="உங்கள் வண்டியில் இருக்கும் அனைத்தையும் தேர்ந்தெடுக்கவும்" />
+            </p>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-              {EQUIPMENT_OPTIONS.map((item) => (
+              {EQUIPMENT_OPTIONS.map((o) => (
                 <label
-                  key={item}
+                  key={o.value}
                   className="flex items-center gap-2 p-3 rounded-xl border border-outline-variant/30 bg-surface cursor-pointer hover:border-primary/30 hover:bg-primary/5 transition"
                 >
                   <input
                     type="checkbox"
-                    checked={equipment.includes(item)}
-                    onChange={() => toggleEquipment(item)}
+                    checked={equipment.includes(o.value)}
+                    onChange={() => toggleEquipment(o.value)}
                     className="accent-primary w-4 h-4"
                   />
-                  <span className="text-sm text-on-surface">{item}</span>
+                  <span className="text-sm text-on-surface">
+                    {lang === "ta" ? o.ta : o.en}
+                  </span>
                 </label>
               ))}
             </div>
@@ -622,17 +708,21 @@ function PublishPageContent() {
 
           {/* Section 4 — Cart Location */}
           <div className={sectionClass}>
-            <h2 className="font-display text-base font-bold text-on-surface mb-1">Cart Location</h2>
-            <p className={`${helperClass} mb-3`}>Where is your cart currently stored or located?</p>
+            <h2 className="font-display text-base font-bold text-on-surface mb-1">
+              <T en="Cart Location" ta="வண்டி இருக்கும் இடம்" />
+            </h2>
+            <p className={`${helperClass} mb-3`}>
+              <T en="Where is your cart currently stored or located?" ta="உங்கள் வண்டி தற்போது எங்கு வைக்கப்பட்டுள்ளது அல்லது அமைந்துள்ளது?" />
+            </p>
 
             <button
               type="button"
               onClick={handleUseProfileLocation}
               className="w-full py-3 rounded-xl border border-outline-variant/30 bg-surface-container text-on-surface text-sm font-medium flex items-center gap-2 px-4 mb-3 hover:border-primary/40 transition"
             >
-              📍 Use My Profile Location
+              📍 <T en="Use My Profile Location" ta="என் சுயவிவர இருப்பிடத்தைப் பயன்படுத்தவும்" />
               <span className="text-on-surface-variant text-xs ml-auto">
-                {vendorArea && vendorDistrict ? `${vendorArea}, ${vendorDistrict}` : "Not set"}
+                {vendorArea && vendorDistrict ? `${vendorArea}, ${vendorDistrict}` : <T en="Not set" ta="அமைக்கப்படவில்லை" />}
               </span>
             </button>
 
@@ -642,26 +732,45 @@ function PublishPageContent() {
               disabled={location.status === "loading"}
               className="w-full py-3 rounded-xl border border-dashed border-outline-variant/40 bg-surface text-on-surface-variant text-sm flex items-center gap-2 px-4 hover:border-primary/40 transition disabled:opacity-60"
             >
-              📍 {location.status === "loading" ? "Detecting…" : "Cart is at a different location"}
+              📍 {location.status === "loading" ? (
+                <T en="Detecting…" ta="இருப்பிடம் கண்டறியப்படுகிறது…" />
+              ) : (
+                <T en="Cart is at a different location" ta="வண்டி வேறு இடத்தில் உள்ளது" />
+              )}
             </button>
 
             {location.status === "success" && (
               <div className="rounded-xl bg-primary/5 border border-primary/20 p-4 mt-3">
-                <div className="flex items-center gap-2 text-primary font-semibold text-sm mb-1">✅ Location {location.source === "profile" ? "Set From Profile" : "Detected"}</div>
+                <div className="flex items-center gap-2 text-primary font-semibold text-sm mb-1">
+                  ✅ <T en="Location" ta="இருப்பிடம்" /> {location.source === "profile" ? (
+                    <T en="Set From Profile" ta="சுயவிவரத்திலிருந்து அமைக்கப்பட்டது" />
+                  ) : (
+                    <T en="Detected" ta="கண்டறியப்பட்டது" />
+                  )}
+                </div>
                 <p className="text-on-surface-variant text-xs">{location.area || "Area"}, {location.district || "District"}</p>
               </div>
             )}
             {location.status === "error" && (
               <div className="rounded-xl bg-error/5 border border-error/20 p-4 mt-3">
-                <p className="text-error text-sm">❌ Could not detect location. Please allow location access and try again.</p>
+                <p className="text-error text-sm">
+                  <T
+                    en="❌ Could not detect location. Please allow location access and try again."
+                    ta="❌ இருப்பிடத்தைக் கண்டறிய முடியவில்லை. தயவுசெய்து இருப்பிட அனுமதியை வழங்கி மீண்டும் முயலவும்."
+                  />
+                </p>
               </div>
             )}
           </div>
 
           {/* Section 5 — Cart Photos */}
           <div className={sectionClass}>
-            <h2 className="font-display text-base font-bold text-on-surface mb-1">Cart Photos</h2>
-            <p className={`${helperClass} mb-3`}>Add 2–5 clear photos of your cart</p>
+            <h2 className="font-display text-base font-bold text-on-surface mb-1">
+              <T en="Cart Photos" ta="வண்டி புகைப்படங்கள்" />
+            </h2>
+            <p className={`${helperClass} mb-3`}>
+              <T en="Add 2–5 clear photos of your cart" ta="உங்கள் வண்டியின் 2-5 தெளிவான புகைப்படங்களைச் சேர்க்கவும்" />
+            </p>
 
             <div className="relative border-2 border-dashed border-outline-variant/40 rounded-xl bg-surface-container p-6 text-center cursor-pointer hover:border-primary/40 hover:bg-primary/5 transition">
               <input
@@ -672,8 +781,12 @@ function PublishPageContent() {
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
               />
               <div className="text-3xl text-primary mb-1">📷</div>
-              <p className="font-semibold text-on-surface text-sm mt-2">Tap to add cart photos</p>
-              <p className="text-xs text-on-surface-variant mt-1">PNG, JPG, WEBP · Up to 5 photos · Max 5MB each</p>
+              <p className="font-semibold text-on-surface text-sm mt-2">
+                <T en="Tap to add cart photos" ta="புகைப்படங்களைச் சேர்க்க தட்டவும்" />
+              </p>
+              <p className="text-xs text-on-surface-variant mt-1">
+                <T en="PNG, JPG, WEBP · Up to 5 photos · Max 5MB each" ta="PNG, JPG, WEBP · 5 புகைப்படங்கள் வரை · தலா 5MB அதிகபட்சம்" />
+              </p>
             </div>
 
             {(existingPhotos.length > 0 || previews.length > 0) && (
@@ -705,20 +818,27 @@ function PublishPageContent() {
               </div>
             )}
             {!editCartId && totalPhotos < 2 && (
-              <p className={helperClass}>Add at least {2 - totalPhotos} more photo{2 - totalPhotos === 1 ? "" : "s"} to continue.</p>
+              <p className={helperClass}>
+                <T
+                  en={`Add at least ${2 - totalPhotos} more photo${2 - totalPhotos === 1 ? "" : "s"} to continue.`}
+                  ta={`தொடர மேலும் குறைந்தபட்சம் ${2 - totalPhotos} புகைப்படங்களைச் சேர்க்கவும்.`}
+                />
+              </p>
             )}
           </div>
 
           {/* Section 6 — Additional Details */}
           <div className={sectionClass}>
-            <h2 className="font-display text-base font-bold text-on-surface mb-0.5">Additional Details</h2>
-            <p className={`${helperClass} mb-3`}>(Optional)</p>
-            <label className={labelClass}>Anything else about this cart?</label>
+            <h2 className="font-display text-base font-bold text-on-surface mb-0.5">
+              <T en="Additional Details" ta="கூடுதல் விவரங்கள்" />
+            </h2>
+            <p className={`${helperClass} mb-3`}><T en="(Optional)" ta="(விருப்பத்திற்குரியது)" /></p>
+            <label className={labelClass}><T en="Anything else about this cart?" ta="இந்த வண்டியைப் பற்றி வேறு ஏதேனும் கூற விரும்புகிறீர்களா?" /></label>
             <textarea
               rows={3}
               value={formData.additionalDetails}
               onChange={(e) => setFormData((f) => ({ ...f, additionalDetails: e.target.value }))}
-              placeholder="e.g. Recently painted, new wheels fitted, available immediately..."
+              placeholder={lang === "ta" ? "எ.கா. சமீபத்தில் வண்ணம் பூசப்பட்டது, புதிய சக்கரங்கள் பொருத்தப்பட்டது, உடனடியாகக் கிடைக்கும்..." : "e.g. Recently painted, new wheels fitted, available immediately..."}
               className={`${inputClass} resize-none`}
             />
           </div>
@@ -731,7 +851,9 @@ function PublishPageContent() {
               onChange={(e) => setConfirmed(e.target.checked)}
               className="accent-primary w-4 h-4 mt-0.5"
             />
-            <span className="text-sm text-on-surface">I confirm I own this cart and have the right to rent it out.</span>
+            <span className="text-sm text-on-surface">
+              <T en="I confirm I own this cart and have the right to rent it out." ta="இந்த வண்டி எனக்குச் சொந்தமானது என்றும் இதை வாடகைக்கு விட எனக்கு உரிமை உண்டு என்றும் உறுதிப்படுத்துகிறேன்." />
+            </span>
           </label>
 
           <button
@@ -745,12 +867,12 @@ function PublishPageContent() {
                   <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" className="opacity-25" />
                   <path d="M4 12a8 8 0 018-8" stroke="currentColor" strokeWidth="3" strokeLinecap="round" className="opacity-75" />
                 </svg>
-                {editCartId ? "Saving…" : "Submitting…"}
+                {editCartId ? <T en="Saving…" ta="சேமிக்கப்படுகிறது…" /> : <T en="Submitting…" ta="சமர்ப்பிக்கப்படுகிறது…" />}
               </span>
             ) : editCartId ? (
-              "SAVE CHANGES"
+              <T en="SAVE CHANGES" ta="மாற்றங்களைச் சேமிக்கவும்" />
             ) : (
-              "SUBMIT LISTING REQUEST"
+              <T en="SUBMIT LISTING REQUEST" ta="வண்டியைப் பதிவிட சமர்ப்பிக்கவும்" />
             )}
           </button>
         </form>
