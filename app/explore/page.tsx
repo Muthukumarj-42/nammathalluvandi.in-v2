@@ -777,45 +777,7 @@ function BrowseCartsPageContent() {
             </div>
           )}
 
-          {/* Browse by Cart Type Section */}
-          <div className="border-t border-[#ffb690]/10 mt-16 pt-8">
-            <span className="font-display text-xs tracking-widest text-[#f97316] uppercase">
-              <Text en="Categories" ta="வகைகள்" />
-            </span>
-            <h2 className="font-display text-2xl md:text-3xl text-[#fffdf7] mt-1 mb-6 uppercase">
-              <Text en="Browse by Cart Type" ta="வண்டி வகை வாரியாக" />
-            </h2>
-            {/* Mobile layout: 1 x 4 swipeable cards. Desktop layout: responsive */}
-            <div className="flex md:grid md:grid-cols-4 gap-4 overflow-x-auto md:overflow-x-visible snap-x snap-mandatory scrollbar-none pb-4 md:pb-0">
-              {[
-                { id: "With Store", label: "With Store / Stove", labelTa: "அடுப்புடன் கூடிய வண்டி", icon: <IconSearchStove className="w-8 h-8 text-[#f97316]" />, desc: "Integrated burners & shelves", descTa: "அடுப்புகள் & அலமாரிகளுடன்" },
-                { id: "With Roof", label: "With Roof / Covered", labelTa: "மேற்கூரையுடன் கூடிய வண்டி", icon: <IconTent className="w-8 h-8 text-[#f97316]" />, desc: "Heavy-duty metal canopy", descTa: "உறுதியான உலோக மேற்கூரையுடன்" },
-                { id: "Ice Cream", label: "Ice Cream Cart", labelTa: "ஐஸ் கிரீம் வண்டி", icon: <IconIceCream className="w-8 h-8 text-[#f97316]" />, desc: "Insulated cold box & dome", descTa: "குளிரூட்டப்பட்ட பெட்டியுடன்" },
-                { id: "Tea Stall", label: "Tea Stall Station", labelTa: "தேநீர் கடை வண்டி", icon: <IconCoffee className="w-8 h-8 text-[#f97316]" />, desc: "Full stainless steel setup", descTa: "முழு எஃகு அமைப்பில்" }
-              ].map(item => {
-                const isSelected = selectedTypes.includes(item.id);
-                return (
-                  <button
-                    key={item.id}
-                    onClick={() => toggleType(item.id)}
-                    className={`flex-shrink-0 w-[240px] md:w-auto snap-start p-4 bg-[#160c06] border hover:border-[#f97316]/50 transition-all duration-300 rounded-xl text-left flex flex-col justify-between aspect-[16/10] ${
-                      isSelected ? "border-[#f97316] bg-[#251913]" : "border-[#ffb690]/15"
-                    }`}
-                  >
-                    <div>
-                      <div className="mb-2">{item.icon}</div>
-                      <h3 className="font-display text-sm md:text-base text-[#fffdf7] tracking-wider uppercase">
-                        <Text en={item.label} ta={item.labelTa} />
-                      </h3>
-                    </div>
-                    <p className="text-[11px] text-[#f6ded3]/60 font-sans">
-                      <Text en={item.desc} ta={item.descTa} />
-                    </p>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
+
         </section>
       </div>
     </main>
