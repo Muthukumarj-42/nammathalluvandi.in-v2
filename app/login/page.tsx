@@ -299,7 +299,7 @@ function LoginForm() {
 
         {mode === "choose" && (
           <>
-            <h2 className="text-xl font-bold text-gray-900 text-center mb-2">
+            <h2 className="text-xl font-bold text-gray-900 text-center mb-2 mt-10">
               <T en="Sign in to continue" ta="தொடர உள்நுழையவும்" />
             </h2>
             <p className="text-sm text-gray-400 text-center mb-8">
@@ -522,12 +522,12 @@ export default function LoginPage() {
             <p className="text-xs font-semibold text-primary uppercase tracking-widest mb-2">
               <T en="FOR CART OWNERS" ta="வண்டி உரிமையாளர்களுக்கு" />
             </p>
-            <h1 className="font-display text-lg md:text-xl font-bold text-on-surface mb-3 leading-tight">
+            <h2 className="font-display text-lg md:text-xl font-bold text-on-surface mb-3 leading-tight">
               <T
                 en="List Your Cart & Earn."
                 ta="உங்கள் வண்டியைப் பட்டியலிட்டு வாடகைக்கு விடுங்கள்"
               />
-            </h1>
+            </h2>
             <p className="text-sm text-on-surface-variant mb-6">
               <T
                 en="Free to list. Zero commission. 300+ renters waiting — Tamil Nadu, Kerala and Andhra Pradesh."
