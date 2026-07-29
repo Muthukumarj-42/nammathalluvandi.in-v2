@@ -39,8 +39,9 @@ export function Footer() {
       <div className="site-container py-16">
         <div className="grid gap-10 lg:grid-cols-[1.1fr_2fr]">
           <div>
-            <span className="font-display text-2xl font-black uppercase tracking-[0.15em] text-on-surface">
-              THALLUVANDI
+            <span className="font-display text-2xl font-black uppercase italic tracking-wide select-none">
+              <span className="text-on-surface">NAMMA</span>
+              <span className="text-[#F97316]">THALLUVANDI.IN</span>
             </span>
             <p className="mt-6 max-w-sm text-sm leading-7 text-on-surface-variant">
               <span className="en">

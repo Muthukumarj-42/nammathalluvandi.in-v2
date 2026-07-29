@@ -705,15 +705,18 @@ function BrowseCartsPageContent() {
                 const showDescription = !!descriptionText && descriptionText.trim().toLowerCase() !== "self-listed cart";
 
                 return (
-                  <div key={cart.id} className="group bg-white border border-gray-200 hover:shadow-lg transition-shadow duration-300 flex flex-col rounded-xl overflow-hidden relative h-full">
+                  <div key={cart.id} className="group bg-white border border-gray-200 hover:shadow-lg transition-all duration-300 flex flex-col rounded-2xl overflow-hidden relative h-full">
 
-                    {/* Photo section */}
-                    <div className="relative w-full h-[200px] bg-gray-100 shrink-0 flex items-center justify-center overflow-hidden">
-                      <span className={`absolute top-2 left-2 z-10 text-[10px] font-bold uppercase tracking-wide px-2 py-1 rounded-full ${conditionClasses}`}>
+                    {/* Photo section - Clickable to details */}
+                    <Link
+                      href={`/carts/${cart.uniqueCode || cart.id}`}
+                      className="relative w-full h-[180px] md:h-[220px] bg-gray-50 shrink-0 flex items-center justify-center overflow-hidden block hover:opacity-95 transition-opacity"
+                    >
+                      <span className={`absolute top-3 left-3 z-10 text-[9px] md:text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full ${conditionClasses}`}>
                         {conditionLabel}
                       </span>
-                      {cart.distanceKm !== undefined && (
-                        <span className="absolute bottom-2 left-2 z-10 bg-green-800 text-white text-xs font-medium px-2 py-1 rounded-full flex items-center gap-1">
+                      {cart.distanceKm !== undefined && cart.distanceKm <= 1000 && (
+                        <span className="absolute bottom-3 left-3 z-10 bg-green-800 text-white text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1 shadow-sm">
                           📍 {cart.distanceKm.toFixed(2)} km
                         </span>
                       )}
@@ -721,29 +724,32 @@ function BrowseCartsPageContent() {
                         <img
                           src={cart.images[0]}
                           alt={cart.nameEn}
-                          className="w-full h-full object-cover"
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         />
                       ) : (
                         <svg viewBox="0 0 100 80" className="w-16 h-16 text-gray-300" fill="currentColor">
                           <path d="M20 20 h60 v40 h-60 z M30 60 v10 M70 60 v10 M25 70 h50 M35 70 v5 M65 70 v5"/>
                         </svg>
                       )}
-                    </div>
+                    </Link>
 
-                    {/* Card content */}
-                    <div className="flex flex-col flex-grow p-2 md:p-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-[11px] font-semibold uppercase tracking-wide border border-green-700 text-green-700 px-2 py-0.5 rounded-full">
+                    {/* Card content - Clean spacing */}
+                    <div className="flex flex-col flex-grow p-4 md:p-5 gap-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-bold uppercase tracking-widest border border-green-700 text-green-700 px-2.5 py-1 rounded-full">
                           {typeLabel}
                         </span>
                         {cart.verified && (
-                          <span className="text-xs text-green-600 font-bold">✓ Verified</span>
+                          <span className="text-xs text-green-600 font-bold flex items-center gap-1">
+                            <span>✓</span>
+                            <span>Verified</span>
+                          </span>
                         )}
                       </div>
 
                       {showDescription && (
                         <p
-                          className="text-xs md:text-sm text-gray-500 mb-2"
+                          className="text-xs md:text-sm text-gray-500 leading-relaxed min-h-[38px]"
                           style={{
                             display: "-webkit-box",
                             WebkitLineClamp: 2,
@@ -756,12 +762,12 @@ function BrowseCartsPageContent() {
                         </p>
                       )}
 
-                      <div className="mt-auto">
-                        <span className="text-lg md:text-2xl font-bold text-green-800 block mb-3">
+                      <div className="mt-auto pt-3 border-t border-gray-100 flex flex-col gap-2">
+                        <span className="text-base md:text-xl font-extrabold text-green-800">
                           ₹{cart.pricePerDay}/day
                         </span>
-                        <Button asChild className="w-full bg-green-800 hover:bg-green-900 text-white font-bold rounded-lg h-10 text-xs md:text-sm">
-                          <Link href={`/carts/${cart.uniqueCode || cart.id}`} className="after:absolute after:inset-0 after:z-10">VIEW DETAILS</Link>
+                        <Button asChild className="w-full bg-green-800 hover:bg-green-900 text-white font-bold rounded-xl h-10 text-xs md:text-sm shadow-sm transition-all">
+                          <Link href={`/book?cart=${cart.id}`}>BOOK NOW</Link>
                         </Button>
                       </div>
                     </div>

@@ -174,9 +174,10 @@ function LoginForm() {
               priority
             />
           </div>
-          <Link href="/admin">
-            <h1 className="font-display text-2xl font-bold tracking-tight text-gray-900 hover:text-[#075200] transition-colors cursor-pointer">
-              THALLUVANDI
+          <Link href="/">
+            <h1 className="font-display text-2xl font-black uppercase italic tracking-wide select-none cursor-pointer">
+              <span className="text-gray-900">NAMMA</span>
+              <span className="text-[#F97316]">THALLUVANDI.IN</span>
             </h1>
           </Link>
           <p className="text-sm text-gray-500 mt-1">
@@ -272,9 +273,10 @@ function LoginForm() {
             priority
           />
         </div>
-        <Link href="/admin">
-          <h1 className="font-display text-2xl font-bold tracking-tight text-gray-900 hover:text-[#075200] transition-colors cursor-pointer">
-            THALLUVANDI
+        <Link href="/">
+          <h1 className="font-display text-2xl font-black uppercase italic tracking-wide select-none cursor-pointer">
+            <span className="text-gray-900">NAMMA</span>
+            <span className="text-[#F97316]">THALLUVANDI.IN</span>
           </h1>
         </Link>
         <p className="text-sm text-gray-500 mt-1">
