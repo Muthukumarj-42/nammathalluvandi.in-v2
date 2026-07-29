@@ -150,7 +150,7 @@ export function Navbar() {
       <header className="fixed inset-x-0 top-0 z-50 flex h-14 items-center justify-between border-b border-outline-variant/20 bg-surface/95 backdrop-blur-sm px-4 md:hidden">
         {/* Left: Brand Logo & Text */}
         <Link href="/" className="flex items-center gap-1.5 shrink-0" aria-label="Namma Thalluvandi home">
-          <span className="font-display text-lg font-black uppercase italic tracking-wide select-none">
+          <span className="font-brand-logo font-display text-lg font-black uppercase italic tracking-wide select-none">
             <span className="text-on-surface">NAMMA</span>
             <span className="text-[#F97316]">THALLUVANDI.IN</span>
           </span>
@@ -169,7 +169,7 @@ export function Navbar() {
       <header className={`fixed inset-x-0 top-0 z-50 hidden border-b border-outline-variant/20 bg-surface/95 text-on-surface transition-all duration-300 md:block ${scrolled ? "shadow-sm backdrop-blur-xl" : ""}`}>
         <div className="w-full px-6 xl:px-12 flex h-20 items-center justify-between gap-4">
           <Link href="/" className="group flex items-center gap-2 shrink-0" aria-label="Namma Thalluvandi home">
-            <span className="font-display text-lg lg:text-2xl xl:text-3xl font-black uppercase italic tracking-wide transition-transform duration-300 group-hover:scale-105 select-none">
+            <span className="font-brand-logo font-display text-lg lg:text-2xl xl:text-3xl font-black uppercase italic tracking-wide transition-transform duration-300 group-hover:scale-105 select-none">
               <span className="text-on-surface">NAMMA</span>
               <span className="text-[#F97316]">THALLUVANDI.IN</span>
             </span>

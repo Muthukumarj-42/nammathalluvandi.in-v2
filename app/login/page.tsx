@@ -274,7 +274,7 @@ function LoginForm() {
           />
         </div>
         <Link href="/" className="max-w-full overflow-hidden">
-          <h1 className="font-display text-xl sm:text-2xl font-black uppercase italic tracking-wide select-none cursor-pointer whitespace-nowrap">
+          <h1 className="font-brand-logo font-display text-lg sm:text-xl md:text-2xl font-black uppercase italic tracking-wide select-none cursor-pointer whitespace-nowrap">
             <span className="text-gray-900">NAMMA</span>
             <span className="text-[#F97316]">THALLUVANDI.IN</span>
           </h1>
@@ -522,7 +522,7 @@ export default function LoginPage() {
             <p className="text-xs font-semibold text-primary uppercase tracking-widest mb-2">
               <T en="FOR CART OWNERS" ta="வண்டி உரிமையாளர்களுக்கு" />
             </p>
-            <h1 className="font-display text-2xl md:text-3xl font-bold text-on-surface mb-3 leading-tight">
+            <h1 className="font-display text-xl md:text-2xl font-bold text-on-surface mb-3 leading-tight">
               <T
                 en="List Your Cart & Earn."
                 ta="உங்கள் வண்டியைப் பட்டியலிட்டு வாடகைக்கு விடுங்கள்"
