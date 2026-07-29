@@ -494,7 +494,7 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <main className="min-h-screen flex items-center justify-center relative overflow-hidden bg-gray-50">
+    <main className="min-h-screen bg-background pt-20 pb-16 px-4 relative overflow-hidden">
       {/* Subtle warm ambient glow */}
       <div
         aria-hidden="true"
@@ -514,13 +514,257 @@ export default function LoginPage() {
         }}
       />
 
-      <Suspense fallback={
-        <div className="flex items-center justify-center">
-          <div className="w-8 h-8 border-2 border-[#f97316] border-t-transparent rounded-full animate-spin" />
+      <div className="max-w-5xl mx-auto flex flex-col md:flex-row gap-8 items-start relative z-10">
+        {/* LEFT COLUMN */}
+        <div className="flex-1 w-full">
+          {/* SECTION 1 — HEADER */}
+          <div className="mb-6">
+            <p className="text-xs font-semibold text-primary uppercase tracking-widest mb-2">
+              FOR CART OWNERS · வண்டி உரிமையாளர்களுக்கு
+            </p>
+            <h1 className="font-display text-3xl font-bold text-on-surface mb-3 leading-tight">
+              உங்கள் வண்டியை<br/>
+              <span className="text-primary">
+                List பண்ணுங்க.
+              </span>
+            </h1>
+            <p className="text-sm text-on-surface-variant mb-6">
+              Free to list. Zero commission. 300+ renters waiting — Tamil Nadu, Kerala and Andhra Pradesh.
+            </p>
+          </div>
+
+          {/* SECTION 2 — STATS BAR */}
+          <div className="grid grid-cols-3 gap-3 mb-8">
+            {/* Card 1 */}
+            <div className="bg-surface rounded-2xl p-4 border border-outline-variant/20 text-center">
+              <p className="font-display text-2xl font-bold text-primary">300+</p>
+              <p className="text-xs text-on-surface-variant mt-1">
+                Cart Renters
+              </p>
+              <p className="text-xs text-on-surface-variant/60">
+                in 50 days
+              </p>
+            </div>
+            {/* Card 2 */}
+            <div className="bg-surface rounded-2xl p-4 border border-outline-variant/20 text-center">
+              <p className="font-display text-2xl font-bold text-primary">20+</p>
+              <p className="text-xs text-on-surface-variant mt-1">
+                Successful Rentals
+              </p>
+              <p className="text-xs text-on-surface-variant/60">
+                around Coimbatore
+              </p>
+            </div>
+            {/* Card 3 */}
+            <div className="bg-surface rounded-2xl p-4 border border-outline-variant/20 text-center">
+              <p className="font-display text-2xl font-bold text-primary">₹0</p>
+              <p className="text-xs text-on-surface-variant mt-1">
+                Commission
+              </p>
+              <p className="text-xs text-on-surface-variant/60">
+                free to list
+              </p>
+            </div>
+          </div>
+
+          {/* SECTION 3 — PRESENT BENEFITS */}
+          <div className="flex items-center gap-2 mb-3">
+            <span className="w-2 h-2 rounded-full bg-primary"></span>
+            <p className="text-sm font-semibold text-on-surface">
+              இப்போதே கிடைக்கும் — Available Now
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+            {/* Card 1 */}
+            <div className="bg-surface rounded-2xl p-4 border border-outline-variant/20 flex gap-3 items-start hover:border-primary/30 transition">
+              <span className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-lg flex-shrink-0">📍</span>
+              <div>
+                <h3 className="text-sm font-semibold text-on-surface mb-0.5">300+ Renters Waiting</h3>
+                <p className="text-xs text-on-surface-variant leading-relaxed">
+                  Active renters from TN, Kerala and Andhra Pradesh — all searching for a cart like yours.
+                </p>
+              </div>
+            </div>
+            {/* Card 2 */}
+            <div className="bg-surface rounded-2xl p-4 border border-outline-variant/20 flex gap-3 items-start hover:border-primary/30 transition">
+              <span className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-lg flex-shrink-0">🆓</span>
+              <div>
+                <h3 className="text-sm font-semibold text-on-surface mb-0.5">Free to List</h3>
+                <p className="text-xs text-on-surface-variant leading-relaxed">
+                  Zero listing fee. Zero commission during pilot phase. List today at no cost.
+                </p>
+              </div>
+            </div>
+            {/* Card 3 */}
+            <div className="bg-surface rounded-2xl p-4 border border-outline-variant/20 flex gap-3 items-start hover:border-primary/30 transition">
+              <span className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-lg flex-shrink-0">✅</span>
+              <div>
+                <h3 className="text-sm font-semibold text-on-surface mb-0.5">Verified Listing</h3>
+                <p className="text-xs text-on-surface-variant leading-relaxed">
+                  NTV reviews your cart before it goes live. Renters trust verified listings more.
+                </p>
+              </div>
+            </div>
+            {/* Card 4 */}
+            <div className="bg-surface rounded-2xl p-4 border border-outline-variant/20 flex gap-3 items-start hover:border-primary/30 transition">
+              <span className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-lg flex-shrink-0">📱</span>
+              <div>
+                <h3 className="text-sm font-semibold text-on-surface mb-0.5">Enquiries on WhatsApp</h3>
+                <p className="text-xs text-on-surface-variant leading-relaxed">
+                  Renter details sent directly to your WhatsApp. No new app needed.
+                </p>
+              </div>
+            </div>
+            {/* Card 5 */}
+            <div className="bg-surface rounded-2xl p-4 border border-outline-variant/20 flex gap-3 items-start hover:border-primary/30 transition">
+              <span className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-lg flex-shrink-0">💰</span>
+              <div>
+                <h3 className="text-sm font-semibold text-on-surface mb-0.5">Easy Rent Collection</h3>
+                <p className="text-xs text-on-surface-variant leading-relaxed">
+                  Advance rent confirmed before cart handover — no more chasing payments at month end.
+                </p>
+              </div>
+            </div>
+            {/* Card 6 */}
+            <div className="bg-surface rounded-2xl p-4 border border-outline-variant/20 flex gap-3 items-start hover:border-primary/30 transition">
+              <span className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-lg flex-shrink-0">📸</span>
+              <div>
+                <h3 className="text-sm font-semibold text-on-surface mb-0.5">Professional Listing</h3>
+                <p className="text-xs text-on-surface-variant leading-relaxed">
+                  Real photos, specs and price — your cart listed like an e-commerce product.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* SECTION 4 — COMING SOON */}
+          <div className="flex items-center gap-2 mb-3">
+            <span className="w-2 h-2 rounded-full bg-orange-400"></span>
+            <p className="text-sm font-semibold text-on-surface">
+              வரவிருக்கும் — Coming Soon
+            </p>
+          </div>
+
+          <div className="bg-surface rounded-2xl border border-outline-variant/20 overflow-hidden mb-6">
+            {/* Item 1 */}
+            <div className="flex items-start gap-3 p-3 border-b border-outline-variant/10 last:border-b-0">
+              <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-orange-50 text-orange-500 flex-shrink-0 mt-0.5 whitespace-nowrap">
+                Soon
+              </span>
+              <div>
+                <p className="text-sm font-medium text-on-surface leading-snug">
+                  Deposit Escrow Protection
+                </p>
+                <p className="text-xs text-on-surface-variant mt-0.5 leading-relaxed">
+                  Security deposit held by NTV — cart protected before any handover.
+                </p>
+              </div>
+            </div>
+            {/* Item 2 */}
+            <div className="flex items-start gap-3 p-3 border-b border-outline-variant/10 last:border-b-0">
+              <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-orange-50 text-orange-500 flex-shrink-0 mt-0.5 whitespace-nowrap">
+                Soon
+              </span>
+              <div>
+                <p className="text-sm font-medium text-on-surface leading-snug">
+                  Digital Rental Agreement
+                </p>
+                <p className="text-xs text-on-surface-variant mt-0.5 leading-relaxed">
+                  Auto-generated legal contract per booking via WhatsApp.
+                </p>
+              </div>
+            </div>
+            {/* Item 3 */}
+            <div className="flex items-start gap-3 p-3 border-b border-outline-variant/10 last:border-b-0">
+              <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-orange-50 text-orange-500 flex-shrink-0 mt-0.5 whitespace-nowrap">
+                Soon
+              </span>
+              <div>
+                <p className="text-sm font-medium text-on-surface leading-snug">
+                  Renter Rating System
+                </p>
+                <p className="text-xs text-on-surface-variant mt-0.5 leading-relaxed">
+                  Bad renters get flagged — you are always protected.
+                </p>
+              </div>
+            </div>
+            {/* Item 4 */}
+            <div className="flex items-start gap-3 p-3 border-b border-outline-variant/10 last:border-b-0">
+              <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-orange-50 text-orange-500 flex-shrink-0 mt-0.5 whitespace-nowrap">
+                Soon
+              </span>
+              <div>
+                <p className="text-sm font-medium text-on-surface leading-snug">
+                  Pre/Post Photo Proof
+                </p>
+                <p className="text-xs text-on-surface-variant mt-0.5 leading-relaxed">
+                  Damage documented with photos — deposit deducted fairly.
+                </p>
+              </div>
+            </div>
+            {/* Item 5 */}
+            <div className="flex items-start gap-3 p-3 border-b border-outline-variant/10 last:border-b-0">
+              <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-orange-50 text-orange-500 flex-shrink-0 mt-0.5 whitespace-nowrap">
+                Soon
+              </span>
+              <div>
+                <p className="text-sm font-medium text-on-surface leading-snug">
+                  Earnings Dashboard
+                </p>
+                <p className="text-xs text-on-surface-variant mt-0.5 leading-relaxed">
+                  Track all rental income and enquiries in one place.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* SECTION 5 — TESTIMONIAL */}
+          <div className="bg-primary/5 rounded-2xl p-4 border-l-4 border-primary mb-6">
+            <p className="text-sm italic text-on-surface leading-relaxed mb-3">
+              &quot;என் வண்டி idle-ஆ இருந்துச்சு. NTV-ல list பண்ணினேன் — ஒரே வாரத்துல enquiry வந்துச்சு.&quot;
+            </p>
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-sm flex-shrink-0">
+                N
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-on-surface">D. Nagaraj</p>
+                <p className="text-xs text-on-surface-variant">
+                  NTV001 · Ondipudur · 30+ years
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* SECTION 6 — TRUST PILLS */}
+          <div className="flex flex-wrap gap-2">
+            <div className="flex items-center gap-1.5 text-xs text-on-surface-variant bg-surface rounded-full px-3 py-1.5 border border-outline-variant/20">
+              🏛 <span>TBI BIT Incubated</span>
+            </div>
+            <div className="flex items-center gap-1.5 text-xs text-on-surface-variant bg-surface rounded-full px-3 py-1.5 border border-outline-variant/20">
+              📋 <span>Udyam Registered</span>
+            </div>
+            <div className="flex items-center gap-1.5 text-xs text-on-surface-variant bg-surface rounded-full px-3 py-1.5 border border-outline-variant/20">
+              🔍 <span>Google #1 Ranked</span>
+            </div>
+          </div>
         </div>
-      }>
-        <LoginForm />
-      </Suspense>
+
+        {/* RIGHT COLUMN */}
+        <div className="w-full md:w-[400px] md:sticky md:top-24">
+          <p className="text-sm text-on-surface-variant text-center mb-3">
+            உங்கள் cart list பண்ண sign in பண்ணுங்க →
+          </p>
+          <Suspense fallback={
+            <div className="flex items-center justify-center">
+              <div className="w-8 h-8 border-2 border-[#f97316] border-t-transparent rounded-full animate-spin" />
+            </div>
+          }>
+            <LoginForm />
+          </Suspense>
+        </div>
+      </div>
     </main>
   );
 }
