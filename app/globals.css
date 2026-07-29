@@ -671,8 +671,18 @@ html[data-lang="ta"] .explore-description {
   background-color: #fffdf7 !important;
 }
 
-/* Force brand logo fonts to stay uniform in all languages */
-.font-brand-logo, .font-brand-logo * {
+/* Force brand logo fonts and styles to stay uniform in all languages */
+html .font-brand-logo,
+html .font-brand-logo *,
+html[data-lang] .font-brand-logo,
+html[data-lang] .font-brand-logo *,
+[lang] .font-brand-logo,
+[lang] .font-brand-logo * {
   font-family: var(--font-bebas), Outfit, sans-serif !important;
   text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  font-style: italic !important;
+  word-break: normal !important;
+  overflow-wrap: normal !important;
+  white-space: nowrap !important;
 }

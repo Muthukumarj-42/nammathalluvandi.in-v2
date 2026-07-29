@@ -522,7 +522,7 @@ export default function LoginPage() {
             <p className="text-xs font-semibold text-primary uppercase tracking-widest mb-2">
               <T en="FOR CART OWNERS" ta="வண்டி உரிமையாளர்களுக்கு" />
             </p>
-            <h1 className="font-display text-xl md:text-2xl font-bold text-on-surface mb-3 leading-tight">
+            <h1 className="font-display text-lg md:text-xl font-bold text-on-surface mb-3 leading-tight">
               <T
                 en="List Your Cart & Earn."
                 ta="உங்கள் வண்டியைப் பட்டியலிட்டு வாடகைக்கு விடுங்கள்"
