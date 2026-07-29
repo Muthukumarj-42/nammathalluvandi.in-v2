@@ -672,6 +672,8 @@ html[data-lang="ta"] .explore-description {
 }
 
 /* Force brand logo fonts and styles to stay uniform in all languages */
+.font-brand-logo,
+.font-brand-logo *,
 html .font-brand-logo,
 html .font-brand-logo *,
 html[data-lang] .font-brand-logo,

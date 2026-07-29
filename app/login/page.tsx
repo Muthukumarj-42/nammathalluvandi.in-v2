@@ -175,10 +175,10 @@ function LoginForm() {
             />
           </div>
           <Link href="/">
-            <h1 className="font-display text-2xl font-black uppercase italic tracking-wide select-none cursor-pointer">
-              <span className="text-gray-900">NAMMA</span>
-              <span className="text-[#F97316]">THALLUVANDI.IN</span>
-            </h1>
+            <span className="font-brand-logo font-display text-2xl font-black uppercase italic tracking-wide select-none cursor-pointer block text-center">
+              <span className="font-brand-logo text-gray-900">NAMMA</span>
+              <span className="font-brand-logo text-[#F97316]">THALLUVANDI.IN</span>
+            </span>
           </Link>
           <p className="text-sm text-gray-500 mt-1">
             <T en="Premium Cart Marketplace" ta="தரமான வண்டி சந்தை" />
@@ -273,11 +273,11 @@ function LoginForm() {
             priority
           />
         </div>
-        <Link href="/" className="max-w-full overflow-hidden">
-          <h1 className="font-brand-logo font-display text-lg sm:text-xl md:text-2xl font-black uppercase italic tracking-wide select-none cursor-pointer whitespace-nowrap">
-            <span className="text-gray-900">NAMMA</span>
-            <span className="text-[#F97316]">THALLUVANDI.IN</span>
-          </h1>
+        <Link href="/" className="max-w-full overflow-hidden block text-center">
+          <span className="font-brand-logo font-display text-lg sm:text-xl md:text-2xl font-black uppercase italic tracking-wide select-none cursor-pointer whitespace-nowrap">
+            <span className="font-brand-logo text-gray-900">NAMMA</span>
+            <span className="font-brand-logo text-[#F97316]">THALLUVANDI.IN</span>
+          </span>
         </Link>
         <p className="text-sm text-gray-500 mt-1">
           <T en="Premium Cart Marketplace" ta="தரமான வண்டி சந்தை" />
