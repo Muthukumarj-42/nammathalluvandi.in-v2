@@ -273,8 +273,8 @@ function LoginForm() {
             priority
           />
         </div>
-        <Link href="/">
-          <h1 className="font-display text-2xl font-black uppercase italic tracking-wide select-none cursor-pointer">
+        <Link href="/" className="max-w-full overflow-hidden">
+          <h1 className="font-display text-xl sm:text-2xl font-black uppercase italic tracking-wide select-none cursor-pointer whitespace-nowrap">
             <span className="text-gray-900">NAMMA</span>
             <span className="text-[#F97316]">THALLUVANDI.IN</span>
           </h1>
@@ -514,18 +514,18 @@ export default function LoginPage() {
         }}
       />
 
-      <div className="max-w-5xl mx-auto flex flex-col md:flex-row gap-8 items-start relative z-10">
+      <div className="max-w-7xl mx-auto px-4 md:px-8 flex flex-col md:flex-row gap-8 items-stretch relative z-10 md:h-[calc(100vh-160px)] md:overflow-hidden">
         {/* LEFT COLUMN - Benefits */}
-        <div className="flex-1 w-full order-2 md:order-1">
+        <div className="flex-1 w-full order-2 md:order-1 md:h-full md:overflow-y-auto scrollbar-none pr-4 pb-12">
           {/* SECTION 1 — HEADER */}
           <div className="mb-6">
             <p className="text-xs font-semibold text-primary uppercase tracking-widest mb-2">
               <T en="FOR CART OWNERS" ta="வண்டி உரிமையாளர்களுக்கு" />
             </p>
-            <h1 className="font-display text-3xl font-bold text-on-surface mb-3 leading-tight">
+            <h1 className="font-display text-2xl md:text-3xl font-bold text-on-surface mb-3 leading-tight">
               <T
-                en="List Your Cart."
-                ta="உங்கள் வண்டியை List பண்ணுங்க."
+                en="List Your Cart & Earn."
+                ta="உங்கள் வண்டியைப் பட்டியலிட்டு வாடகைக்கு விடுங்கள்"
               />
             </h1>
             <p className="text-sm text-on-surface-variant mb-6">
@@ -540,7 +540,7 @@ export default function LoginPage() {
           <div className="grid grid-cols-3 gap-3 mb-8">
             {/* Card 1 */}
             <div className="bg-surface rounded-2xl p-4 border border-outline-variant/20 text-center">
-              <p className="font-display text-2xl font-bold text-primary">300+</p>
+              <p className="font-display text-xl md:text-2xl font-bold text-primary">300+</p>
               <p className="text-xs text-on-surface-variant mt-1">
                 <T en="Cart Renters" ta="வாடகைதாரர்கள்" />
               </p>
@@ -550,7 +550,7 @@ export default function LoginPage() {
             </div>
             {/* Card 2 */}
             <div className="bg-surface rounded-2xl p-4 border border-outline-variant/20 text-center">
-              <p className="font-display text-2xl font-bold text-primary">20+</p>
+              <p className="font-display text-xl md:text-2xl font-bold text-primary">20+</p>
               <p className="text-xs text-on-surface-variant mt-1">
                 <T en="Successful Rentals" ta="வெற்றிகரமான வாடகைகள்" />
               </p>
@@ -560,7 +560,7 @@ export default function LoginPage() {
             </div>
             {/* Card 3 */}
             <div className="bg-surface rounded-2xl p-4 border border-outline-variant/20 text-center">
-              <p className="font-display text-2xl font-bold text-primary">₹0</p>
+              <p className="font-display text-xl md:text-2xl font-bold text-primary">₹0</p>
               <p className="text-xs text-on-surface-variant mt-1">
                 <T en="Commission" ta="கமிஷன்" />
               </p>
@@ -588,8 +588,8 @@ export default function LoginPage() {
                 </h3>
                 <p className="text-xs text-on-surface-variant leading-relaxed">
                   <T
-                    en="Active renters from TN, Kerala and Andhra Pradesh — all searching for a cart like yours."
-                    ta="தமிழகம், கேரளா மற்றும் ஆந்திராவைச் சேர்ந்த வாடிக்கையாளர்கள் உங்களுடைய வண்டியை வாடகைக்கு எடுக்கத் தேடிக்கொண்டிருக்கிறார்கள்."
+                    en="Active renters from TN, Kerala & Andhra searching for your cart."
+                    ta="தமிழகம், கேரளா மற்றும் ஆந்திராவிலிருந்து வண்டியைத் தேடும் வாடிக்கையாளர்கள்."
                   />
                 </p>
               </div>
@@ -603,8 +603,8 @@ export default function LoginPage() {
                 </h3>
                 <p className="text-xs text-on-surface-variant leading-relaxed">
                   <T
-                    en="Zero listing fee. Zero commission during pilot phase. List today at no cost."
-                    ta="பதிவுக் கட்டணம் எதுவும் இல்லை. தற்போதைய சோதனை கட்டத்தில் பூஜ்ஜிய கமிஷன். இன்றே இலவசமாகப் பதிவு செய்யுங்கள்."
+                    en="Zero listing fee and zero commission. List today at no cost."
+                    ta="பதிவுக் கட்டணம் மற்றும் கமிஷன் இல்லை. இன்றே இலவசமாகப் பதியுங்கள்."
                   />
                 </p>
               </div>
@@ -618,8 +618,8 @@ export default function LoginPage() {
                 </h3>
                 <p className="text-xs text-on-surface-variant leading-relaxed">
                   <T
-                    en="NTV reviews your cart before it goes live. Renters trust verified listings more."
-                    ta="வண்டி நேரலையில் செல்வதற்கு முன் NTV குழு சரிபார்க்கிறது. இதனால் வாடகைதாரர்கள் எளிதில் நம்புகிறார்கள்."
+                    en="Carts are verified by NTV before going live to build trust."
+                    ta="வண்டிகள் நேரலையில் செல்வதற்கு முன் NTV-ஆல் சரிபார்க்கப்படும்."
                   />
                 </p>
               </div>
@@ -633,8 +633,8 @@ export default function LoginPage() {
                 </h3>
                 <p className="text-xs text-on-surface-variant leading-relaxed">
                   <T
-                    en="Renter details sent directly to your WhatsApp. No new app needed."
-                    ta="வண்டியைத் தேடும் வாடிக்கையாளர் விவரங்கள் நேரடியாக உங்கள் வாட்ஸ்அப்பிற்கு அனுப்பப்படும். புதிய செயலி தேவையில்லை."
+                    en="Inquiries and renter details sent directly to your WhatsApp."
+                    ta="வாடிக்கையாளர் விவரங்கள் நேரடியாக உங்கள் வாட்ஸ்அப்பிற்கு வரும்."
                   />
                 </p>
               </div>
@@ -648,8 +648,8 @@ export default function LoginPage() {
                 </h3>
                 <p className="text-xs text-on-surface-variant leading-relaxed">
                   <T
-                    en="Advance rent confirmed before cart handover — no more chasing payments at month end."
-                    ta="வண்டியை ஒப்படைக்கும் முன்பே முன்பணம் மற்றும் வாடகை உறுதிசெய்யப்படும். மாத இறுதியில் அலையத் தேவையில்லை."
+                    en="Confirm advance rent before handover. No payment chasing."
+                    ta="முன்பணம் மற்றும் வாடகை ஒப்படைப்பிற்கு முன்பே உறுதிசெய்யப்படும்."
                   />
                 </p>
               </div>
@@ -663,8 +663,8 @@ export default function LoginPage() {
                 </h3>
                 <p className="text-xs text-on-surface-variant leading-relaxed">
                   <T
-                    en="Real photos, specs and price — your cart listed like an e-commerce product."
-                    ta="உண்மையான புகைப்படங்கள், விவரங்கள் மற்றும் விலையுடன் உங்கள் வண்டி ஒரு ஆன்லைன் தயாரிப்பைப் போல் காட்சிப்படுத்தப்படும்."
+                    en="Listed like a premium e-commerce product with photos & specs."
+                    ta="புகைப்படங்கள், விவரங்களுடன் ஒரு ஆன்லைன் தயாரிப்பைப் போல் பதியப்படும்."
                   />
                 </p>
               </div>
@@ -691,8 +691,8 @@ export default function LoginPage() {
                 </p>
                 <p className="text-xs text-on-surface-variant mt-0.5 leading-relaxed">
                   <T
-                    en="Security deposit held by NTV — cart protected before any handover."
-                    ta="வண்டியை ஒப்படைக்கும் முன் முன்பணம் NTV-ஆல் பாதுகாப்பாக வைக்கப்படும்."
+                    en="Security deposit held by NTV for cart protection."
+                    ta="பாதுகாப்பு முன்பணம் NTV-ஆல் பாதுகாக்கப்படும்."
                   />
                 </p>
               </div>
@@ -708,8 +708,8 @@ export default function LoginPage() {
                 </p>
                 <p className="text-xs text-on-surface-variant mt-0.5 leading-relaxed">
                   <T
-                    en="Auto-generated legal contract per booking via WhatsApp."
-                    ta="ஒவ்வொரு முன்பதிவிற்கும் வாட்ஸ்அப் மூலம் தானாக உருவாக்கப்படும் சட்ட ஒப்பந்தம்."
+                    en="Auto-generated legal rental contract per booking."
+                    ta="தானாக உருவாக்கப்படும் சட்டப்பூர்வ வாடகை ஒப்பந்தம்."
                   />
                 </p>
               </div>
@@ -725,8 +725,8 @@ export default function LoginPage() {
                 </p>
                 <p className="text-xs text-on-surface-variant mt-0.5 leading-relaxed">
                   <T
-                    en="Bad renters get flagged — you are always protected."
-                    ta="சரியான முறையில் வண்டிகளை பராமரிக்காதவர்கள் அடையாளம் காணப்படுவார்கள் — நீங்கள் எப்போதும் பாதுகாப்பாக இருக்கலாம்."
+                    en="Flagged bad renters to keep you protected."
+                    ta="பயனர்களின் மதிப்பீடுகள் உங்களை பாதுகாக்கும்."
                   />
                 </p>
               </div>
@@ -742,8 +742,8 @@ export default function LoginPage() {
                 </p>
                 <p className="text-xs text-on-surface-variant mt-0.5 leading-relaxed">
                   <T
-                    en="Damage documented with photos — deposit deducted fairly."
-                    ta="முன்/பின் புகைப்பட ஆதாரங்களுடன் சேதங்கள் ஆவணப்படுத்தப்பட்டு முன்பணம் நியாயமாக கழிக்கப்படும்."
+                    en="Damage photo documentation for fair deposit deductions."
+                    ta="புகைப்பட ஆதாரங்களுடன் சேதங்கள் கணக்கிடப்படும்."
                   />
                 </p>
               </div>
@@ -759,8 +759,8 @@ export default function LoginPage() {
                 </p>
                 <p className="text-xs text-on-surface-variant mt-0.5 leading-relaxed">
                   <T
-                    en="Track all rental income and enquiries in one place."
-                    ta="உங்கள் அனைத்து வாடகை வருவாய் மற்றும் விசாரணைகளை ஒரே இடத்தில் கண்காணிக்கலாம்."
+                    en="Track your rental income and inquiries in one dashboard."
+                    ta="வருவாய் மற்றும் விசாரணைகளை ஒரே இடத்தில் கண்காணிக்கலாம்."
                   />
                 </p>
               </div>
@@ -800,7 +800,7 @@ export default function LoginPage() {
         </div>
 
         {/* RIGHT COLUMN - Sign in card */}
-        <div className="w-full md:w-[400px] md:sticky md:top-24 order-1 md:order-2">
+        <div className="w-full md:w-[400px] md:sticky md:top-0 order-1 md:order-2 shrink-0 self-start pb-8">
           <p className="text-sm text-on-surface-variant text-center mb-3">
             <T en="Sign in to list your cart →" ta="உங்கள் cart list பண்ண sign in பண்ணுங்க →" />
           </p>
