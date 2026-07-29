@@ -35,6 +35,22 @@ function Text({ en, ta }: { en: string; ta: string }) {
   );
 }
 
+const CHIP_TRANSLATIONS: Record<string, { en: string; ta: string }> = {
+  "All": { en: "All", ta: "அனைத்தும்" },
+  "With Store": { en: "With Store", ta: "அடுப்புடன்" },
+  "With Roof": { en: "With Roof", ta: "மேற்கூரையுடன்" },
+  "Ice Cream": { en: "Ice Cream", ta: "ஐஸ் கிரீம்" },
+  "Tea & Coffee": { en: "Tea & Coffee", ta: "டீ & காபி" },
+  "E-Rickshaw": { en: "E-Rickshaw", ta: "ஈ-ரிக்ஷா" }
+};
+
+const CONDITION_TRANSLATIONS: Record<string, { en: string; ta: string }> = {
+  "NEW": { en: "NEW", ta: "புதியது" },
+  "USED - VERY GOOD": { en: "USED - VERY GOOD", ta: "மிகவும் நல்ல நிலை" },
+  "USED - GOOD": { en: "USED - GOOD", ta: "நல்ல நிலை" },
+  "USED": { en: "USED", ta: "பயன்படுத்தப்பட்டது" }
+};
+
 function BrowseCartsPageContent() {
   const searchParams = useSearchParams();
   const [search, setSearch] = useState("");
@@ -594,7 +610,7 @@ function BrowseCartsPageContent() {
                       : "bg-white text-green-800 border border-green-800 hover:bg-green-50"
                   }`}
                 >
-                  {chip}
+                  <Text en={CHIP_TRANSLATIONS[chip]?.en || chip} ta={CHIP_TRANSLATIONS[chip]?.ta || chip} />
                 </button>
               );
             })}
@@ -656,10 +672,10 @@ function BrowseCartsPageContent() {
               onChange={e => setSortBy(e.target.value)}
               className="h-8 bg-[#251913] border border-[#ffb690]/25 text-[#ffb690] text-[10px] font-bold uppercase tracking-wider rounded-lg px-3 outline-none focus:border-[#f97316]"
             >
-              <option value="nearest">Nearest First</option>
-              <option value="price-asc">Price: Low to High</option>
-              <option value="price-desc">Price: High to Low</option>
-              <option value="newest">Newest First</option>
+              <option value="nearest">{lang === "ta" ? "அருகிலுள்ளவை முதலில்" : "Nearest First"}</option>
+              <option value="price-asc">{lang === "ta" ? "விலை: குறைந்ததிலிருந்து அதிகம்" : "Price: Low to High"}</option>
+              <option value="price-desc">{lang === "ta" ? "விலை: அதிகத்திலிருந்து குறைவு" : "Price: High to Low"}</option>
+              <option value="newest">{lang === "ta" ? "புதியவை முதலில்" : "Newest First"}</option>
             </select>
           </div>
 
@@ -713,7 +729,7 @@ function BrowseCartsPageContent() {
                       className="relative w-full h-[180px] md:h-[220px] bg-gray-50 shrink-0 flex items-center justify-center overflow-hidden block hover:opacity-95 transition-opacity"
                     >
                       <span className={`absolute top-3 left-3 z-10 text-[9px] md:text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full ${conditionClasses}`}>
-                        {conditionLabel}
+                        <Text en={CONDITION_TRANSLATIONS[conditionLabel]?.en || conditionLabel} ta={CONDITION_TRANSLATIONS[conditionLabel]?.ta || conditionLabel} />
                       </span>
                       {cart.distanceKm !== undefined && cart.distanceKm <= 1000 && (
                         <span className="absolute bottom-3 left-3 z-10 bg-green-800 text-white text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1 shadow-sm">
@@ -742,7 +758,7 @@ function BrowseCartsPageContent() {
                         {cart.verified && (
                           <span className="text-xs text-green-600 font-bold flex items-center gap-1">
                             <span>✓</span>
-                            <span>Verified</span>
+                            <Text en="Verified" ta="சரிபார்க்கப்பட்டது" />
                           </span>
                         )}
                       </div>
@@ -767,7 +783,9 @@ function BrowseCartsPageContent() {
                           ₹{cart.pricePerDay}/day
                         </span>
                         <Button asChild className="w-full bg-green-800 hover:bg-green-900 text-white font-bold rounded-xl h-10 text-xs md:text-sm shadow-sm transition-all">
-                          <Link href={`/book?cart=${cart.id}`}>BOOK NOW</Link>
+                          <Link href={`/book?cart=${cart.id}`}>
+                            <Text en="BOOK NOW" ta="பதிவு செய்யவும்" />
+                          </Link>
                         </Button>
                       </div>
                     </div>
