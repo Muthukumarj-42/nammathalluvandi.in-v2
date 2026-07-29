@@ -762,7 +762,15 @@ export async function escalateBooking(bookingId: string): Promise<Booking | null
 export async function getWhatsappMessages(): Promise<WhatsappMessage[]> {
   if (isDbConfigured) {
     const { data } = await supabase.from("whatsapp_messages").select("*").order("created_at", { ascending: false });
-    return data || [];
+    return (data || []).map((row: any) => ({
+      id: row.id,
+      booking_id: row.booking_id || null,
+      direction: row.direction === "out" ? "outbound" : row.direction === "in" ? "inbound" : row.direction,
+      recipient_phone: row.phone || row.recipient_phone || "",
+      message_body: row.message_body || (row.payload?.entry?.[0]?.changes?.[0]?.value?.messages?.[0]?.text?.body) || (row.payload?.body) || `Type: ${row.message_type}`,
+      status: row.status === "delivered" ? "delivered" : row.status === "failed" ? "failed" : "sent",
+      created_at: row.created_at,
+    }));
   }
   return mockMessages;
 }
@@ -771,43 +779,51 @@ export async function logOutboundMessage(bookingId: string | null, recipientUser
   const recipient = await getUser(recipientUserId);
   const phone = recipient ? recipient.phone : "unknown";
 
-  const msg = {
-    booking_id: bookingId,
-    direction: "outbound" as const,
-    recipient_phone: phone,
-    message_body: body,
-    status: "sent" as const,
+  const dbMsg = {
+    direction: "out",
+    phone,
+    message_type: "text",
+    payload: { body, booking_id: bookingId },
+    status: "sent",
   };
 
   if (isDbConfigured) {
-    await supabase.from("whatsapp_messages").insert([msg]);
+    await supabase.from("whatsapp_messages").insert([dbMsg]);
     return;
   }
 
   mockMessages.push({
     id: `w-${Math.random().toString(36).substr(2, 9)}`,
-    ...msg,
+    booking_id: bookingId,
+    direction: "outbound",
+    recipient_phone: phone,
+    message_body: body,
+    status: "sent",
     created_at: new Date().toISOString(),
   });
 }
 
 export async function logInboundMessage(bookingId: string | null, senderPhone: string, body: string): Promise<void> {
-  const msg = {
-    booking_id: bookingId,
-    direction: "inbound" as const,
-    recipient_phone: senderPhone,
-    message_body: body,
-    status: "delivered" as const,
+  const dbMsg = {
+    direction: "in",
+    phone: senderPhone,
+    message_type: "text",
+    payload: { body, booking_id: bookingId },
+    status: "received",
   };
 
   if (isDbConfigured) {
-    await supabase.from("whatsapp_messages").insert([msg]);
+    await supabase.from("whatsapp_messages").insert([dbMsg]);
     return;
   }
 
   mockMessages.push({
     id: `w-${Math.random().toString(36).substr(2, 9)}`,
-    ...msg,
+    booking_id: bookingId,
+    direction: "inbound",
+    recipient_phone: senderPhone,
+    message_body: body,
+    status: "delivered",
     created_at: new Date().toISOString(),
   });
 }
