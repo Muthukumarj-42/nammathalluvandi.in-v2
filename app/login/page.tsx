@@ -515,21 +515,24 @@ export default function LoginPage() {
       />
 
       <div className="max-w-5xl mx-auto flex flex-col md:flex-row gap-8 items-start relative z-10">
-        {/* LEFT COLUMN */}
-        <div className="flex-1 w-full">
+        {/* LEFT COLUMN - Benefits */}
+        <div className="flex-1 w-full order-2 md:order-1">
           {/* SECTION 1 — HEADER */}
           <div className="mb-6">
             <p className="text-xs font-semibold text-primary uppercase tracking-widest mb-2">
-              FOR CART OWNERS · வண்டி உரிமையாளர்களுக்கு
+              <T en="FOR CART OWNERS" ta="வண்டி உரிமையாளர்களுக்கு" />
             </p>
             <h1 className="font-display text-3xl font-bold text-on-surface mb-3 leading-tight">
-              உங்கள் வண்டியை<br/>
-              <span className="text-primary">
-                List பண்ணுங்க.
-              </span>
+              <T
+                en="List Your Cart."
+                ta="உங்கள் வண்டியை List பண்ணுங்க."
+              />
             </h1>
             <p className="text-sm text-on-surface-variant mb-6">
-              Free to list. Zero commission. 300+ renters waiting — Tamil Nadu, Kerala and Andhra Pradesh.
+              <T
+                en="Free to list. Zero commission. 300+ renters waiting — Tamil Nadu, Kerala and Andhra Pradesh."
+                ta="இலவசப் பதிவு. பூஜ்ஜிய கமிஷன். 300+ வாடகைதாரர்கள் தயார் நிலையில் உள்ளனர் — தமிழ்நாடு, கேரளா மற்றும் ஆந்திரா."
+              />
             </p>
           </div>
 
@@ -539,30 +542,30 @@ export default function LoginPage() {
             <div className="bg-surface rounded-2xl p-4 border border-outline-variant/20 text-center">
               <p className="font-display text-2xl font-bold text-primary">300+</p>
               <p className="text-xs text-on-surface-variant mt-1">
-                Cart Renters
+                <T en="Cart Renters" ta="வாடகைதாரர்கள்" />
               </p>
               <p className="text-xs text-on-surface-variant/60">
-                in 50 days
+                <T en="in 50 days" ta="50 நாட்களில்" />
               </p>
             </div>
             {/* Card 2 */}
             <div className="bg-surface rounded-2xl p-4 border border-outline-variant/20 text-center">
               <p className="font-display text-2xl font-bold text-primary">20+</p>
               <p className="text-xs text-on-surface-variant mt-1">
-                Successful Rentals
+                <T en="Successful Rentals" ta="வெற்றிகரமான வாடகைகள்" />
               </p>
               <p className="text-xs text-on-surface-variant/60">
-                around Coimbatore
+                <T en="around Coimbatore" ta="கோவை சுற்றுவட்டாரத்தில்" />
               </p>
             </div>
             {/* Card 3 */}
             <div className="bg-surface rounded-2xl p-4 border border-outline-variant/20 text-center">
               <p className="font-display text-2xl font-bold text-primary">₹0</p>
               <p className="text-xs text-on-surface-variant mt-1">
-                Commission
+                <T en="Commission" ta="கமிஷன்" />
               </p>
               <p className="text-xs text-on-surface-variant/60">
-                free to list
+                <T en="free to list" ta="இலவசப் பதிவு" />
               </p>
             </div>
           </div>
@@ -571,7 +574,7 @@ export default function LoginPage() {
           <div className="flex items-center gap-2 mb-3">
             <span className="w-2 h-2 rounded-full bg-primary"></span>
             <p className="text-sm font-semibold text-on-surface">
-              இப்போதே கிடைக்கும் — Available Now
+              <T en="Benefits of Listing on NTV" ta="நம்ம தள்ளுவண்டியில் பதிவிடுவதன் நன்மைகள்" />
             </p>
           </div>
 
@@ -580,9 +583,14 @@ export default function LoginPage() {
             <div className="bg-surface rounded-2xl p-4 border border-outline-variant/20 flex gap-3 items-start hover:border-primary/30 transition">
               <span className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-lg flex-shrink-0">📍</span>
               <div>
-                <h3 className="text-sm font-semibold text-on-surface mb-0.5">300+ Renters Waiting</h3>
+                <h3 className="text-sm font-semibold text-on-surface mb-0.5">
+                  <T en="300+ Renters Waiting" ta="300+ வாடகைதாரர்கள் தயார்" />
+                </h3>
                 <p className="text-xs text-on-surface-variant leading-relaxed">
-                  Active renters from TN, Kerala and Andhra Pradesh — all searching for a cart like yours.
+                  <T
+                    en="Active renters from TN, Kerala and Andhra Pradesh — all searching for a cart like yours."
+                    ta="தமிழகம், கேரளா மற்றும் ஆந்திராவைச் சேர்ந்த வாடிக்கையாளர்கள் உங்களுடைய வண்டியை வாடகைக்கு எடுக்கத் தேடிக்கொண்டிருக்கிறார்கள்."
+                  />
                 </p>
               </div>
             </div>
@@ -590,9 +598,14 @@ export default function LoginPage() {
             <div className="bg-surface rounded-2xl p-4 border border-outline-variant/20 flex gap-3 items-start hover:border-primary/30 transition">
               <span className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-lg flex-shrink-0">🆓</span>
               <div>
-                <h3 className="text-sm font-semibold text-on-surface mb-0.5">Free to List</h3>
+                <h3 className="text-sm font-semibold text-on-surface mb-0.5">
+                  <T en="Free to List" ta="இலவசப் பதிவு" />
+                </h3>
                 <p className="text-xs text-on-surface-variant leading-relaxed">
-                  Zero listing fee. Zero commission during pilot phase. List today at no cost.
+                  <T
+                    en="Zero listing fee. Zero commission during pilot phase. List today at no cost."
+                    ta="பதிவுக் கட்டணம் எதுவும் இல்லை. தற்போதைய சோதனை கட்டத்தில் பூஜ்ஜிய கமிஷன். இன்றே இலவசமாகப் பதிவு செய்யுங்கள்."
+                  />
                 </p>
               </div>
             </div>
@@ -600,9 +613,14 @@ export default function LoginPage() {
             <div className="bg-surface rounded-2xl p-4 border border-outline-variant/20 flex gap-3 items-start hover:border-primary/30 transition">
               <span className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-lg flex-shrink-0">✅</span>
               <div>
-                <h3 className="text-sm font-semibold text-on-surface mb-0.5">Verified Listing</h3>
+                <h3 className="text-sm font-semibold text-on-surface mb-0.5">
+                  <T en="Verified Listing" ta="சரிபார்க்கப்பட்ட பதிவு" />
+                </h3>
                 <p className="text-xs text-on-surface-variant leading-relaxed">
-                  NTV reviews your cart before it goes live. Renters trust verified listings more.
+                  <T
+                    en="NTV reviews your cart before it goes live. Renters trust verified listings more."
+                    ta="வண்டி நேரலையில் செல்வதற்கு முன் NTV குழு சரிபார்க்கிறது. இதனால் வாடகைதாரர்கள் எளிதில் நம்புகிறார்கள்."
+                  />
                 </p>
               </div>
             </div>
@@ -610,9 +628,14 @@ export default function LoginPage() {
             <div className="bg-surface rounded-2xl p-4 border border-outline-variant/20 flex gap-3 items-start hover:border-primary/30 transition">
               <span className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-lg flex-shrink-0">📱</span>
               <div>
-                <h3 className="text-sm font-semibold text-on-surface mb-0.5">Enquiries on WhatsApp</h3>
+                <h3 className="text-sm font-semibold text-on-surface mb-0.5">
+                  <T en="Enquiries on WhatsApp" ta="வாட்ஸ்அப்பில் விசாரணைகள்" />
+                </h3>
                 <p className="text-xs text-on-surface-variant leading-relaxed">
-                  Renter details sent directly to your WhatsApp. No new app needed.
+                  <T
+                    en="Renter details sent directly to your WhatsApp. No new app needed."
+                    ta="வண்டியைத் தேடும் வாடிக்கையாளர் விவரங்கள் நேரடியாக உங்கள் வாட்ஸ்அப்பிற்கு அனுப்பப்படும். புதிய செயலி தேவையில்லை."
+                  />
                 </p>
               </div>
             </div>
@@ -620,9 +643,14 @@ export default function LoginPage() {
             <div className="bg-surface rounded-2xl p-4 border border-outline-variant/20 flex gap-3 items-start hover:border-primary/30 transition">
               <span className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-lg flex-shrink-0">💰</span>
               <div>
-                <h3 className="text-sm font-semibold text-on-surface mb-0.5">Easy Rent Collection</h3>
+                <h3 className="text-sm font-semibold text-on-surface mb-0.5">
+                  <T en="Easy Rent Collection" ta="சுலபமான வாடகை வசூல்" />
+                </h3>
                 <p className="text-xs text-on-surface-variant leading-relaxed">
-                  Advance rent confirmed before cart handover — no more chasing payments at month end.
+                  <T
+                    en="Advance rent confirmed before cart handover — no more chasing payments at month end."
+                    ta="வண்டியை ஒப்படைக்கும் முன்பே முன்பணம் மற்றும் வாடகை உறுதிசெய்யப்படும். மாத இறுதியில் அலையத் தேவையில்லை."
+                  />
                 </p>
               </div>
             </div>
@@ -630,9 +658,14 @@ export default function LoginPage() {
             <div className="bg-surface rounded-2xl p-4 border border-outline-variant/20 flex gap-3 items-start hover:border-primary/30 transition">
               <span className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-lg flex-shrink-0">📸</span>
               <div>
-                <h3 className="text-sm font-semibold text-on-surface mb-0.5">Professional Listing</h3>
+                <h3 className="text-sm font-semibold text-on-surface mb-0.5">
+                  <T en="Professional Listing" ta="தொழில்முறைப் பட்டியல்" />
+                </h3>
                 <p className="text-xs text-on-surface-variant leading-relaxed">
-                  Real photos, specs and price — your cart listed like an e-commerce product.
+                  <T
+                    en="Real photos, specs and price — your cart listed like an e-commerce product."
+                    ta="உண்மையான புகைப்படங்கள், விவரங்கள் மற்றும் விலையுடன் உங்கள் வண்டி ஒரு ஆன்லைன் தயாரிப்பைப் போல் காட்சிப்படுத்தப்படும்."
+                  />
                 </p>
               </div>
             </div>
@@ -642,7 +675,7 @@ export default function LoginPage() {
           <div className="flex items-center gap-2 mb-3">
             <span className="w-2 h-2 rounded-full bg-orange-400"></span>
             <p className="text-sm font-semibold text-on-surface">
-              வரவிருக்கும் — Coming Soon
+              <T en="Coming Soon" ta="வரவிருப்பவை" />
             </p>
           </div>
 
@@ -650,70 +683,85 @@ export default function LoginPage() {
             {/* Item 1 */}
             <div className="flex items-start gap-3 p-3 border-b border-outline-variant/10 last:border-b-0">
               <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-orange-50 text-orange-500 flex-shrink-0 mt-0.5 whitespace-nowrap">
-                Soon
+                <T en="Soon" ta="விரைவில்" />
               </span>
               <div>
                 <p className="text-sm font-medium text-on-surface leading-snug">
-                  Deposit Escrow Protection
+                  <T en="Deposit Escrow Protection" ta="முன்பண பாதுகாப்புப் பெட்டகம்" />
                 </p>
                 <p className="text-xs text-on-surface-variant mt-0.5 leading-relaxed">
-                  Security deposit held by NTV — cart protected before any handover.
+                  <T
+                    en="Security deposit held by NTV — cart protected before any handover."
+                    ta="வண்டியை ஒப்படைக்கும் முன் முன்பணம் NTV-ஆல் பாதுகாப்பாக வைக்கப்படும்."
+                  />
                 </p>
               </div>
             </div>
             {/* Item 2 */}
             <div className="flex items-start gap-3 p-3 border-b border-outline-variant/10 last:border-b-0">
               <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-orange-50 text-orange-500 flex-shrink-0 mt-0.5 whitespace-nowrap">
-                Soon
+                <T en="Soon" ta="விரைவில்" />
               </span>
               <div>
                 <p className="text-sm font-medium text-on-surface leading-snug">
-                  Digital Rental Agreement
+                  <T en="Digital Rental Agreement" ta="டிஜிட்டல் வாடகை ஒப்பந்தம்" />
                 </p>
                 <p className="text-xs text-on-surface-variant mt-0.5 leading-relaxed">
-                  Auto-generated legal contract per booking via WhatsApp.
+                  <T
+                    en="Auto-generated legal contract per booking via WhatsApp."
+                    ta="ஒவ்வொரு முன்பதிவிற்கும் வாட்ஸ்அப் மூலம் தானாக உருவாக்கப்படும் சட்ட ஒப்பந்தம்."
+                  />
                 </p>
               </div>
             </div>
             {/* Item 3 */}
             <div className="flex items-start gap-3 p-3 border-b border-outline-variant/10 last:border-b-0">
               <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-orange-50 text-orange-500 flex-shrink-0 mt-0.5 whitespace-nowrap">
-                Soon
+                <T en="Soon" ta="விரைவில்" />
               </span>
               <div>
                 <p className="text-sm font-medium text-on-surface leading-snug">
-                  Renter Rating System
+                  <T en="Renter Rating System" ta="வாடகைதாரர் மதிப்பீட்டு முறை" />
                 </p>
                 <p className="text-xs text-on-surface-variant mt-0.5 leading-relaxed">
-                  Bad renters get flagged — you are always protected.
+                  <T
+                    en="Bad renters get flagged — you are always protected."
+                    ta="சரியான முறையில் வண்டிகளை பராமரிக்காதவர்கள் அடையாளம் காணப்படுவார்கள் — நீங்கள் எப்போதும் பாதுகாப்பாக இருக்கலாம்."
+                  />
                 </p>
               </div>
             </div>
             {/* Item 4 */}
             <div className="flex items-start gap-3 p-3 border-b border-outline-variant/10 last:border-b-0">
               <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-orange-50 text-orange-500 flex-shrink-0 mt-0.5 whitespace-nowrap">
-                Soon
+                <T en="Soon" ta="விரைவில்" />
               </span>
               <div>
                 <p className="text-sm font-medium text-on-surface leading-snug">
-                  Pre/Post Photo Proof
+                  <T en="Pre/Post Photo Proof" ta="புகைப்பட சேதக் கட்டுப்பாடு" />
                 </p>
                 <p className="text-xs text-on-surface-variant mt-0.5 leading-relaxed">
-                  Damage documented with photos — deposit deducted fairly.
+                  <T
+                    en="Damage documented with photos — deposit deducted fairly."
+                    ta="முன்/பின் புகைப்பட ஆதாரங்களுடன் சேதங்கள் ஆவணப்படுத்தப்பட்டு முன்பணம் நியாயமாக கழிக்கப்படும்."
+                  />
                 </p>
               </div>
             </div>
             {/* Item 5 */}
             <div className="flex items-start gap-3 p-3 border-b border-outline-variant/10 last:border-b-0">
               <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-orange-50 text-orange-500 flex-shrink-0 mt-0.5 whitespace-nowrap">
-                Soon
+                <T en="Soon" ta="விரைவில்" />
               </span>
               <div>
                 <p className="text-sm font-medium text-on-surface leading-snug">
-                  Earnings Dashboard
+                  <T en="Earnings Dashboard" ta="வருவாய் கண்காணிப்பு" />
                 </p>
                 <p className="text-xs text-on-surface-variant mt-0.5 leading-relaxed">
-                  Track all rental income and enquiries in one place.
+                  <T
+                    en="Track all rental income and enquiries in one place."
+                    ta="உங்கள் அனைத்து வாடகை வருவாய் மற்றும் விசாரணைகளை ஒரே இடத்தில் கண்காணிக்கலாம்."
+                  />
                 </p>
               </div>
             </div>
@@ -722,7 +770,10 @@ export default function LoginPage() {
           {/* SECTION 5 — TESTIMONIAL */}
           <div className="bg-primary/5 rounded-2xl p-4 border-l-4 border-primary mb-6">
             <p className="text-sm italic text-on-surface leading-relaxed mb-3">
-              &quot;என் வண்டி idle-ஆ இருந்துச்சு. NTV-ல list பண்ணினேன் — ஒரே வாரத்துல enquiry வந்துச்சு.&quot;
+              <T
+                en="&quot;My cart was idle. I listed it on NTV — got an enquiry within a single week.&quot;"
+                ta="&quot;என் வண்டி idle-ஆ இருந்துச்சு. NTV-ல list பண்ணினேன் — ஒரே வாரத்துல enquiry வந்துச்சு.&quot;"
+              />
             </p>
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-sm flex-shrink-0">
@@ -731,7 +782,7 @@ export default function LoginPage() {
               <div>
                 <p className="text-xs font-semibold text-on-surface">D. Nagaraj</p>
                 <p className="text-xs text-on-surface-variant">
-                  NTV001 · Ondipudur · 30+ years
+                  <T en="NTV001 · Ondipudur · 30+ years" ta="NTV001 · ஒண்டிப்புதூர் · 30+ ஆண்டுகள் அனுபவம்" />
                 </p>
               </div>
             </div>
@@ -740,21 +791,18 @@ export default function LoginPage() {
           {/* SECTION 6 — TRUST PILLS */}
           <div className="flex flex-wrap gap-2">
             <div className="flex items-center gap-1.5 text-xs text-on-surface-variant bg-surface rounded-full px-3 py-1.5 border border-outline-variant/20">
-              🏛 <span>TBI BIT Incubated</span>
+              📋 <T en="Udyam Registered" ta="உத்யம் பதிவு பெற்றது" />
             </div>
             <div className="flex items-center gap-1.5 text-xs text-on-surface-variant bg-surface rounded-full px-3 py-1.5 border border-outline-variant/20">
-              📋 <span>Udyam Registered</span>
-            </div>
-            <div className="flex items-center gap-1.5 text-xs text-on-surface-variant bg-surface rounded-full px-3 py-1.5 border border-outline-variant/20">
-              🔍 <span>Google #1 Ranked</span>
+              🔍 <T en="Google #1 Ranked" ta="கூகுளில் #1 இடம்" />
             </div>
           </div>
         </div>
 
-        {/* RIGHT COLUMN */}
-        <div className="w-full md:w-[400px] md:sticky md:top-24">
+        {/* RIGHT COLUMN - Sign in card */}
+        <div className="w-full md:w-[400px] md:sticky md:top-24 order-1 md:order-2">
           <p className="text-sm text-on-surface-variant text-center mb-3">
-            உங்கள் cart list பண்ண sign in பண்ணுங்க →
+            <T en="Sign in to list your cart →" ta="உங்கள் cart list பண்ண sign in பண்ணுங்க →" />
           </p>
           <Suspense fallback={
             <div className="flex items-center justify-center">
