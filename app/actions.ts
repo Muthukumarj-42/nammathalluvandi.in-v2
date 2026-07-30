@@ -247,6 +247,10 @@ export async function saveCart(cartData: {
   vendorId?: string;
   ownerId?: string; // When provided, skip phone-based user lookup
   photos?: string[];
+  isForRent?: boolean;
+  isForSale?: boolean;
+  salePrice?: number;
+  negotiable?: boolean;
 }) {
   try {
     let ownerId = cartData.ownerId;
@@ -275,7 +279,11 @@ export async function saveCart(cartData: {
       size: cartData.size || "5ft x 3.5ft",
       weight: cartData.weight || "100kg",
       stove_type: cartData.stoveType || "None",
-      price_per_day: cartData.pricePerDay || 80,
+      price_per_day: cartData.isForRent ? (cartData.pricePerDay || 80) : null,
+      is_for_rent: cartData.isForRent !== undefined ? cartData.isForRent : true,
+      is_for_sale: cartData.isForSale !== undefined ? cartData.isForSale : false,
+      sale_price: cartData.isForSale ? (cartData.salePrice || 0) : null,
+      negotiable: cartData.negotiable || false,
       min_rental_period: cartData.minRentalPeriod,
       available_from: cartData.availableFrom,
       equipment: cartData.equipment,

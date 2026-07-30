@@ -19,7 +19,11 @@ export interface DbCart {
   size?: string;
   weight?: string;
   stove_type?: string;
-  price_per_day: number;
+  price_per_day?: number | null;
+  is_for_rent?: boolean;
+  is_for_sale?: boolean;
+  sale_price?: number | null;
+  negotiable?: boolean;
   min_rental_period?: string | null;
   available_from?: string | null;
   equipment?: string[];
