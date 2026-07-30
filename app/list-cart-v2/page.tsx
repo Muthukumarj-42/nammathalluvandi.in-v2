@@ -6,10 +6,8 @@ import Link from "next/link";
 import { 
   LogIn, 
   AlertCircle, 
-  Store, 
   MapPin, 
   Camera, 
-  IndianRupee, 
   Compass, 
   Check, 
   ChevronRight, 
@@ -17,72 +15,58 @@ import {
   Upload, 
   X,
   RefreshCw,
-  Info
+  Info,
+  Search,
+  IndianRupee
 } from "lucide-react";
 import { saveCart } from "@/app/actions";
 import { useAuth } from "@/context/auth-context";
 import { createClient } from "@/lib/supabase-browser";
-import { Baloo_2, Poppins } from "next/font/google";
-
-// Configure Google Fonts local to this view to isolate visual presentation
-const baloo = Baloo_2({
-  subsets: ["latin"],
-  weight: ["600", "700", "800"],
-  variable: "--font-baloo",
-  display: "swap",
-});
-
-const poppins = Poppins({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-poppins",
-  display: "swap",
-});
 
 const CART_TYPE_OPTIONS = [
-  { value: "With Store", label: "With Store / Stove Cart" },
-  { value: "With Roof", label: "With Roof / Covered Cart" },
-  { value: "Ice Cream", label: "Ice Cream Cart" },
-  { value: "Tea Stall", label: "Tea & Coffee Cart" },
-  { value: "E-Rickshaw", label: "E-Rickshaw Food Cart" },
-  { value: "Other", label: "Custom / Other" },
+  { value: "With Store", en: "With Store / Stove Cart", ta: "அடுப்புடன் கூடிய வண்டி / ஸ்டவ் வண்டி" },
+  { value: "With Roof", en: "With Roof / Covered Cart", ta: "மேற்கூரையுடன் கூடிய வண்டி / மூடப்பட்ட வண்டி" },
+  { value: "Ice Cream", en: "Ice Cream Cart", ta: "ஐஸ்கிரீம் வண்டி" },
+  { value: "Tea Stall", en: "Tea & Coffee Cart", ta: "டீ & காபி கடை வண்டி" },
+  { value: "E-Rickshaw", en: "E-Rickshaw Food Cart", ta: "இ-ரிக்ஷா உணவு வண்டி" },
+  { value: "Other", en: "Custom / Other", ta: "தனிப்பயனாக்கப்பட்ட வண்டி / இதர" },
 ];
 
 const CONDITION_OPTIONS = [
-  { value: "New", label: "Brand New" },
-  { value: "Used - Very Good", label: "Used — Very Good" },
-  { value: "Used - Good", label: "Used — Good" },
-  { value: "Fair", label: "Used — Fair" },
+  { value: "New", en: "Brand New", ta: "புதியது" },
+  { value: "Used - Very Good", en: "Used — Very Good", ta: "பயன்படுத்தப்பட்டது — மிக நன்று" },
+  { value: "Used - Good", en: "Used — Good", ta: "பயன்படுத்தப்பட்டது — நன்று" },
+  { value: "Fair", en: "Used — Fair", ta: "பயன்படுத்தப்பட்டது — சுமார்" },
 ];
 
 const SIZE_OPTIONS = [
-  { value: "Small (3 ft)", label: "Small (3 ft)" },
-  { value: "Medium (4 ft)", label: "Medium (4 ft)" },
-  { value: "Large (5 ft)", label: "Large (5 ft)" },
-  { value: "Extra Large (6 ft)", label: "Extra Large (6 ft)" },
+  { value: "Small (3 ft)", en: "Small (3 ft)", ta: "சிறிய (3 அடி)" },
+  { value: "Medium (4 ft)", en: "Medium (4 ft)", ta: "நடுத்தர (4 அடி)" },
+  { value: "Large (5 ft)", en: "Large (5 ft)", ta: "பெரிய (5 அடி)" },
+  { value: "Extra Large (6 ft)", en: "Extra Large (6 ft)", ta: "மிகப் பெரிய (6 அடி)" },
 ];
 
 const STOVE_OPTIONS = [
-  { value: "None", label: "None" },
-  { value: "Single Burner", label: "Single Burner" },
-  { value: "Double Burner", label: "Double Burner" },
-  { value: "Triple Burner", label: "Triple Burner" },
+  { value: "None", en: "None", ta: "இல்லை" },
+  { value: "Single Burner", en: "Single Burner", ta: "ஒற்றை அடுப்பு" },
+  { value: "Double Burner", en: "Double Burner", ta: "இரட்டை அடுப்பு" },
+  { value: "Triple Burner", en: "Triple Burner", ta: "மூன்று அடுப்பு" },
 ];
 
 const RENTAL_PERIOD_OPTIONS = [
-  { value: "daily", label: "Daily" },
-  { value: "weekly", label: "Weekly" },
-  { value: "1_month", label: "1 Month" },
-  { value: "3_months", label: "3 Months" },
+  { value: "daily", en: "Daily", ta: "தினசரி" },
+  { value: "weekly", en: "Weekly", ta: "வாராந்திர" },
+  { value: "1_month", en: "1 Month", ta: "1 மாதம்" },
+  { value: "3_months", en: "3 Months", ta: "3 மாதங்கள்" },
 ];
 
 const SUGGESTED_ANGLES = [
-  { index: 0, label: "Front Angle" },
-  { index: 1, label: "Side View" },
-  { index: 2, label: "Stove View" },
-  { index: 3, label: "Extra View 1" },
-  { index: 4, label: "Extra View 2" },
-  { index: 5, label: "Extra View 3" },
+  { index: 0, en: "Front Angle", ta: "முன்பக்க கோணம்" },
+  { index: 1, en: "Side View", ta: "பக்கவாட்டு தோற்றம்" },
+  { index: 2, en: "Stove View", ta: "அடுப்பு பகுதி" },
+  { index: 3, en: "Extra View 1", ta: "கூடுதல் படம் 1" },
+  { index: 4, en: "Extra View 2", ta: "கூடுதல் படம் 2" },
+  { index: 5, en: "Extra View 3", ta: "கூடுதல் படம் 3" },
 ];
 
 type GeoState = {
@@ -150,13 +134,9 @@ function ListCartV2Content() {
   const supabase = useMemo(() => createClient(), []);
   const { user, isVendor, vendorProfile, loading: authLoading } = useAuth();
 
-  // Custom styling references:
-  // dark green: bg-[#1a3d2e] / text-[#1a3d2e]
-  // orange accent: bg-[#e8732c] / text-[#e8732c]
-  // cream background: bg-[#ece4d1]
-  // cream card: bg-[#f5f0e6]
-  // muted green text: text-[#6b7d72]
-  // border tan: border-[#e8dfc8]
+  // Reference for Camera & Gallery Upload Inputs
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
 
   // Flow State
   const [step, setStep] = useState<number>(0); // 0: Landing, 1 to 6 steps
@@ -164,6 +144,19 @@ function ListCartV2Content() {
   const [submitLoading, setSubmitLoading] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [error, setError] = useState("");
+
+  // Sync state with global HTML data attribute
+  useEffect(() => {
+    const updateLang = () => {
+      const current = document.documentElement.getAttribute("data-lang") || "en";
+      setLang(current as "en" | "ta");
+    };
+    updateLang();
+
+    const observer = new MutationObserver(updateLang);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-lang"] });
+    return () => observer.disconnect();
+  }, []);
 
   // Step 1: Intent
   const [intentRent, setIntentRent] = useState(true);
@@ -183,6 +176,7 @@ function ListCartV2Content() {
 
   // Step 4: Location
   const [location, setLocation] = useState<GeoState>(EMPTY_GEO);
+  const [geocodeLoading, setGeocodeLoading] = useState(false);
 
   // Step 5: Photos (Drag & Drop sorting)
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
@@ -195,7 +189,11 @@ function ListCartV2Content() {
     const files = Array.from(e.target.files);
     const totalAllowed = 6;
     if (selectedFiles.length + files.length > totalAllowed) {
-      setError(`You can only upload up to ${totalAllowed} photos in total.`);
+      setError(
+        lang === "ta" 
+          ? `நீங்கள் அதிகபட்சமாக ${totalAllowed} புகைப்படங்களை மட்டுமே பதிவேற்ற முடியும்.` 
+          : `You can only upload up to ${totalAllowed} photos in total.`
+      );
       return;
     }
     setError("");
@@ -259,7 +257,11 @@ function ListCartV2Content() {
 
   const handleUseProfileLocation = () => {
     if (!vendorProfile?.latitude || !vendorProfile?.longitude) {
-      setError("Your profile doesn't have a saved location yet.");
+      setError(
+        lang === "ta"
+          ? "உங்கள் சுயவிவரத்தில் சேமிக்கப்பட்ட இருப்பிடம் எதுவும் இல்லை."
+          : "Your profile doesn't have a saved location yet."
+      );
       return;
     }
     setLocation({
@@ -270,6 +272,53 @@ function ListCartV2Content() {
       district: vendorProfile.district || "",
       address: `${vendorProfile.area || ""}, ${vendorProfile.district || ""}`.trim(),
     });
+  };
+
+  // Manual Geocode Lookup using Nominatim
+  const handleGeocodeSearch = async () => {
+    if (!location.address.trim()) return;
+    setGeocodeLoading(true);
+    setError("");
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(location.address)}&limit=1`,
+        {
+          headers: {
+            "User-Agent": "NammaThalluvandi/1.0"
+          }
+        }
+      );
+      const json = await res.json();
+      if (json && json.length > 0) {
+        const item = json[0];
+        const lat = parseFloat(item.lat);
+        const lon = parseFloat(item.lon);
+        
+        setLocation({
+          status: "success",
+          latitude: lat,
+          longitude: lon,
+          area: item.display_name.split(",")[0] || "",
+          district: item.display_name.split(",")[1] || "",
+          address: item.display_name,
+        });
+      } else {
+        setError(
+          lang === "ta"
+            ? "இந்த முகவரியைக் கண்டறிய முடியவில்லை. தயவுசெய்து வேறு பகுதியைத் தேர்ந்தெடுக்கவும்."
+            : "Could not find coordinates for this address. Please try another area name."
+        );
+      }
+    } catch (err) {
+      console.error(err);
+      setError(
+        lang === "ta"
+          ? "இருப்பிடத்தைத் தேடுவதில் தோல்வி. தயவுசெய்து மீண்டும் முயற்சிக்கவும்."
+          : "Geocoding search failed. Please try again."
+      );
+    } finally {
+      setGeocodeLoading(false);
+    }
   };
 
   // Validate step navigation
@@ -392,10 +441,10 @@ function ListCartV2Content() {
   // Auth Loading
   if (authLoading) {
     return (
-      <main className="min-h-screen bg-[#ece4d1] flex items-center justify-center">
+      <main className="min-h-screen bg-background flex items-center justify-center">
         <div className="flex flex-col items-center gap-2">
-          <div className="w-10 h-10 border-4 border-[#1a3d2e] border-t-transparent rounded-full animate-spin" />
-          <span className="text-[#1a3d2e] font-semibold text-sm font-body">Loading NTV Portal...</span>
+          <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+          <span className="text-primary font-semibold text-sm">Loading NTV Portal...</span>
         </div>
       </main>
     );
@@ -404,17 +453,21 @@ function ListCartV2Content() {
   // Not Logged In
   if (!user) {
     return (
-      <main className="min-h-screen bg-[#ece4d1] pt-24 pb-16 px-4 flex items-center justify-center font-body">
-        <div className="max-w-md w-full text-center bg-[#f5f0e6] p-8 rounded-[24px] border border-[#e8dfc8] shadow-md">
-          <div className="w-16 h-16 rounded-full bg-[#1a3d2e]/10 flex items-center justify-center mx-auto mb-5">
-            <LogIn className="w-8 h-8 text-[#1a3d2e]" />
+      <main className="min-h-screen bg-background pt-24 pb-16 px-4 flex items-center justify-center">
+        <div className="max-w-md w-full text-center bg-surface p-8 rounded-2xl border border-outline-variant/30 shadow-sm">
+          <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-5">
+            <LogIn className="w-8 h-8 text-primary" />
           </div>
-          <h1 className="font-display text-2xl font-bold text-[#1a3d2e] mb-3">Sign In to Continue</h1>
-          <p className="text-[#6b7d72] text-sm mb-8 leading-relaxed">
-            You need a registered account to publish or manage food cart listings on Namma Thalluvandi.
+          <h1 className="text-2xl font-bold text-on-surface mb-3">
+            {lang === "ta" ? "தொடர உள்நுழையவும்" : "Sign In to Continue"}
+          </h1>
+          <p className="text-on-surface-variant text-sm mb-8 leading-relaxed">
+            {lang === "ta"
+              ? "நம்ம தள்ளுவண்டியில் வண்டியைப் பட்டியலிட அல்லது நிர்வகிக்க உங்களுக்கு ஒரு கணக்கு தேவை."
+              : "You need a registered account to publish or manage food cart listings on Namma Thalluvandi."}
           </p>
-          <Link href="/login?redirect=/list-cart-v2" className="inline-flex items-center justify-center gap-2 w-full py-4 rounded-[14px] bg-[#e8732c] text-white font-bold text-sm uppercase tracking-wider hover:bg-[#e8732c]/90 transition shadow-md">
-            <LogIn className="w-4 h-4" /> Login / Register
+          <Link href="/login?redirect=/list-cart-v2" className="inline-flex items-center justify-center gap-2 w-full py-4 rounded-xl bg-[#F97316] text-white font-bold text-sm uppercase tracking-wider hover:bg-[#e06612] transition shadow-md">
+            <LogIn className="w-4 h-4" /> {lang === "ta" ? "உள்நுழைய / பதிவு செய்ய" : "Login / Register"}
           </Link>
         </div>
       </main>
@@ -424,20 +477,24 @@ function ListCartV2Content() {
   // No Vendor Profile
   if (!isVendor) {
     return (
-      <main className="min-h-screen bg-[#ece4d1] pt-24 pb-16 px-4 flex items-center justify-center font-body">
-        <div className="max-w-md w-full text-center bg-[#f5f0e6] p-8 rounded-[24px] border border-[#e8dfc8] shadow-md">
-          <div className="w-16 h-16 rounded-full bg-[#1a3d2e]/10 flex items-center justify-center mx-auto mb-5">
-            <Store className="w-8 h-8 text-[#1a3d2e]" />
+      <main className="min-h-screen bg-background pt-24 pb-16 px-4 flex items-center justify-center">
+        <div className="max-w-md w-full text-center bg-surface p-8 rounded-2xl border border-outline-variant/30 shadow-sm">
+          <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-5">
+            <img src="/brand/text-logo.webp" alt="NTV" className="w-10 h-10 object-contain" />
           </div>
-          <h1 className="font-display text-2xl font-bold text-[#1a3d2e] mb-3">Create Vendor Profile</h1>
-          <div className="flex items-start gap-3 p-4 rounded-xl bg-white border border-[#e8dfc8] text-left mb-6">
-            <AlertCircle className="w-5 h-5 text-[#e8732c] shrink-0 mt-0.5" />
-            <p className="text-sm text-[#6b7d72] leading-relaxed">
-              To start listing your carts, you first need to set up a free vendor profile containing your business context.
+          <h1 className="text-2xl font-bold text-on-surface mb-3">
+            {lang === "ta" ? "சுயவிவரத்தை உருவாக்கவும்" : "Create Vendor Profile"}
+          </h1>
+          <div className="flex items-start gap-3 p-4 rounded-xl bg-background border border-outline-variant/20 text-left mb-6">
+            <AlertCircle className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+            <p className="text-sm text-on-surface-variant leading-relaxed">
+              {lang === "ta"
+                ? "உங்கள் தள்ளுவண்டிகளை பட்டியலிட, முதலில் உங்கள் வணிக விவரங்களுடன் ஒரு இலவச விற்பனையாளர் சுயவிவரத்தை அமைக்க வேண்டும்."
+                : "To start listing your carts, you first need to set up a free vendor profile containing your business context."}
             </p>
           </div>
-          <Link href="/vendor/register" className="inline-flex items-center justify-center gap-2 w-full py-4 rounded-[14px] bg-[#e8732c] text-white font-bold text-sm uppercase tracking-wider hover:bg-[#e8732c]/90 transition shadow-md">
-            <Store className="w-4 h-4" /> Create Vendor Profile
+          <Link href="/vendor/register" className="inline-flex items-center justify-center gap-2 w-full py-4 rounded-xl bg-[#F97316] text-white font-bold text-sm uppercase tracking-wider hover:bg-[#e06612] transition shadow-md">
+            {lang === "ta" ? "விற்பனையாளர் சுயவிவரத்தை உருவாக்கு" : "Create Vendor Profile"}
           </Link>
         </div>
       </main>
@@ -447,32 +504,38 @@ function ListCartV2Content() {
   // Success Screen
   if (submitSuccess) {
     return (
-      <main className="min-h-screen bg-[#ece4d1] pt-24 pb-16 px-4 flex items-center justify-center font-body">
-        <div className="max-w-md w-full text-center bg-[#f5f0e6] p-8 rounded-[28px] border border-[#e8dfc8] shadow-lg">
-          <div className="w-20 h-20 rounded-full bg-[#1a3d2e] flex items-center justify-center mx-auto mb-6 shadow-md border-4 border-[#e8dfc8]">
+      <main className="min-h-screen bg-background pt-24 pb-16 px-4 flex items-center justify-center">
+        <div className="max-w-md w-full text-center bg-surface p-8 rounded-2xl border border-outline-variant/30 shadow-sm">
+          <div className="w-20 h-20 rounded-full bg-primary flex items-center justify-center mx-auto mb-6 shadow-md border-4 border-background">
             <Check className="w-10 h-10 text-white" />
           </div>
-          <h1 className="font-display text-3xl font-extrabold text-[#1a3d2e] mb-2">Listing Submitted!</h1>
+          <h1 className="text-3xl font-extrabold text-on-surface mb-2">
+            {lang === "ta" ? "பதிவு சமர்ப்பிக்கப்பட்டது!" : "Listing Submitted!"}
+          </h1>
           
-          <div className="inline-block px-4 py-1.5 bg-[#e8732c]/10 rounded-full border border-[#e8732c]/30 text-[#e8732c] text-xs font-bold uppercase tracking-wider mb-6">
-            PENDING REVIEW
+          <div className="inline-block px-4 py-1.5 bg-primary/10 rounded-full border border-primary/20 text-primary text-xs font-bold uppercase tracking-wider mb-6">
+            {lang === "ta" ? "மதிப்பாய்வில் உள்ளது" : "PENDING REVIEW"}
           </div>
 
-          <p className="text-[#6b7d72] text-sm leading-relaxed mb-6">
-            Our team typically reviews new listings within 24 hours. You'll be notified once your cart goes live.
+          <p className="text-on-surface-variant text-sm leading-relaxed mb-6">
+            {lang === "ta"
+              ? "எங்கள் குழு பொதுவாக புதிய பதிவுகளை 24 மணி நேரத்திற்குள் மதிப்பாய்வு செய்கிறது. அது நேரலைக்கு வந்ததும் உங்களுக்குத் தெரிவிக்கப்படும்."
+              : "Our team typically reviews new listings within 24 hours. You'll be notified once your cart goes live."}
           </p>
 
-          <div className="bg-white rounded-xl p-4 border border-[#e8dfc8] mb-8 text-left">
-            <span className="text-xs font-semibold text-[#6b7d72] uppercase block mb-2">Surfaces where listed:</span>
+          <div className="bg-background rounded-xl p-4 border border-outline-variant/20 mb-8 text-left">
+            <span className="text-xs font-semibold text-on-surface-variant uppercase block mb-2">
+              {lang === "ta" ? "பட்டியலிடப்பட்ட இடங்கள்:" : "Surfaces where listed:"}
+            </span>
             <div className="flex gap-2">
               {intentRent && (
-                <span className="px-3 py-1 bg-[#1a3d2e]/10 text-[#1a3d2e] text-xs font-bold rounded-full">
-                  Explore (Rental)
+                <span className="px-3 py-1 bg-primary/15 text-primary text-xs font-bold rounded-full">
+                  {lang === "ta" ? "வாடகைக்கு (Explore)" : "Explore (Rental)"}
                 </span>
               )}
               {intentSale && (
-                <span className="px-3 py-1 bg-[#e8732c]/10 text-[#e8732c] text-xs font-bold rounded-full">
-                  Live Sales
+                <span className="px-3 py-1 bg-[#F97316]/15 text-[#F97316] text-xs font-bold rounded-full">
+                  {lang === "ta" ? "விற்பனைக்கு (Sales)" : "Live Sales"}
                 </span>
               )}
             </div>
@@ -480,9 +543,9 @@ function ListCartV2Content() {
 
           <button
             onClick={handleReset}
-            className="w-full py-4 rounded-[14px] bg-[#1a3d2e] text-white font-bold text-sm uppercase tracking-wider hover:bg-[#1a3d2e]/90 transition shadow-md"
+            className="w-full py-4 rounded-xl bg-primary text-white font-bold text-sm uppercase tracking-wider hover:bg-primary/90 transition shadow-md"
           >
-            List Another Cart
+            {lang === "ta" ? "மற்றொரு வண்டியைச் சேர்க்க" : "List Another Cart"}
           </button>
         </div>
       </main>
@@ -491,88 +554,51 @@ function ListCartV2Content() {
 
   // Roadmap node labels
   const stepsList = [
-    { num: 1, label: "Intent" },
-    { num: 2, label: "Details" },
-    { num: 3, label: "Pricing" },
-    { num: 4, label: "Location" },
-    { num: 5, label: "Photos" },
-    { num: 6, label: "Review" }
+    { num: 1, en: "Intent", ta: "நோக்கம்" },
+    { num: 2, en: "Details", ta: "விவரங்கள்" },
+    { num: 3, en: "Pricing", ta: "விலை" },
+    { num: 4, en: "Location", ta: "இருப்பிடம்" },
+    { num: 5, en: "Photos", ta: "புகைப்படம்" },
+    { num: 6, en: "Review", ta: "மதிப்பாய்வு" }
   ];
 
   return (
-    <div className={`${baloo.variable} ${poppins.variable} min-h-screen bg-[#ece4d1] font-sans antialiased text-[#1a3d2e] pb-24`}>
-      {/* Hide global layout elements that are rendered via layout.tsx */}
-      <style dangerouslySetInnerHTML={{__html: `
-        /* Hide global navbar (desktop & mobile headers) */
-        header {
-          display: none !important;
-        }
-        /* Hide global footer */
-        footer {
-          display: none !important;
-        }
-        /* Hide global mobile navigation bar at the bottom */
-        nav[aria-label="Mobile navigation"] {
-          display: none !important;
-        }
-        /* Hide global WhatsApp float widget button */
-        a[aria-label="WhatsApp booking"] {
-          display: none !important;
-        }
-      `}} />
+    <div className="min-h-screen bg-background text-on-surface pb-24 pt-24 px-4">
       {/* ──────────────── SCREEN 0: LANDING ──────────────── */}
       {step === 0 && (
-        <main className="max-w-md mx-auto px-4 pt-16 pb-12 flex flex-col items-center">
-          {/* Landing Header */}
-          <div className="w-full flex items-center justify-between mb-12">
-            <div className="flex items-center gap-2">
-              <div className="w-9 h-9 rounded-lg bg-[#1a3d2e] flex items-center justify-center shadow-sm">
-                <Store size={18} className="text-[#e8732c]" />
-              </div>
-              <span className="font-display font-extrabold text-xl text-[#1a3d2e] tracking-tight">
-                Namma Thalluvandi
-              </span>
-            </div>
-            
-            {/* EN/TA toggler (Cosmetic) */}
-            <button 
-              onClick={() => setLang(l => l === "en" ? "ta" : "en")}
-              className="text-xs font-bold px-3 py-1.5 rounded-full border border-[#e8dfc8] bg-[#f5f0e6] hover:bg-[#e8dfc8] transition"
-            >
-              {lang === "en" ? "தமிழ்" : "EN"}
-            </button>
+        <main className="max-w-md mx-auto py-12 flex flex-col items-center">
+          {/* Central landing badge using NTV Logo */}
+          <div className="w-20 h-20 rounded-full bg-surface flex items-center justify-center mb-6 shadow-sm border border-outline-variant/30 p-2">
+            <img src="/brand/text-logo.webp" alt="NTV Logo" className="w-14 h-14 object-contain" />
           </div>
 
-          {/* Central landing badge */}
-          <div className="w-[84px] h-[84px] rounded-full bg-[#1a3d2e] flex items-center justify-center mb-6 shadow-md border-4 border-[#e8dfc8]">
-            <Store size={38} className="text-[#e8732c]" />
-          </div>
-
-          <h1 className="font-display text-4xl font-extrabold text-center mb-3">
-            List Your Cart
+          <h1 className="text-3xl font-black text-center mb-3">
+            {lang === "ta" ? "உங்கள் வண்டியைப் பட்டியலிட்டு வாடகைக்கு விடுங்கள்" : "List Your Cart"}
           </h1>
           
-          <p className="text-center text-[#6b7d72] text-sm leading-relaxed mb-8 max-w-sm">
-            Rent it out, sell it, or both — reach buyers and renters across your area in a few steps.
+          <p className="text-center text-on-surface-variant text-sm leading-relaxed mb-8 max-w-sm">
+            {lang === "ta"
+              ? "வாடகைக்கு விடுங்கள், விற்கவும் அல்லது இரண்டும் செய்யலாம் — உங்கள் பகுதியில் உள்ள வாடிக்கையாளர்களை எளிதாக சென்றடையுங்கள்."
+              : "Rent it out, sell it, or both — reach buyers and renters across your area in a few steps."}
           </p>
 
           {/* Vendor profile Identity Card */}
-          <div className="w-full bg-[#f5f0e6] rounded-[20px] p-5 border border-[#e8dfc8] shadow-sm mb-10 flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-[#e8732c] flex items-center justify-center text-white font-bold text-lg shadow-inner">
+          <div className="w-full bg-surface rounded-2xl p-5 border border-outline-variant/20 shadow-sm mb-10 flex items-center gap-4">
+            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-lg border border-primary/20 shrink-0">
               {(vendorProfile?.full_name || vendorProfile?.shop_name || "V")[0].toUpperCase()}
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-0.5">
                 <span className="font-bold text-sm truncate">{vendorProfile?.full_name || vendorProfile?.shop_name}</span>
-                <span className="text-[10px] font-extrabold tracking-wider bg-[#1a3d2e] text-white px-2 py-0.5 rounded-full">
-                  VENDOR
+                <span className="text-[10px] font-extrabold tracking-wider bg-primary text-white px-2 py-0.5 rounded-full uppercase">
+                  {lang === "ta" ? "விற்பனையாளர்" : "VENDOR"}
                 </span>
               </div>
-              <p className="text-xs text-[#6b7d72] flex items-center gap-1">
-                <MapPin size={12} className="text-[#e8732c]" />
+              <p className="text-xs text-on-surface-variant flex items-center gap-1">
+                <MapPin size={12} className="text-[#F97316]" />
                 {vendorProfile?.area && vendorProfile?.district 
                   ? `${vendorProfile.area}, ${vendorProfile.district}` 
-                  : "Location not set"}
+                  : (lang === "ta" ? "இருப்பிடம் அமைக்கப்படவில்லை" : "Location not set")}
               </p>
             </div>
           </div>
@@ -580,65 +606,35 @@ function ListCartV2Content() {
           {/* Start CTA */}
           <button
             onClick={() => setStep(1)}
-            className="w-full py-4 rounded-[14px] bg-[#e8732c] text-white font-display text-base font-bold uppercase tracking-wider hover:bg-[#e8732c]/90 transition shadow-md flex items-center justify-center gap-2"
+            className="w-full py-4 rounded-xl bg-[#F97316] text-white text-base font-bold uppercase tracking-wider hover:bg-[#e06612] transition shadow-md flex items-center justify-center gap-2"
           >
-            Start Listing <ChevronRight size={18} />
+            {lang === "ta" ? "பட்டியலிட தொடங்கு" : "Start Listing"} <ChevronRight size={18} />
           </button>
         </main>
       )}
 
       {/* ──────────────── FLOW STEPS (1-6) ──────────────── */}
       {step >= 1 && (
-        <div className="max-w-[640px] mx-auto px-4 pt-4">
+        <div className="max-w-[640px] mx-auto">
           
           {/* Style block for roadmap step marker animation */}
           <style dangerouslySetInnerHTML={{__html: `
             @keyframes pulseScale {
               0% { transform: scale(1); }
-              100% { transform: scale(1.18); }
+              100% { transform: scale(1.1); }
             }
             .pulse-active {
               animation: pulseScale 0.7s infinite alternate ease-in-out;
             }
           `}} />
 
-          {/* Sticky Header */}
-          <div className="sticky top-0 z-50 bg-[#ece4d1] pb-3 border-b border-[#e8dfc8] mb-6">
-            <div className="flex items-center justify-between py-2 mb-3">
-              <div className="flex items-center gap-1.5">
-                <div className="w-7 h-7 rounded bg-[#1a3d2e] flex items-center justify-center">
-                  <Store size={14} className="text-[#e8732c]" />
-                </div>
-                <span className="font-display font-extrabold text-sm text-[#1a3d2e]">Namma Thalluvandi</span>
-              </div>
-
-              {/* Vendor Compact Pill */}
-              <div className="flex items-center gap-2 bg-[#f5f0e6] px-2.5 py-1 rounded-full border border-[#e8dfc8] max-w-[200px]">
-                <div className="w-5 h-5 rounded-full bg-[#e8732c] flex items-center justify-center text-white text-[10px] font-bold">
-                  {(vendorProfile?.full_name || "V")[0].toUpperCase()}
-                </div>
-                <span className="text-[10px] font-bold text-[#1a3d2e] truncate max-w-[80px]">
-                  {vendorProfile?.full_name || vendorProfile?.shop_name}
-                </span>
-                <span className="text-[8px] font-extrabold bg-[#1a3d2e] text-white px-1.5 py-0.2 rounded-full scale-90">
-                  V
-                </span>
-              </div>
-
-              <button 
-                onClick={() => setLang(l => l === "en" ? "ta" : "en")}
-                className="text-[10px] font-bold px-2 py-1 rounded-full border border-[#e8dfc8] bg-[#f5f0e6]"
-              >
-                {lang === "en" ? "தமிழ்" : "EN"}
-              </button>
-            </div>
-
-            {/* Roadmap Progress Bar */}
+          {/* Roadmap Progress Bar Container inside the content area */}
+          <div className="bg-surface rounded-2xl border border-outline-variant/30 p-5 mb-6 shadow-sm">
             <div className="relative w-full px-2 pt-2 pb-4">
               {/* Progress Line */}
-              <div className="absolute top-6 left-6 right-6 h-0.5 bg-[#e8dfc8] -z-10" />
+              <div className="absolute top-6 left-6 right-6 h-0.5 bg-outline-variant/20 -z-10" />
               <div 
-                className="absolute top-6 left-6 h-0.5 bg-[#1a3d2e] -z-10 transition-all duration-300"
+                className="absolute top-6 left-6 h-0.5 bg-primary -z-10 transition-all duration-300"
                 style={{ width: `${((step - 1) / 5) * 100}%` }}
               />
 
@@ -651,15 +647,15 @@ function ListCartV2Content() {
                     <div key={s.num} className="flex flex-col items-center relative select-none">
                       <div
                         className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 border-2
-                          ${isActive ? "bg-[#e8732c] text-white border-[#e8732c] pulse-active shadow-md z-10" : ""}
-                          ${isCompleted ? "bg-[#1a3d2e] text-white border-[#1a3d2e] z-10" : ""}
-                          ${!isActive && !isCompleted ? "bg-[#ece4d1] text-[#6b7d72] border-[#e8dfc8]" : ""}
+                          ${isActive ? "bg-[#F97316] text-white border-[#F97316] pulse-active shadow-md z-10" : ""}
+                          ${isCompleted ? "bg-primary text-white border-primary z-10" : ""}
+                          ${!isActive && !isCompleted ? "bg-background text-on-surface-variant/50 border-outline-variant/35" : ""}
                         `}
                       >
                         {isCompleted ? <Check size={14} className="stroke-[3px]" /> : s.num}
                       </div>
-                      <span className={`text-[10px] font-semibold mt-1 transition-colors ${isActive ? "text-[#e8732c] font-bold" : "text-[#6b7d72]"}`}>
-                        {s.label}
+                      <span className={`text-[10px] font-semibold mt-1.5 transition-colors ${isActive ? "text-[#F97316] font-bold" : "text-on-surface-variant"}`}>
+                        {lang === "ta" ? s.ta : s.en}
                       </span>
                     </div>
                   );
@@ -670,7 +666,7 @@ function ListCartV2Content() {
 
           {/* Form Error Banner */}
           {error && (
-            <div className="mb-4 p-4 bg-red-100 border border-red-200 text-red-800 rounded-xl text-sm flex gap-2 items-start font-body">
+            <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-800 rounded-xl text-sm flex gap-2 items-start">
               <AlertCircle size={16} className="mt-0.5 shrink-0" />
               <span>{error}</span>
             </div>
@@ -678,30 +674,40 @@ function ListCartV2Content() {
 
           {/* ──────────────── STEP 1: INTENT ──────────────── */}
           {step === 1 && (
-            <div className="animate-fade-in font-body">
-              <h2 className="font-display text-2xl font-bold mb-1 text-[#1a3d2e]">What would you like to do?</h2>
-              <p className="text-xs text-[#6b7d72] mb-6">Select one or both — list for rent and sale at the same time.</p>
+            <div className="animate-fade-in">
+              <h2 className="text-2xl font-bold mb-1">
+                {lang === "ta" ? "நீங்கள் என்ன செய்ய விரும்புகிறீர்கள்?" : "What would you like to do?"}
+              </h2>
+              <p className="text-xs text-on-surface-variant mb-6">
+                {lang === "ta"
+                  ? "ஒன்றை அல்லது இரண்டையுமே தேர்ந்தெடுக்கலாம் — வாடகைக்கும் விற்பனைக்கும் ஒரே நேரத்தில் பட்டியலிட முடியும்."
+                  : "Select one or both — list for rent and sale at the same time."}
+              </p>
               
               <div className="grid grid-cols-2 gap-4">
                 {/* Rent Card */}
                 <button
                   type="button"
                   onClick={() => setIntentRent(!intentRent)}
-                  className={`relative p-5 rounded-[22px] border-2 text-left bg-[#f5f0e6] transition-all hover:shadow-md h-36 flex flex-col justify-between
-                    ${intentRent ? "border-[#e8732c] ring-1 ring-[#e8732c]" : "border-[#e8dfc8]"}
+                  className={`relative p-5 rounded-2xl border text-left bg-surface transition-all hover:shadow-sm h-36 flex flex-col justify-between
+                    ${intentRent ? "border-[#F97316] ring-1 ring-[#F97316]" : "border-outline-variant/30"}
                   `}
                 >
                   {intentRent && (
-                    <div className="absolute top-3 right-3 w-5 h-5 rounded-full bg-[#e8732c] flex items-center justify-center text-white">
+                    <div className="absolute top-3 right-3 w-5 h-5 rounded-full bg-[#F97316] flex items-center justify-center text-white">
                       <Check size={12} className="stroke-[3.5px]" />
                     </div>
                   )}
-                  <div className="w-10 h-10 rounded-xl bg-[#1a3d2e]/10 flex items-center justify-center text-[#1a3d2e] mb-3">
-                    <Store size={20} />
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary mb-3">
+                    <img src="/brand/text-logo.webp" alt="NTV Icon" className="w-6 h-6 object-contain" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-sm text-[#1a3d2e] leading-snug">Rent Out My Cart</h3>
-                    <p className="text-[10px] text-[#6b7d72] mt-0.5">Earn recurring income</p>
+                    <h3 className="font-bold text-sm leading-snug">
+                      {lang === "ta" ? "வாடகைக்கு விட" : "Rent Out My Cart"}
+                    </h3>
+                    <p className="text-[10px] text-on-surface-variant mt-0.5">
+                      {lang === "ta" ? "மாதாந்திர வருமானம் பெற" : "Earn recurring income"}
+                    </p>
                   </div>
                 </button>
 
@@ -709,21 +715,25 @@ function ListCartV2Content() {
                 <button
                   type="button"
                   onClick={() => setIntentSale(!intentSale)}
-                  className={`relative p-5 rounded-[22px] border-2 text-left bg-[#f5f0e6] transition-all hover:shadow-md h-36 flex flex-col justify-between
-                    ${intentSale ? "border-[#e8732c] ring-1 ring-[#e8732c]" : "border-[#e8dfc8]"}
+                  className={`relative p-5 rounded-2xl border text-left bg-surface transition-all hover:shadow-sm h-36 flex flex-col justify-between
+                    ${intentSale ? "border-[#F97316] ring-1 ring-[#F97316]" : "border-outline-variant/30"}
                   `}
                 >
                   {intentSale && (
-                    <div className="absolute top-3 right-3 w-5 h-5 rounded-full bg-[#e8732c] flex items-center justify-center text-white">
+                    <div className="absolute top-3 right-3 w-5 h-5 rounded-full bg-[#F97316] flex items-center justify-center text-white">
                       <Check size={12} className="stroke-[3.5px]" />
                     </div>
                   )}
-                  <div className="w-10 h-10 rounded-xl bg-[#e8732c]/10 flex items-center justify-center text-[#e8732c] mb-3">
+                  <div className="w-10 h-10 rounded-xl bg-[#F97316]/10 flex items-center justify-center text-[#F97316] mb-3">
                     <IndianRupee size={20} />
                   </div>
                   <div>
-                    <h3 className="font-bold text-sm text-[#1a3d2e] leading-snug">Sell My Cart</h3>
-                    <p className="text-[10px] text-[#6b7d72] mt-0.5">One-time payout</p>
+                    <h3 className="font-bold text-sm leading-snug">
+                      {lang === "ta" ? "விற்பனை செய்ய" : "Sell My Cart"}
+                    </h3>
+                    <p className="text-[10px] text-on-surface-variant mt-0.5">
+                      {lang === "ta" ? "முழுத் தொகைக்கு விற்க" : "One-time payout"}
+                    </p>
                   </div>
                 </button>
               </div>
@@ -732,16 +742,20 @@ function ListCartV2Content() {
 
           {/* ──────────────── STEP 2: CART DETAILS ──────────────── */}
           {step === 2 && (
-            <div className="animate-fade-in font-body">
-              <h2 className="font-display text-2xl font-bold mb-1 text-[#1a3d2e]">Cart Details</h2>
-              <p className="text-xs text-[#6b7d72] mb-6">Describe the physical attributes of your food cart.</p>
+            <div className="animate-fade-in">
+              <h2 className="text-2xl font-bold mb-1">
+                {lang === "ta" ? "வண்டி விவரங்கள்" : "Cart Details"}
+              </h2>
+              <p className="text-xs text-on-surface-variant mb-6">
+                {lang === "ta" ? "உங்கள் தள்ளுவண்டியின் உடல் அமைப்புகளை விவரிக்கவும்." : "Describe the physical attributes of your food cart."}
+              </p>
 
-              <div className="bg-[#f5f0e6] p-6 rounded-[24px] border border-[#e8dfc8] shadow-sm flex flex-col gap-6">
+              <div className="bg-surface p-6 rounded-2xl border border-outline-variant/30 shadow-sm flex flex-col gap-6">
                 
                 {/* 1. Cart Type */}
                 <div>
-                  <span className="block text-xs font-bold text-[#1a3d2e] uppercase tracking-wider mb-2.5">
-                    Cart Type *
+                  <span className="block text-xs font-bold uppercase tracking-wider mb-2.5">
+                    {lang === "ta" ? "வண்டி வகை *" : "Cart Type *"}
                   </span>
                   <div className="flex flex-wrap gap-2">
                     {CART_TYPE_OPTIONS.map((opt) => {
@@ -752,10 +766,10 @@ function ListCartV2Content() {
                           type="button"
                           onClick={() => setCartType(opt.value)}
                           className={`px-4 py-2 rounded-full text-xs font-semibold border transition-all
-                            ${sel ? "bg-[#e8732c] text-white border-[#e8732c]" : "bg-white text-[#1a3d2e] border-[#e8dfc8] hover:border-[#1a3d2e]/30"}
+                            ${sel ? "bg-primary text-white border-primary" : "bg-background text-on-surface border-outline-variant/30 hover:border-primary/30"}
                           `}
                         >
-                          {opt.label}
+                          {lang === "ta" ? opt.ta : opt.en}
                         </button>
                       );
                     })}
@@ -764,8 +778,8 @@ function ListCartV2Content() {
 
                 {/* 2. Condition */}
                 <div>
-                  <span className="block text-xs font-bold text-[#1a3d2e] uppercase tracking-wider mb-2.5">
-                    Condition *
+                  <span className="block text-xs font-bold uppercase tracking-wider mb-2.5">
+                    {lang === "ta" ? "வண்டியின் நிலை *" : "Condition *"}
                   </span>
                   <div className="flex flex-wrap gap-2">
                     {CONDITION_OPTIONS.map((opt) => {
@@ -776,10 +790,10 @@ function ListCartV2Content() {
                           type="button"
                           onClick={() => setCondition(opt.value)}
                           className={`px-4 py-2 rounded-full text-xs font-semibold border transition-all
-                            ${sel ? "bg-[#e8732c] text-white border-[#e8732c]" : "bg-white text-[#1a3d2e] border-[#e8dfc8] hover:border-[#1a3d2e]/30"}
+                            ${sel ? "bg-primary text-white border-primary" : "bg-background text-on-surface border-outline-variant/30 hover:border-primary/30"}
                           `}
                         >
-                          {opt.label}
+                          {lang === "ta" ? opt.ta : opt.en}
                         </button>
                       );
                     })}
@@ -788,8 +802,8 @@ function ListCartV2Content() {
 
                 {/* 3. Cart Size */}
                 <div>
-                  <span className="block text-xs font-bold text-[#1a3d2e] uppercase tracking-wider mb-2.5">
-                    Cart Size *
+                  <span className="block text-xs font-bold uppercase tracking-wider mb-2.5">
+                    {lang === "ta" ? "வண்டி அளவு *" : "Cart Size *"}
                   </span>
                   <div className="flex flex-wrap gap-2">
                     {SIZE_OPTIONS.map((opt) => {
@@ -800,10 +814,10 @@ function ListCartV2Content() {
                           type="button"
                           onClick={() => setCartSize(opt.value)}
                           className={`px-4 py-2 rounded-full text-xs font-semibold border transition-all
-                            ${sel ? "bg-[#e8732c] text-white border-[#e8732c]" : "bg-white text-[#1a3d2e] border-[#e8dfc8] hover:border-[#1a3d2e]/30"}
+                            ${sel ? "bg-primary text-white border-primary" : "bg-background text-on-surface border-outline-variant/30 hover:border-primary/30"}
                           `}
                         >
-                          {opt.label}
+                          {lang === "ta" ? opt.ta : opt.en}
                         </button>
                       );
                     })}
@@ -812,8 +826,8 @@ function ListCartV2Content() {
 
                 {/* 4. Stove Type */}
                 <div>
-                  <span className="block text-xs font-bold text-[#1a3d2e] uppercase tracking-wider mb-2.5">
-                    Stove Type *
+                  <span className="block text-xs font-bold uppercase tracking-wider mb-2.5">
+                    {lang === "ta" ? "அடுப்பு வகை *" : "Stove Type *"}
                   </span>
                   <div className="flex flex-wrap gap-2">
                     {STOVE_OPTIONS.map((opt) => {
@@ -824,10 +838,10 @@ function ListCartV2Content() {
                           type="button"
                           onClick={() => setStoveType(opt.value)}
                           className={`px-4 py-2 rounded-full text-xs font-semibold border transition-all
-                            ${sel ? "bg-[#e8732c] text-white border-[#e8732c]" : "bg-white text-[#1a3d2e] border-[#e8dfc8] hover:border-[#1a3d2e]/30"}
+                            ${sel ? "bg-primary text-white border-primary" : "bg-background text-on-surface border-outline-variant/30 hover:border-primary/30"}
                           `}
                         >
-                          {opt.label}
+                          {lang === "ta" ? opt.ta : opt.en}
                         </button>
                       );
                     })}
@@ -840,46 +854,60 @@ function ListCartV2Content() {
 
           {/* ──────────────── STEP 3: PRICING ──────────────── */}
           {step === 3 && (
-            <div className="animate-fade-in font-body">
-              <h2 className="font-display text-2xl font-bold mb-1 text-[#1a3d2e]">Pricing Details</h2>
-              <p className="text-xs text-[#6b7d72] mb-6">Enter rental terms, sales price, or both depending on intent.</p>
+            <div className="animate-fade-in">
+              <h2 className="text-2xl font-bold mb-1">
+                {lang === "ta" ? "விலை விவரங்கள்" : "Pricing Details"}
+              </h2>
+              <p className="text-xs text-on-surface-variant mb-6">
+                {lang === "ta"
+                  ? "வாடகை கால வரம்புகள், விற்பனை விலை அல்லது இரண்டையுமே பூர்த்தி செய்யவும்."
+                  : "Enter rental terms, sales price, or both depending on intent."}
+              </p>
 
               <div className="flex flex-col gap-4">
                 
                 {/* RENTAL PRICING */}
                 {intentRent && (
-                  <div className="bg-[#f5f0e6] p-6 rounded-[24px] border border-[#e8dfc8] shadow-sm">
-                    <div className="flex items-center justify-between mb-4 pb-2 border-b border-[#e8dfc8]">
-                      <span className="font-display font-extrabold text-sm text-[#1a3d2e] uppercase tracking-wide">
-                        Rental Pricing
+                  <div className="bg-surface p-6 rounded-2xl border border-outline-variant/30 shadow-sm">
+                    <div className="flex items-center justify-between mb-4 pb-2 border-b border-outline-variant/20">
+                      <span className="font-bold text-sm uppercase tracking-wide">
+                        {lang === "ta" ? "வாடகை விலை" : "Rental Pricing"}
                       </span>
-                      <span className="text-[10px] font-bold text-[#e8732c] bg-[#e8732c]/10 px-2.5 py-0.5 rounded-full uppercase">
-                        Recurring
+                      <span className="text-[10px] font-bold text-[#F97316] bg-[#F97316]/10 px-2.5 py-0.5 rounded-full uppercase">
+                        {lang === "ta" ? "தொடர்ச்சியான" : "Recurring"}
                       </span>
                     </div>
 
                     <div className="mb-4">
-                      <label className="block text-xs font-bold text-[#1a3d2e] uppercase mb-1.5">Daily Rent (₹) *</label>
+                      <label className="block text-xs font-bold uppercase mb-1.5">
+                        {lang === "ta" ? "தினசரி வாடகை (₹) *" : "Daily Rent (₹) *"}
+                      </label>
                       <div className="relative">
-                        <span className="absolute left-4 top-3 text-sm font-bold text-[#6b7d72]">₹</span>
+                        <span className="absolute left-4 top-3.5 text-sm font-bold text-on-surface-variant">₹</span>
                         <input
                           type="number"
                           value={dailyRent}
                           onChange={(e) => setDailyRent(e.target.value)}
                           placeholder="e.g. 80"
-                          className="w-full pl-8 pr-4 py-3 rounded-xl bg-white border border-[#e8dfc8] text-sm focus:outline-none focus:border-[#e8732c] transition"
+                          className="w-full pl-8 pr-4 py-3 rounded-xl bg-background border border-outline-variant/30 text-sm focus:outline-none focus:border-primary transition"
                         />
                       </div>
                       
                       {/* Range Helper Box */}
-                      <div className="mt-3 p-3 bg-white/70 rounded-xl border border-[#e8dfc8] flex items-start gap-2 text-xs text-[#6b7d72]">
-                        <Info size={14} className="text-[#1a3d2e] shrink-0 mt-0.5" />
-                        <span>💡 Similar carts in your area rent for ₹60 – ₹120/day depending on size.</span>
+                      <div className="mt-3 p-3 bg-background rounded-xl border border-outline-variant/20 flex items-start gap-2 text-xs text-on-surface-variant">
+                        <Info size={14} className="text-primary shrink-0 mt-0.5" />
+                        <span>
+                          {lang === "ta"
+                            ? "💡 உங்கள் பகுதியில் உள்ள இதே போன்ற வண்டிகள் அளவுக்கு ஏற்ப ஒரு நாளைக்கு ₹60 - ₹120 வரை வாடகைக்கு விடப்படுகின்றன."
+                            : "💡 Similar carts in your area rent for ₹60 – ₹120/day depending on size."}
+                        </span>
                       </div>
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold text-[#1a3d2e] uppercase mb-2">Minimum Rental Period *</label>
+                      <label className="block text-xs font-bold uppercase mb-2">
+                        {lang === "ta" ? "குறைந்தபட்ச வாடகை காலம் *" : "Minimum Rental Period *"}
+                      </label>
                       <div className="flex gap-2 flex-wrap">
                         {RENTAL_PERIOD_OPTIONS.map((opt) => {
                           const sel = minRentalPeriod === opt.value;
@@ -889,10 +917,10 @@ function ListCartV2Content() {
                               type="button"
                               onClick={() => setMinRentalPeriod(opt.value)}
                               className={`px-4 py-2 rounded-full text-xs font-semibold border transition-all
-                                ${sel ? "bg-[#e8732c] text-white border-[#e8732c]" : "bg-white text-[#1a3d2e] border-[#e8dfc8] hover:border-[#1a3d2e]/30"}
+                                ${sel ? "bg-primary text-white border-primary" : "bg-background text-on-surface border-outline-variant/30 hover:border-primary/30"}
                               `}
                             >
-                              {opt.label}
+                              {lang === "ta" ? opt.ta : opt.en}
                             </button>
                           );
                         })}
@@ -903,46 +931,50 @@ function ListCartV2Content() {
 
                 {/* SALE PRICING */}
                 {intentSale && (
-                  <div className="bg-[#f5f0e6] p-6 rounded-[24px] border border-[#e8dfc8] shadow-sm">
-                    <div className="flex items-center justify-between mb-4 pb-2 border-b border-[#e8dfc8]">
-                      <span className="font-display font-extrabold text-sm text-[#1a3d2e] uppercase tracking-wide">
-                        Sale Pricing
+                  <div className="bg-surface p-6 rounded-2xl border border-outline-variant/30 shadow-sm">
+                    <div className="flex items-center justify-between mb-4 pb-2 border-b border-outline-variant/20">
+                      <span className="font-bold text-sm uppercase tracking-wide">
+                        {lang === "ta" ? "விற்பனை விலை" : "Sale Pricing"}
                       </span>
-                      <span className="text-[10px] font-bold text-[#1a3d2e] bg-[#1a3d2e]/10 px-2.5 py-0.5 rounded-full uppercase">
-                        One-Time
+                      <span className="text-[10px] font-bold text-primary bg-primary/10 px-2.5 py-0.5 rounded-full uppercase">
+                        {lang === "ta" ? "ஒரு முறை" : "One-Time"}
                       </span>
                     </div>
 
                     <div className="mb-4">
-                      <label className="block text-xs font-bold text-[#1a3d2e] uppercase mb-1.5">One-time Sale Price (₹) *</label>
+                      <label className="block text-xs font-bold uppercase mb-1.5">
+                        {lang === "ta" ? "விற்பனை தொகை (₹) *" : "One-time Sale Price (₹) *"}
+                      </label>
                       <div className="relative">
-                        <span className="absolute left-4 top-3 text-sm font-bold text-[#6b7d72]">₹</span>
+                        <span className="absolute left-4 top-3.5 text-sm font-bold text-on-surface-variant">₹</span>
                         <input
                           type="number"
                           value={salePrice}
                           onChange={(e) => setSalePrice(e.target.value)}
                           placeholder="e.g. 15000"
-                          className="w-full pl-8 pr-4 py-3 rounded-xl bg-white border border-[#e8dfc8] text-sm focus:outline-none focus:border-[#e8732c] transition"
+                          className="w-full pl-8 pr-4 py-3 rounded-xl bg-background border border-outline-variant/30 text-sm focus:outline-none focus:border-primary transition"
                         />
                       </div>
                     </div>
 
-                    {/* Toggle Switch */}
-                    <div className="flex items-center justify-between p-3 bg-white/70 rounded-xl border border-[#e8dfc8]">
+                    {/* Toggle Switch - Styled cleanly to match standard forms */}
+                    <div className="flex items-center justify-between p-3.5 bg-background rounded-xl border border-outline-variant/20">
                       <div>
-                        <span className="text-xs font-bold text-[#1a3d2e] block">Negotiable</span>
-                        <span className="text-[10px] text-[#6b7d72]">Are you open to bargaining?</span>
+                        <span className="text-xs font-bold block">{lang === "ta" ? "பேச்சுவார்த்தைக்கு உட்பட்டது" : "Negotiable"}</span>
+                        <span className="text-[10px] text-on-surface-variant">
+                          {lang === "ta" ? "விலையை குறைக்க சம்மதமா?" : "Are you open to bargaining?"}
+                        </span>
                       </div>
                       <button
                         type="button"
                         onClick={() => setNegotiable(!negotiable)}
-                        className={`w-11 h-6 rounded-full transition-colors relative focus:outline-none border border-[#e8dfc8]
-                          ${negotiable ? "bg-[#e8732c]" : "bg-white"}
+                        className={`relative inline-flex h-6.5 w-12 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none
+                          ${negotiable ? "bg-[#F97316]" : "bg-outline-variant/50"}
                         `}
                       >
-                        <div 
-                          className={`w-4 h-4 rounded-full bg-white absolute top-0.5 shadow-sm transition-transform border border-[#e8dfc8]
-                            ${negotiable ? "translate-x-5" : "translate-x-0.5"}
+                        <span 
+                          className={`pointer-events-none inline-block h-5.5 w-5.5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out
+                            ${negotiable ? "translate-x-5.5" : "translate-x-0"}
                           `}
                         />
                       </button>
@@ -957,66 +989,84 @@ function ListCartV2Content() {
 
           {/* ──────────────── STEP 4: LOCATION ──────────────── */}
           {step === 4 && (
-            <div className="animate-fade-in font-body">
-              <h2 className="font-display text-2xl font-bold mb-1 text-[#1a3d2e]">Cart Location</h2>
-              <p className="text-xs text-[#6b7d72] mb-6">Specify where your cart is stored or can be picked up.</p>
+            <div className="animate-fade-in">
+              <h2 className="text-2xl font-bold mb-1">
+                {lang === "ta" ? "வண்டி இருப்பிடம்" : "Cart Location"}
+              </h2>
+              <p className="text-xs text-on-surface-variant mb-6">
+                {lang === "ta" ? "வண்டி நிறுத்தப்பட்டுள்ள அல்லது பெற்றுக்கொள்ளக்கூடிய இடத்தை குறிப்பிடவும்." : "Specify where your cart is stored or can be picked up."}
+              </p>
 
-              <div className="bg-[#f5f0e6] p-6 rounded-[24px] border border-[#e8dfc8] shadow-sm flex flex-col gap-4">
+              <div className="bg-surface p-6 rounded-2xl border border-outline-variant/30 shadow-sm flex flex-col gap-4">
                 
                 {/* Auto Detect Button */}
                 <button
                   type="button"
                   onClick={handleGpsDetect}
                   disabled={location.status === "loading"}
-                  className="w-full py-3.5 rounded-xl bg-[#1a3d2e] text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-[#1a3d2e]/90 transition shadow-sm disabled:opacity-50"
+                  className="w-full py-3.5 rounded-xl bg-primary text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-primary/90 transition shadow-sm disabled:opacity-50"
                 >
                   <Compass size={16} className={location.status === "loading" ? "animate-spin" : ""} />
-                  {location.status === "loading" ? "Detecting GPS..." : "Auto-detect my location"}
+                  {location.status === "loading" 
+                    ? (lang === "ta" ? "இருப்பிடத்தைக் கண்டறிகிறது..." : "Detecting GPS...") 
+                    : (lang === "ta" ? "என் இருப்பிடத்தை தானாகக் கண்டறி" : "Auto-detect my location")}
                 </button>
 
                 {vendorProfile?.latitude && (
                   <button
                     type="button"
                     onClick={handleUseProfileLocation}
-                    className="w-full py-2.5 rounded-xl bg-white text-[#1a3d2e] border border-[#e8dfc8] text-xs font-semibold hover:bg-[#e8dfc8]/30 transition"
+                    className="w-full py-2.5 rounded-xl bg-background text-on-surface border border-outline-variant/30 text-xs font-semibold hover:bg-outline-variant/10 transition"
                   >
-                    📍 Use My Profile Location ({vendorProfile.area || "Vendor Area"})
+                    📍 {lang === "ta" ? `என் சுயவிவர இருப்பிடத்தைப் பயன்படுத்து (${vendorProfile.area || "விற்பனையாளர் பகுதி"})` : `Use My Profile Location (${vendorProfile.area || "Vendor Area"})`}
                   </button>
                 )}
 
-                {/* Manual Address */}
+                {/* Manual Address Search Input */}
                 <div>
-                  <label className="block text-xs font-bold text-[#1a3d2e] uppercase mb-1.5">Manual Address / Area *</label>
-                  <input
-                    type="text"
-                    value={location.address}
-                    onChange={(e) => setLocation((l) => ({ ...l, address: e.target.value }))}
-                    placeholder="e.g. Ondipudur, Coimbatore"
-                    className="w-full px-4 py-3 rounded-xl bg-white border border-[#e8dfc8] text-sm focus:outline-none focus:border-[#e8732c] transition"
-                  />
+                  <label className="block text-xs font-bold uppercase mb-1.5">
+                    {lang === "ta" ? "முகவரி / பகுதி தேடுக *" : "Search Address / Area *"}
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={location.address}
+                      onChange={(e) => setLocation((l) => ({ ...l, address: e.target.value }))}
+                      onKeyDown={(e) => e.key === "Enter" && handleGeocodeSearch()}
+                      placeholder="e.g. Ondipudur, Coimbatore"
+                      className="flex-1 px-4 py-3 rounded-xl bg-background border border-outline-variant/30 text-sm focus:outline-none focus:border-primary transition"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleGeocodeSearch}
+                      disabled={geocodeLoading}
+                      className="px-4 rounded-xl bg-primary text-white flex items-center justify-center hover:bg-primary/90 transition disabled:opacity-50"
+                    >
+                      {geocodeLoading ? <RefreshCw size={16} className="animate-spin" /> : <Search size={16} />}
+                    </button>
+                  </div>
                 </div>
 
-                {/* Stylized Static Map Placeholder */}
-                <div className="relative h-44 rounded-xl border border-[#e8dfc8] bg-[#ece4d1] overflow-hidden flex items-center justify-center">
-                  {/* Decorative roads map SVG */}
-                  <svg className="absolute inset-0 w-full h-full opacity-35" xmlns="http://www.w3.org/2000/svg">
-                    <line x1="10%" y1="0" x2="30%" y2="100%" stroke="#1a3d2e" strokeWidth="6" />
-                    <line x1="0" y1="40%" x2="100%" y2="50%" stroke="#1a3d2e" strokeWidth="8" />
-                    <line x1="80%" y1="0" x2="60%" y2="100%" stroke="#1a3d2e" strokeWidth="4" />
-                    <circle cx="65%" cy="47%" r="28" fill="#e8dfc8" />
-                  </svg>
-
-                  {/* Centered Orange Pin */}
-                  <div className="relative flex flex-col items-center z-10">
-                    <div className="w-10 h-10 rounded-full bg-[#e8732c]/10 flex items-center justify-center border border-[#e8732c] animate-bounce">
-                      <MapPin size={22} className="text-[#e8732c]" />
-                    </div>
-                  </div>
-
-                  {/* Address Overlay */}
-                  {location.address.trim() !== "" && (
-                    <div className="absolute bottom-3 left-3 right-3 bg-white/90 backdrop-blur-sm border border-[#e8dfc8] px-3 py-1.5 rounded-lg text-center truncate shadow-sm">
-                      <span className="text-[10px] font-bold text-[#1a3d2e]">{location.address}</span>
+                {/* Live Google Maps Integration */}
+                <div className="relative h-60 rounded-xl border border-outline-variant/30 bg-background overflow-hidden flex items-center justify-center">
+                  {location.latitude && location.longitude ? (
+                    <iframe
+                      title="NTV Google Map"
+                      width="100%"
+                      height="100%"
+                      style={{ border: 0 }}
+                      src={`https://maps.google.com/maps?q=${location.latitude},${location.longitude}&z=16&output=embed`}
+                      allowFullScreen
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className="flex flex-col items-center gap-2 p-4 text-center">
+                      <MapPin size={32} className="text-on-surface-variant/40 animate-bounce" />
+                      <span className="text-xs text-on-surface-variant">
+                        {lang === "ta" 
+                          ? "வரைபடத்தை ஏற்ற ஜிபிஎஸ் இருப்பிடத்தைக் கண்டறியவும் அல்லது பகுதியைத் தேடவும்." 
+                          : "Detect GPS or search your area to load live interactive Google Map."}
+                      </span>
                     </div>
                   )}
                 </div>
@@ -1027,23 +1077,29 @@ function ListCartV2Content() {
 
           {/* ──────────────── STEP 5: PHOTOS ──────────────── */}
           {step === 5 && (
-            <div className="animate-fade-in font-body">
-              <h2 className="font-display text-2xl font-bold mb-1 text-[#1a3d2e]">Cart Photos</h2>
-              <p className="text-xs text-[#6b7d72] mb-6">Upload clear photos of your cart. Reorder by dragging.</p>
+            <div className="animate-fade-in">
+              <h2 className="text-2xl font-bold mb-1">
+                {lang === "ta" ? "வண்டி புகைப்படங்கள்" : "Cart Photos"}
+              </h2>
+              <p className="text-xs text-on-surface-variant mb-6">
+                {lang === "ta" 
+                  ? "வண்டியின் தெளிவான புகைப்படங்களை பதிவேற்றவும். வரிசையை மாற்ற இழுக்கவும்." 
+                  : "Upload clear photos of your cart. Reorder by dragging."}
+              </p>
 
-              <div className="bg-[#f5f0e6] p-6 rounded-[24px] border border-[#e8dfc8] shadow-sm">
+              <div className="bg-surface p-6 rounded-2xl border border-outline-variant/30 shadow-sm">
                 
                 {/* Photo Counter */}
                 <div className="flex items-center justify-between mb-4">
-                  <span className="text-xs font-bold text-[#1a3d2e] uppercase tracking-wide">
-                    Cart Gallery
+                  <span className="text-xs font-bold uppercase tracking-wide">
+                    {lang === "ta" ? "பட தொகுப்பு" : "Cart Gallery"}
                   </span>
                   <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full border
                     ${selectedFiles.length >= 2 
                       ? "bg-emerald-100 border-emerald-200 text-emerald-800" 
-                      : "bg-[#e8732c]/10 border-[#e8732c]/30 text-[#e8732c]"}
+                      : "bg-[#F97316]/10 border-[#F97316]/30 text-[#F97316]"}
                   `}>
-                    {selectedFiles.length} of 6 photos added — min 2 required
+                    {selectedFiles.length} {lang === "ta" ? "இல் 6 படங்கள் - குறைந்தபட்சம் 2 தேவை" : "of 6 photos added — min 2 required"}
                   </span>
                 </div>
 
@@ -1062,7 +1118,7 @@ function ListCartV2Content() {
                           onDragStart={() => handleDragStart(angle.index)}
                           onDragOver={handleDragOver}
                           onDrop={() => handleDrop(angle.index)}
-                          className="relative aspect-square rounded-xl overflow-hidden border border-[#e8dfc8] bg-white group cursor-move shadow-sm transition-transform active:scale-95"
+                          className="relative aspect-square rounded-xl overflow-hidden border border-outline-variant/20 bg-background group cursor-move shadow-sm transition-transform active:scale-95"
                         >
                           <img src={preview} alt="Cart preview" className="w-full h-full object-cover" />
                           
@@ -1094,35 +1150,59 @@ function ListCartV2Content() {
                         key={angle.index}
                         onDragOver={handleDragOver}
                         onDrop={() => handleDrop(angle.index)}
-                        className="relative aspect-square rounded-xl border-2 border-dashed border-[#e8dfc8] bg-white flex flex-col items-center justify-center p-2 text-center"
+                        className="relative aspect-square rounded-xl border-2 border-dashed border-outline-variant/30 bg-background flex flex-col items-center justify-center p-2 text-center"
                       >
-                        <Camera size={18} className="text-[#6b7d72] mb-1.5" />
-                        <span className="text-[9px] font-bold text-[#1a3d2e] leading-snug truncate w-full">
-                          {angle.label}
+                        <Camera size={18} className="text-on-surface-variant mb-1.5" />
+                        <span className="text-[9px] font-bold leading-snug truncate w-full">
+                          {lang === "ta" ? angle.ta : angle.en}
                         </span>
-                        <span className="text-[7px] text-[#6b7d72] mt-0.5">Required</span>
+                        <span className="text-[7px] text-on-surface-variant mt-0.5">
+                          {lang === "ta" ? "தேவை" : "Required"}
+                        </span>
                       </div>
                     );
                   })}
                 </div>
 
-                {/* Upload Button */}
-                <div className="relative">
+                {/* Camera / Gallery explicit buttons */}
+                <div className="flex gap-3">
+                  {/* Take Photo direct camera trigger input */}
                   <input
                     type="file"
-                    multiple
+                    ref={cameraInputRef}
                     accept="image/*"
+                    capture="environment"
                     onChange={handleFileChange}
                     disabled={selectedFiles.length >= 6}
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
+                    className="hidden"
                   />
                   <button
                     type="button"
+                    onClick={() => cameraInputRef.current?.click()}
                     disabled={selectedFiles.length >= 6}
-                    className="w-full py-3.5 rounded-xl border-2 border-dashed border-[#e8dfc8] bg-white hover:bg-[#e8dfc8]/20 transition flex items-center justify-center gap-2 text-xs font-bold text-[#1a3d2e] disabled:opacity-50"
+                    className="flex-1 py-3 rounded-xl border border-outline-variant/30 bg-background hover:bg-outline-variant/10 transition flex items-center justify-center gap-2 text-xs font-bold text-on-surface disabled:opacity-50"
                   >
-                    <Upload size={14} />
-                    Choose Photos (PNG, JPG, WEBP)
+                    <Camera size={16} className="text-primary" />
+                    {lang === "ta" ? "படம் எடு" : "Take Photo"}
+                  </button>
+
+                  {/* Upload photo direct gallery trigger input */}
+                  <input
+                    type="file"
+                    ref={galleryInputRef}
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    disabled={selectedFiles.length >= 6}
+                    className="hidden"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => galleryInputRef.current?.click()}
+                    disabled={selectedFiles.length >= 6}
+                    className="flex-1 py-3 rounded-xl border border-outline-variant/30 bg-background hover:bg-outline-variant/10 transition flex items-center justify-center gap-2 text-xs font-bold text-on-surface disabled:opacity-50"
+                  >
+                    <Upload size={14} className="text-[#F97316]" />
+                    {lang === "ta" ? "பதிவேற்று" : "Upload Photo"}
                   </button>
                 </div>
 
@@ -1132,24 +1212,28 @@ function ListCartV2Content() {
 
           {/* ──────────────── STEP 6: REVIEW & SUBMIT ──────────────── */}
           {step === 6 && (
-            <div className="animate-fade-in font-body">
-              <h2 className="font-display text-2xl font-bold mb-1 text-[#1a3d2e]">Review & Submit</h2>
-              <p className="text-xs text-[#6b7d72] mb-6">Review your food cart details before publishing.</p>
+            <div className="animate-fade-in">
+              <h2 className="text-2xl font-bold mb-1">
+                {lang === "ta" ? "மதிப்பாய்வு செய்து சமர்ப்பிக்கவும்" : "Review & Submit"}
+              </h2>
+              <p className="text-xs text-on-surface-variant mb-6">
+                {lang === "ta" ? "வெளியிடுவதற்கு முன் உங்கள் வண்டி விவரங்களை சரிபார்க்கவும்." : "Review your food cart details before publishing."}
+              </p>
 
               {/* Callout box */}
-              <div className="p-4 bg-[#e8732c]/10 border border-[#e8732c]/30 rounded-xl mb-6 flex flex-col gap-2">
-                <span className="text-xs font-bold text-[#e8732c] uppercase tracking-wide">
-                  This cart will appear on:
+              <div className="p-4 bg-primary/10 border border-primary/20 rounded-xl mb-6 flex flex-col gap-2">
+                <span className="text-xs font-bold text-primary uppercase tracking-wide">
+                  {lang === "ta" ? "இந்த வண்டி காண்பிக்கப்படும் இடங்கள்:" : "This cart will appear on:"}
                 </span>
                 <div className="flex gap-2">
                   {intentRent && (
-                    <span className="px-3 py-1 bg-[#1a3d2e]/10 text-[#1a3d2e] text-xs font-bold rounded-full">
-                      Explore (Rental)
+                    <span className="px-3 py-1 bg-primary/15 text-primary text-xs font-bold rounded-full">
+                      {lang === "ta" ? "வாடகைக்கு (Explore)" : "Explore (Rental)"}
                     </span>
                   )}
                   {intentSale && (
-                    <span className="px-3 py-1 bg-[#e8732c]/10 text-[#e8732c] text-xs font-bold rounded-full">
-                      Live Sales
+                    <span className="px-3 py-1 bg-[#F97316]/15 text-[#F97316] text-xs font-bold rounded-full">
+                      {lang === "ta" ? "விற்பனைக்கு (Sales)" : "Live Sales"}
                     </span>
                   )}
                 </div>
@@ -1158,64 +1242,68 @@ function ListCartV2Content() {
               <div className="flex flex-col gap-4">
                 
                 {/* 1. Specs Details Review */}
-                <div className="bg-[#f5f0e6] p-5 rounded-2xl border border-[#e8dfc8]">
-                  <div className="flex items-center justify-between mb-3 pb-1 border-b border-[#e8dfc8]">
-                    <span className="text-xs font-bold text-[#1a3d2e] uppercase tracking-wide">Specs & Attributes</span>
-                    <button onClick={() => setStep(2)} className="text-xs text-[#e8732c] font-bold hover:underline">
-                      Edit
+                <div className="bg-surface p-5 rounded-2xl border border-outline-variant/30">
+                  <div className="flex items-center justify-between mb-3 pb-1 border-b border-outline-variant/20">
+                    <span className="text-xs font-bold uppercase tracking-wide">
+                      {lang === "ta" ? "வண்டியின் அமைப்புகள்" : "Specs & Attributes"}
+                    </span>
+                    <button onClick={() => setStep(2)} className="text-xs text-[#F97316] font-bold hover:underline">
+                      {lang === "ta" ? "திருத்து" : "Edit"}
                     </button>
                   </div>
-                  <div className="flex flex-col gap-1.5 text-xs text-[#1a3d2e]">
+                  <div className="flex flex-col gap-1.5 text-xs">
                     <div className="flex justify-between">
-                      <span className="text-[#6b7d72]">Cart Type:</span>
+                      <span className="text-on-surface-variant">{lang === "ta" ? "வண்டி வகை:" : "Cart Type:"}</span>
                       <span className="font-semibold">{cartType}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-[#6b7d72]">Condition:</span>
+                      <span className="text-on-surface-variant">{lang === "ta" ? "வண்டியின் நிலை:" : "Condition:"}</span>
                       <span className="font-semibold">{condition}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-[#6b7d72]">Cart Size:</span>
+                      <span className="text-on-surface-variant">{lang === "ta" ? "வண்டி அளவு:" : "Cart Size:"}</span>
                       <span className="font-semibold">{cartSize}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-[#6b7d72]">Stove Type:</span>
+                      <span className="text-on-surface-variant">{lang === "ta" ? "அடுப்பு வகை:" : "Stove Type:"}</span>
                       <span className="font-semibold">{stoveType}</span>
                     </div>
                   </div>
                 </div>
 
                 {/* 2. Pricing Review */}
-                <div className="bg-[#f5f0e6] p-5 rounded-2xl border border-[#e8dfc8]">
-                  <div className="flex items-center justify-between mb-3 pb-1 border-b border-[#e8dfc8]">
-                    <span className="text-xs font-bold text-[#1a3d2e] uppercase tracking-wide">Pricing Terms</span>
-                    <button onClick={() => setStep(3)} className="text-xs text-[#e8732c] font-bold hover:underline">
-                      Edit
+                <div className="bg-surface p-5 rounded-2xl border border-outline-variant/30">
+                  <div className="flex items-center justify-between mb-3 pb-1 border-b border-outline-variant/20">
+                    <span className="text-xs font-bold uppercase tracking-wide">
+                      {lang === "ta" ? "வாடகை மற்றும் விற்பனை தொகை" : "Pricing Terms"}
+                    </span>
+                    <button onClick={() => setStep(3)} className="text-xs text-[#F97316] font-bold hover:underline">
+                      {lang === "ta" ? "திருத்து" : "Edit"}
                     </button>
                   </div>
-                  <div className="flex flex-col gap-1.5 text-xs text-[#1a3d2e]">
+                  <div className="flex flex-col gap-1.5 text-xs">
                     {intentRent && (
                       <>
                         <div className="flex justify-between">
-                          <span className="text-[#6b7d72]">Daily Rent:</span>
-                          <span className="font-semibold">₹{dailyRent}/day</span>
+                          <span className="text-on-surface-variant">{lang === "ta" ? "தினசரி வாடகை:" : "Daily Rent:"}</span>
+                          <span className="font-semibold">₹{dailyRent}/{lang === "ta" ? "நாள்" : "day"}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-[#6b7d72]">Min Rental Period:</span>
+                          <span className="text-on-surface-variant">{lang === "ta" ? "குறைந்தபட்ச வாடகை காலம்:" : "Min Rental Period:"}</span>
                           <span className="font-semibold capitalize">{minRentalPeriod}</span>
                         </div>
                       </>
                     )}
-                    {intentRent && intentSale && <div className="h-px bg-[#e8dfc8] my-1" />}
+                    {intentRent && intentSale && <div className="h-px bg-outline-variant/20 my-1" />}
                     {intentSale && (
                       <>
                         <div className="flex justify-between">
-                          <span className="text-[#6b7d72]">One-time Sale Price:</span>
+                          <span className="text-on-surface-variant">{lang === "ta" ? "விற்பனை விலை:" : "One-time Sale Price:"}</span>
                           <span className="font-semibold">₹{salePrice}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-[#6b7d72]">Negotiable:</span>
-                          <span className="font-semibold">{negotiable ? "Yes" : "No"}</span>
+                          <span className="text-on-surface-variant">{lang === "ta" ? "விலையை குறைக்க சம்மதம்:" : "Negotiable:"}</span>
+                          <span className="font-semibold">{negotiable ? (lang === "ta" ? "ஆம்" : "Yes") : (lang === "ta" ? "இல்லை" : "No")}</span>
                         </div>
                       </>
                     )}
@@ -1223,30 +1311,34 @@ function ListCartV2Content() {
                 </div>
 
                 {/* 3. Location Review */}
-                <div className="bg-[#f5f0e6] p-5 rounded-2xl border border-[#e8dfc8]">
-                  <div className="flex items-center justify-between mb-3 pb-1 border-b border-[#e8dfc8]">
-                    <span className="text-xs font-bold text-[#1a3d2e] uppercase tracking-wide">Location</span>
-                    <button onClick={() => setStep(4)} className="text-xs text-[#e8732c] font-bold hover:underline">
-                      Edit
+                <div className="bg-surface p-5 rounded-2xl border border-outline-variant/30">
+                  <div className="flex items-center justify-between mb-3 pb-1 border-b border-outline-variant/20">
+                    <span className="text-xs font-bold uppercase tracking-wide">
+                      {lang === "ta" ? "இருப்பிடம்" : "Location"}
+                    </span>
+                    <button onClick={() => setStep(4)} className="text-xs text-[#F97316] font-bold hover:underline">
+                      {lang === "ta" ? "திருத்து" : "Edit"}
                     </button>
                   </div>
-                  <div className="flex justify-between text-xs text-[#1a3d2e]">
-                    <span className="text-[#6b7d72]">Pick-up address:</span>
+                  <div className="flex justify-between text-xs">
+                    <span className="text-on-surface-variant">{lang === "ta" ? "முகவரி:" : "Pick-up address:"}</span>
                     <span className="font-semibold truncate max-w-[200px]">{location.address}</span>
                   </div>
                 </div>
 
                 {/* 4. Photos Review */}
-                <div className="bg-[#f5f0e6] p-5 rounded-2xl border border-[#e8dfc8]">
-                  <div className="flex items-center justify-between mb-3 pb-1 border-b border-[#e8dfc8]">
-                    <span className="text-xs font-bold text-[#1a3d2e] uppercase tracking-wide">Uploaded Photos</span>
-                    <button onClick={() => setStep(5)} className="text-xs text-[#e8732c] font-bold hover:underline">
-                      Edit
+                <div className="bg-surface p-5 rounded-2xl border border-outline-variant/30">
+                  <div className="flex items-center justify-between mb-3 pb-1 border-b border-outline-variant/20">
+                    <span className="text-xs font-bold uppercase tracking-wide">
+                      {lang === "ta" ? "பதிவேற்றிய புகைப்படங்கள்" : "Uploaded Photos"}
+                    </span>
+                    <button onClick={() => setStep(5)} className="text-xs text-[#F97316] font-bold hover:underline">
+                      {lang === "ta" ? "திருத்து" : "Edit"}
                     </button>
                   </div>
                   <div className="grid grid-cols-6 gap-2">
                     {previews.map((preview, idx) => (
-                      <div key={idx} className="aspect-square rounded-lg border border-[#e8dfc8] overflow-hidden bg-white">
+                      <div key={idx} className="aspect-square rounded-lg border border-outline-variant/20 overflow-hidden bg-background">
                         <img src={preview} alt="review" className="w-full h-full object-cover" />
                       </div>
                     ))}
@@ -1257,55 +1349,53 @@ function ListCartV2Content() {
             </div>
           )}
 
-          {/* Sticky Bottom Nav Navigation */}
-          <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#ece4d1]/95 backdrop-blur-sm border-t border-[#e8dfc8] py-4 px-4 shadow-lg">
-            <div className="max-w-[640px] mx-auto flex gap-3">
-              {/* Back Button */}
-              {step > 1 ? (
-                <button
-                  type="button"
-                  onClick={() => setStep(step - 1)}
-                  className="px-6 py-4 rounded-[14px] border border-[#1a3d2e] text-[#1a3d2e] font-bold text-sm uppercase tracking-wider hover:bg-[#1a3d2e]/10 transition flex items-center gap-1.5"
-                >
-                  <ChevronLeft size={16} /> Back
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => setStep(0)}
-                  className="px-6 py-4 rounded-[14px] border border-[#1a3d2e] text-[#1a3d2e] font-bold text-sm uppercase tracking-wider hover:bg-[#1a3d2e]/10 transition flex items-center gap-1.5"
-                >
-                  <ChevronLeft size={16} /> Cancel
-                </button>
-              )}
+          {/* Bottom Nav Navigation - Structured cleanly matching page styles */}
+          <div className="mt-8 flex gap-3">
+            {/* Back Button */}
+            {step > 1 ? (
+              <button
+                type="button"
+                onClick={() => setStep(step - 1)}
+                className="px-6 py-3.5 rounded-xl border border-outline-variant/40 text-on-surface font-bold text-sm uppercase tracking-wider hover:bg-outline-variant/10 transition flex items-center gap-1.5"
+              >
+                <ChevronLeft size={16} /> {lang === "ta" ? "முன்னால்" : "Back"}
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setStep(0)}
+                className="px-6 py-3.5 rounded-xl border border-outline-variant/40 text-on-surface font-bold text-sm uppercase tracking-wider hover:bg-outline-variant/10 transition flex items-center gap-1.5"
+              >
+                <ChevronLeft size={16} /> {lang === "ta" ? "ரத்துசெய்" : "Cancel"}
+              </button>
+            )}
 
-              {/* Next/Submit Button */}
-              {step < 6 ? (
-                <button
-                  type="button"
-                  disabled={!isStepValid}
-                  onClick={() => setStep(step + 1)}
-                  className="flex-1 py-4 rounded-[14px] bg-[#e8732c] text-white font-display text-sm font-bold uppercase tracking-wider hover:bg-[#e8732c]/90 transition shadow-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1"
-                >
-                  Next <ChevronRight size={16} />
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={handleSubmit}
-                  disabled={submitLoading}
-                  className="flex-1 py-4 rounded-[14px] bg-[#e8732c] text-white font-display text-sm font-bold uppercase tracking-wider hover:bg-[#e8732c]/90 transition shadow-md disabled:opacity-50 flex items-center justify-center gap-2"
-                >
-                  {submitLoading ? (
-                    <>
-                      <RefreshCw size={16} className="animate-spin" /> Submitting...
-                    </>
-                  ) : (
-                    "Submit Listing"
-                  )}
-                </button>
-              )}
-            </div>
+            {/* Next/Submit Button */}
+            {step < 6 ? (
+              <button
+                type="button"
+                disabled={!isStepValid}
+                onClick={() => setStep(step + 1)}
+                className="flex-1 py-3.5 rounded-xl bg-[#F97316] text-white text-sm font-bold uppercase tracking-wider hover:bg-[#e06612] transition shadow-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1"
+              >
+                {lang === "ta" ? "அடுத்தது" : "Next"} <ChevronRight size={16} />
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={handleSubmit}
+                disabled={submitLoading}
+                className="flex-1 py-3.5 rounded-xl bg-[#F97316] text-white text-sm font-bold uppercase tracking-wider hover:bg-[#e06612] transition shadow-md disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {submitLoading ? (
+                  <>
+                    <RefreshCw size={16} className="animate-spin" /> {lang === "ta" ? "சமர்ப்பிக்கிறது..." : "Submitting..."}
+                  </>
+                ) : (
+                  (lang === "ta" ? "பதிவை சமர்ப்பி" : "Submit Listing")
+                )}
+              </button>
+            )}
           </div>
 
         </div>
@@ -1318,8 +1408,8 @@ export default function ListCartV2Page() {
   return (
     <Suspense
       fallback={
-        <main className="min-h-screen bg-[#ece4d1] flex items-center justify-center">
-          <div className="w-8 h-8 border-2 border-[#1a3d2e] border-t-transparent rounded-full animate-spin" />
+        <main className="min-h-screen bg-background flex items-center justify-center">
+          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
         </main>
       }
     >
