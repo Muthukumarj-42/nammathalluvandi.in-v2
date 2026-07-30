@@ -22,6 +22,7 @@ export interface Cart {
   longitude?: number;
   verified?: boolean;
   uniqueCode?: string | null;
+  ownerId?: string | null;
 }
 
 export const filters = [
@@ -155,7 +156,8 @@ export function mapDbCartToCart(item: any): Cart {
     latitude: Number(item.latitude) || 11.0168,
     longitude: Number(item.longitude) || 76.9558,
     verified: item.verified || false,
-    uniqueCode: item.unique_code || item.uniqueCode || null
+    uniqueCode: item.unique_code || item.uniqueCode || null,
+    ownerId: item.owner_id || item.ownerId || null
   };
 }
 
