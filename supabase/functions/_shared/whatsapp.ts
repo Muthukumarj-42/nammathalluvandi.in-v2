@@ -96,3 +96,77 @@ export async function sendWhatsAppTemplate(
 
   return JSON.parse(responseText);
 }
+
+/**
+ * Invokes Meta's Cloud API to send an Authentication template containing an OTP code
+ * formatted according to Meta's strict Authentication template requirements (using copy_code sub_type).
+ */
+export async function sendWhatsAppAuthOTP(
+  toPhone: string,
+  otpCode: string,
+  templateName: string = "otp_verification"
+) {
+  if (!WHATSAPP_PHONE_NUMBER_ID || !WHATSAPP_ACCESS_TOKEN) {
+    console.error("Missing WhatsApp credentials. WHATSAPP_PHONE_NUMBER_ID or WHATSAPP_ACCESS_TOKEN not set.");
+    throw new Error("WhatsApp Cloud API configuration is missing.");
+  }
+
+  const cleanPhone = formatPhoneNumber(toPhone);
+  const url = `https://graph.facebook.com/v24.0/${WHATSAPP_PHONE_NUMBER_ID}/messages`;
+
+  const payload = {
+    messaging_product: "whatsapp",
+    recipient_type: "individual",
+    to: cleanPhone,
+    type: "template",
+    template: {
+      name: templateName,
+      language: {
+        code: "en"
+      },
+      components: [
+        {
+          type: "body",
+          parameters: [
+            {
+              type: "text",
+              text: otpCode
+            }
+          ]
+        },
+        {
+          type: "button",
+          sub_type: "copy_code",
+          index: "0",
+          parameters: [
+            {
+              type: "text",
+              text: otpCode
+            }
+          ]
+        }
+      ]
+    }
+  };
+
+  console.log(`Sending WhatsApp Authentication OTP to ${cleanPhone} [Template: ${templateName}]`);
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${WHATSAPP_ACCESS_TOKEN}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(payload)
+  });
+
+  const responseText = await response.text();
+  console.log(`WhatsApp Auth API response for ${cleanPhone}:`, responseText);
+
+  if (!response.ok) {
+    throw new Error(`WhatsApp Auth API request failed: ${responseText}`);
+  }
+
+  return JSON.parse(responseText);
+}
+

@@ -3,7 +3,7 @@
 
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { sendWhatsAppTemplate, formatPhoneNumber } from "../_shared/whatsapp.ts";
+import { sendWhatsAppAuthOTP, formatPhoneNumber } from "../_shared/whatsapp.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -85,25 +85,8 @@ serve(async (req) => {
       throw insertError;
     }
 
-    // 4. Send the OTP code via WhatsApp Cloud API Template
-    // Authentication templates typically accept the OTP code as a body parameter.
-    // If your template also contains a URL button parameter, it is added to buttonParameters.
-    try {
-      await sendWhatsAppTemplate(
-        cleanPhone,
-        "otp_verification",
-        [{ type: "text", text: otp }],
-        [{ type: "text", text: otp }] // Button URL parameter fallback if URL buttons exist in template
-      );
-    } catch (whatsappErr: any) {
-      console.error("WhatsApp delivery failed, attempting text parameter without button parameter fallback:", whatsappErr);
-      // Attempt sending strictly with body parameters in case the template does not have button parameters
-      await sendWhatsAppTemplate(
-        cleanPhone,
-        "otp_verification",
-        [{ type: "text", text: otp }]
-      );
-    }
+    // 4. Send the OTP code via Meta Authentication Template payload
+    await sendWhatsAppAuthOTP(cleanPhone, otp, "otp_verification");
 
     return new Response(
       JSON.stringify({ success: true }),

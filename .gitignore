@@ -7,3 +7,7 @@ tsconfig.tsbuildinfo
 # Environment variables
 .env*
 !.env.example
+
+# Supabase temp backups
+supabase/.temp/
+
