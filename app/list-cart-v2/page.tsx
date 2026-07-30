@@ -501,6 +501,25 @@ function ListCartV2Content() {
 
   return (
     <div className={`${baloo.variable} ${poppins.variable} min-h-screen bg-[#ece4d1] font-sans antialiased text-[#1a3d2e] pb-24`}>
+      {/* Hide global layout elements that are rendered via layout.tsx */}
+      <style dangerouslySetInnerHTML={{__html: `
+        /* Hide global navbar (desktop & mobile headers) */
+        header {
+          display: none !important;
+        }
+        /* Hide global footer */
+        footer {
+          display: none !important;
+        }
+        /* Hide global mobile navigation bar at the bottom */
+        nav[aria-label="Mobile navigation"] {
+          display: none !important;
+        }
+        /* Hide global WhatsApp float widget button */
+        a[aria-label="WhatsApp booking"] {
+          display: none !important;
+        }
+      `}} />
       {/* ──────────────── SCREEN 0: LANDING ──────────────── */}
       {step === 0 && (
         <main className="max-w-md mx-auto px-4 pt-16 pb-12 flex flex-col items-center">
@@ -584,7 +603,7 @@ function ListCartV2Content() {
           `}} />
 
           {/* Sticky Header */}
-          <header className="sticky top-0 z-50 bg-[#ece4d1] pb-3 border-b border-[#e8dfc8] mb-6">
+          <div className="sticky top-0 z-50 bg-[#ece4d1] pb-3 border-b border-[#e8dfc8] mb-6">
             <div className="flex items-center justify-between py-2 mb-3">
               <div className="flex items-center gap-1.5">
                 <div className="w-7 h-7 rounded bg-[#1a3d2e] flex items-center justify-center">
@@ -647,7 +666,7 @@ function ListCartV2Content() {
                 })}
               </div>
             </div>
-          </header>
+          </div>
 
           {/* Form Error Banner */}
           {error && (
@@ -1239,7 +1258,7 @@ function ListCartV2Content() {
           )}
 
           {/* Sticky Bottom Nav Navigation */}
-          <footer className="fixed bottom-0 left-0 right-0 z-50 bg-[#ece4d1]/95 backdrop-blur-sm border-t border-[#e8dfc8] py-4 px-4 shadow-lg">
+          <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#ece4d1]/95 backdrop-blur-sm border-t border-[#e8dfc8] py-4 px-4 shadow-lg">
             <div className="max-w-[640px] mx-auto flex gap-3">
               {/* Back Button */}
               {step > 1 ? (
@@ -1287,7 +1306,7 @@ function ListCartV2Content() {
                 </button>
               )}
             </div>
-          </footer>
+          </div>
 
         </div>
       )}
