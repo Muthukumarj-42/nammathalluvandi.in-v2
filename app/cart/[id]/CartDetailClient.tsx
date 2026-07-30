@@ -94,7 +94,7 @@ export default function CartDetailClient({ cart }: CartDetailClientProps) {
   // Build contact form URL with cart pre-filled
   const contactInquiryUrl = useMemo(() => {
     const slug = encodeURIComponent(cart.nameEn);
-    return `/contact?cart=${cart.id}&name=${slug}&ref=inquiry#enquiry-form`;
+    return `/contact?cart=${cart.uniqueCode || cart.id}&name=${slug}&ref=inquiry#enquiry-form`;
   }, [cart]);
 
   return (

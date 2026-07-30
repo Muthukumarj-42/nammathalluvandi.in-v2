@@ -299,7 +299,7 @@ export default function HomePage() {
                           </span>
                         </div>
                         <Button asChild className="bg-transparent border border-[#f97316] text-[#f97316] hover:bg-[#f97316]/10 rounded-xl px-2 py-1 md:px-6 md:py-2 h-7 md:h-auto font-display tracking-wider text-[9px] md:text-xs shrink-0 whitespace-nowrap">
-                          <Link href={`/cart/${cart.id}`} className="after:absolute after:inset-0 after:z-10 whitespace-nowrap">
+                          <Link href={`/carts/${cart.uniqueCode || cart.id}`} className="after:absolute after:inset-0 after:z-10 whitespace-nowrap">
                             <Text en="Details" ta="விவரங்கள்" />
                           </Link>
                         </Button>
@@ -362,7 +362,7 @@ export default function HomePage() {
                       </p>
 
                       <Button asChild className="w-full bg-[#f97316] hover:bg-[#e2640e] text-[#0a0a08] border-none rounded-xl font-display uppercase tracking-widest text-[9px] md:text-xs py-1.5 md:py-2 h-8 md:h-10">
-                        <Link href={`/contact?cart=${cart.id}&name=${encodeURIComponent(cart.nameEn)}&ref=sale#enquiry-form`} scroll={false} className="after:absolute after:inset-0 after:z-10">
+                        <Link href={`/contact?cart=${cart.uniqueCode || cart.id}&name=${encodeURIComponent(cart.nameEn)}&ref=sale#enquiry-form`} scroll={false} className="after:absolute after:inset-0 after:z-10">
                           <Text en="Enquire Now" ta="இப்போதே விசாரிக்கவும்" />
                         </Link>
                       </Button>

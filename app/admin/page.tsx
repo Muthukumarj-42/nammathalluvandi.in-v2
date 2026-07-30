@@ -753,7 +753,7 @@ export default function AdminDashboard() {
                           Edit
                         </button>
                         <a
-                          href={`/carts/${cart.id}`}
+                          href={`/carts/${cart.uniqueCode || cart.id}`}
                           target="_blank"
                           rel="noreferrer"
                           className="px-3 py-1.5 rounded-lg bg-surface-container text-on-surface text-xs font-medium text-center hover:bg-surface-container/80 transition"

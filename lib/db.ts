@@ -1,4 +1,5 @@
 import { supabase, isDbConfigured } from "./supabase";
+import { getTnRtoCodeForLocation } from "./rto";
 import { calculateHaversineDistance } from "./routing";
 
 export interface User {
@@ -80,6 +81,7 @@ let mockUsers: User[] = [
 let mockCarts: DbCart[] = [
   {
     id: "e0000000-0000-0000-0000-000000000001",
+    unique_code: "ntv-tn66001",
     owner_id: "c2222222-2222-2222-2222-222222222222",
     type: "With Store",
     condition: "New",
@@ -96,6 +98,7 @@ let mockCarts: DbCart[] = [
   },
   {
     id: "e0000000-0000-0000-0000-000000000002",
+    unique_code: "ntv-tn38001",
     owner_id: "c2222222-2222-2222-2222-222222222222",
     type: "With Roof",
     condition: "Used - Very Good",
@@ -112,6 +115,7 @@ let mockCarts: DbCart[] = [
   },
   {
     id: "e0000000-0000-0000-0000-000000000003",
+    unique_code: "ntv-tn38002",
     owner_id: "c3333333-3333-3333-3333-333333333333",
     type: "Ice Cream",
     condition: "New",
@@ -128,6 +132,7 @@ let mockCarts: DbCart[] = [
   },
   {
     id: "e0000000-0000-0000-0000-000000000004",
+    unique_code: "ntv-tn39001",
     owner_id: "c4444444-4444-4444-4444-444444444444",
     type: "Tea Stall",
     condition: "Used - Good",
@@ -144,6 +149,7 @@ let mockCarts: DbCart[] = [
   },
   {
     id: "e0000000-0000-0000-0000-000000000005",
+    unique_code: "ntv-tn37001",
     owner_id: "c3333333-3333-3333-3333-333333333333",
     type: "With Store",
     condition: "Used - Good",
@@ -397,22 +403,30 @@ export async function getAllCarts(): Promise<DbCart[]> {
 }
 
 export async function getCartById(id: string): Promise<DbCart | null> {
+  const cleanId = id.trim();
   if (isDbConfigured) {
-    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
-    const query = supabase.from("carts").select("*");
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(cleanId);
     if (isUuid) {
-      const { data } = await query.eq("id", id).maybeSingle();
-      return data || null;
-    } else {
-      const { data } = await query.eq("unique_code", id).maybeSingle();
-      return data || null;
+      const { data } = await supabase.from("carts").select("*").eq("id", cleanId).maybeSingle();
+      if (data) return data;
     }
+    const { data: dataByCode } = await supabase.from("carts").select("*").ilike("unique_code", cleanId).maybeSingle();
+    if (dataByCode) return dataByCode;
+
+    const { data: dataById } = await supabase.from("carts").select("*").eq("id", cleanId).maybeSingle();
+    return dataById || null;
   }
-  return mockCarts.find((c) => c.id === id || c.unique_code === id) || null;
+  const lower = cleanId.toLowerCase();
+  return mockCarts.find((c) => c.id === cleanId || (c.unique_code && c.unique_code.toLowerCase() === lower)) || null;
 }
 
 export async function saveCart(cart: Omit<DbCart, "id" | "verified" | "status"> & { id?: string; status?: DbCart["status"]; verified?: boolean }): Promise<DbCart> {
   if (isDbConfigured) {
+    if (!cart.unique_code) {
+      const rto = getTnRtoCodeForLocation(cart.area, cart.district, (cart as any).location, (cart as any).vendorLocation);
+      const { count } = await supabase.from("carts").select("id", { count: "exact", head: true }).ilike("unique_code", `ntv-${rto}%`);
+      cart.unique_code = `ntv-${rto}${String((count || 0) + 1).padStart(3, "0")}`;
+    }
     const { data, error } = await supabase
       .from("carts")
       .upsert([cart])
@@ -430,22 +444,9 @@ export async function saveCart(cart: Omit<DbCart, "id" | "verified" | "status"> 
   } else {
     let uniqueCode = cart.unique_code;
     if (!uniqueCode) {
-      const getRtoCodeForDistrict = (districtName: string | null | undefined): number => {
-        if (!districtName) return 99;
-        const d = districtName.toLowerCase().trim();
-        if (d.includes("chennai")) return 1;
-        if (d.includes("coimbatore")) return 37;
-        if (d.includes("erode")) return 33;
-        if (d.includes("tiruppur") || d.includes("tirupur")) return 39;
-        if (d.includes("salem")) return 27;
-        if (d.includes("trichy") || d.includes("tiruchirappalli")) return 45;
-        if (d.includes("madurai")) return 58;
-        if (d.includes("thanjavur")) return 49;
-        return 99;
-      };
-      const rto = getRtoCodeForDistrict(cart.district);
-      const count = mockCarts.filter((c) => c.unique_code && c.unique_code.startsWith(`ntv-${rto}`)).length;
-      uniqueCode = `ntv-${rto}${String(count + 1).padStart(4, "0")}`;
+      const rto = getTnRtoCodeForLocation(cart.area, cart.district, (cart as any).location, (cart as any).vendorLocation);
+      const count = mockCarts.filter((c) => c.unique_code && c.unique_code.toLowerCase().startsWith(`ntv-${rto}`)).length;
+      uniqueCode = `ntv-${rto}${String(count + 1).padStart(3, "0")}`;
     }
 
     const created: DbCart = {

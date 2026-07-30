@@ -499,8 +499,6 @@ export function BookingFlow() {
     formData.date !== "" &&
     formData.date >= todayDate &&
     formData.location.trim() !== "" &&
-    formData.latitude.trim() !== "" &&
-    formData.longitude.trim() !== "" &&
     agreed &&
     phoneError === "";
 
@@ -524,8 +522,8 @@ export function BookingFlow() {
         location: formData.location.trim(),
         duration: "1 month",
         details: formData.details.trim(),
-        latitude: Number(formData.latitude),
-        longitude: Number(formData.longitude),
+        latitude: formData.latitude ? Number(formData.latitude) : 11.0168,
+        longitude: formData.longitude ? Number(formData.longitude) : 76.9558,
       });
     } catch (err) {
       console.error("Failed to save booking to database:", err);
@@ -829,15 +827,27 @@ export function BookingFlow() {
                 />
               </div>
 
-              {/* Field 4: Location */}
+              {/* Field 4: Location with integrated Auto-Detect */}
               <div className="flex flex-col">
-                <label
-                  htmlFor="location"
-                  className="text-sm font-semibold mb-1 block"
-                >
-                  <span className="en">Location in Coimbatore *</span>
-                  <span className="ta tamil-text">இடம் (கோவையில்) *</span>
-                </label>
+                <div className="flex justify-between items-center mb-1">
+                  <label
+                    htmlFor="location"
+                    className="text-sm font-semibold block"
+                  >
+                    <span className="en">Location in Coimbatore *</span>
+                    <span className="ta tamil-text">இடம் (கோவையில்) *</span>
+                  </label>
+                  <button
+                    type="button"
+                    onClick={handleDetectLocation}
+                    disabled={geoStatus === "loading"}
+                    className="text-xs font-bold text-[#f97316] hover:text-[#e2640e] flex items-center gap-1 transition disabled:opacity-50"
+                  >
+                    <MapPin className="w-3.5 h-3.5 text-[#f97316]" />
+                    <span className="en">{geoStatus === "loading" ? "Detecting..." : "Auto-Detect"}</span>
+                    <span className="ta tamil-text text-[10px]">{geoStatus === "loading" ? "கண்டறியப்படுகிறது..." : "கண்டறியவும்"}</span>
+                  </button>
+                </div>
                 <input
                   type="text"
                   id="location"
@@ -847,66 +857,19 @@ export function BookingFlow() {
                   placeholder={placeholders.location}
                   className="w-full h-12 border border-[#e5e0d8] focus:border-[#f97316] focus:ring-2 focus:ring-[#f97316]/40 rounded-xl px-4 bg-white text-base outline-none transition"
                 />
-              </div>
-
-              {/* Field 5: GPS Coordinates */}
-              <div className="bg-orange-50/50 border border-orange-200/50 rounded-xl p-4 space-y-3">
-                <div className="flex justify-between items-center">
-                  <span className="text-xs font-bold uppercase tracking-wider text-ink flex items-center gap-1">
-                    <MapPin className="w-3.5 h-3.5 text-[#f97316]" />
-                    <span className="en">GPS Coordinates (Required) *</span>
-                    <span className="ta tamil-text text-[10px]">GPS இருப்பிடம் *</span>
-                  </span>
-                  <button
-                    type="button"
-                    onClick={handleDetectLocation}
-                    className="text-xs font-bold text-[#f97316] hover:text-[#f97316]/80 flex items-center gap-1 transition"
-                  >
-                    <span className="en">Auto-Detect</span>
-                    <span className="ta tamil-text text-[10px]">கண்டறியவும்</span>
-                  </button>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="flex flex-col">
-                    <label htmlFor="latitude" className="text-[10px] uppercase text-[#78716c] mb-1">Latitude</label>
-                    <input
-                      type="text"
-                      id="latitude"
-                      required
-                      placeholder="e.g. 11.0030"
-                      value={formData.latitude}
-                      onChange={handleInputChange}
-                      className="w-full h-10 border border-[#e5e0d8] rounded-lg px-3 text-sm bg-white text-ink outline-none"
-                    />
-                  </div>
-                  <div className="flex flex-col">
-                    <label htmlFor="longitude" className="text-[10px] uppercase text-[#78716c] mb-1">Longitude</label>
-                    <input
-                      type="text"
-                      id="longitude"
-                      required
-                      placeholder="e.g. 77.0350"
-                      value={formData.longitude}
-                      onChange={handleInputChange}
-                      className="w-full h-10 border border-[#e5e0d8] rounded-lg px-3 text-sm bg-white text-ink outline-none"
-                    />
-                  </div>
-                </div>
-
                 {geoStatus === "loading" && (
-                  <p className="text-[10px] text-amber-600 animate-pulse">
-                    <Text en="Detecting GPS coordinates..." ta="ஜிபிஎஸ் ஆயத்தொலைவுகள் கண்டறியப்படுகின்றன..." />
+                  <p className="text-xs text-amber-600 animate-pulse mt-1">
+                    <Text en="Detecting location..." ta="இருப்பிடம் கண்டறியப்படுகிறது..." />
                   </p>
                 )}
-                {geoStatus === "success" && (
-                  <p className="text-[10px] text-green-600 font-bold">
-                    <Text en="Successfully populated GPS coordinates!" ta="ஜிபிஎஸ் ஆயத்தொலைவுகள் வெற்றிகரமாக பெறப்பட்டன!" />
+                {geoStatus === "success" && formData.location && (
+                  <p className="text-xs text-green-600 font-semibold mt-1">
+                    <Text en="✓ Location populated!" ta="✓ இருப்பிடம் பெறப்பட்டது!" />
                   </p>
                 )}
                 {geoStatus === "error" && (
-                  <p className="text-[10px] text-red-500">
-                    <Text en="Could not retrieve GPS automatically. Please input manually." ta="ஜிபிஎஸ் தானாகப் பெற முடியவில்லை. தயவுசெய்து கைமுறையாக உள்ளிடவும்." />
+                  <p className="text-xs text-red-500 mt-1">
+                    <Text en="Could not retrieve location automatically. Please input manually." ta="இருப்பிடத்தை தானாகப் பெற முடியவில்லை. தயவுசெய்து கைமுறையாக உள்ளிடவும்." />
                   </p>
                 )}
               </div>

@@ -783,7 +783,7 @@ function BrowseCartsPageContent() {
                           ₹{cart.pricePerDay}/day
                         </span>
                         <Button asChild className="w-full bg-green-800 hover:bg-green-900 text-white font-bold rounded-xl h-10 text-xs md:text-sm shadow-sm transition-all">
-                          <Link href={`/book?cart=${cart.id}`}>
+                          <Link href={`/book?cart=${cart.uniqueCode || cart.id}`}>
                             <Text en="BOOK NOW" ta="பதிவு செய்யவும்" />
                           </Link>
                         </Button>

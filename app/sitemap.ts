@@ -16,7 +16,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const allCarts = await getCarts();
 
   const dynamicPages = allCarts.map((cart) => ({
-    url: `/carts/${cart.id}`,
+    url: `/carts/${cart.uniqueCode || cart.id}`,
     priority: 0.8,
     changeFrequency: "weekly" as const,
   }));
