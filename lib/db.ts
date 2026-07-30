@@ -427,7 +427,8 @@ export async function getCartById(id: string): Promise<DbCart | null> {
 export async function saveCart(cart: Omit<DbCart, "id" | "verified" | "status"> & { id?: string; status?: DbCart["status"]; verified?: boolean }): Promise<DbCart> {
   if (isDbConfigured) {
     if (!cart.unique_code) {
-      const rto = getTnRtoCodeForLocation(cart.area, cart.district, (cart as any).location, (cart as any).vendorLocation);
+      const rtoRaw = getTnRtoCodeForLocation(cart.area, cart.district, (cart as any).location, (cart as any).vendorLocation);
+      const rto = rtoRaw.toLowerCase().replace("tn", "").replace(/[a-z]/g, "");
       const { count } = await supabase.from("carts").select("id", { count: "exact", head: true }).ilike("unique_code", `ntv-${rto}%`);
       cart.unique_code = `ntv-${rto}${String((count || 0) + 1).padStart(3, "0")}`;
     }
@@ -448,7 +449,8 @@ export async function saveCart(cart: Omit<DbCart, "id" | "verified" | "status"> 
   } else {
     let uniqueCode = cart.unique_code;
     if (!uniqueCode) {
-      const rto = getTnRtoCodeForLocation(cart.area, cart.district, (cart as any).location, (cart as any).vendorLocation);
+      const rtoRaw = getTnRtoCodeForLocation(cart.area, cart.district, (cart as any).location, (cart as any).vendorLocation);
+      const rto = rtoRaw.toLowerCase().replace("tn", "").replace(/[a-z]/g, "");
       const count = mockCarts.filter((c) => c.unique_code && c.unique_code.toLowerCase().startsWith(`ntv-${rto}`)).length;
       uniqueCode = `ntv-${rto}${String(count + 1).padStart(3, "0")}`;
     }

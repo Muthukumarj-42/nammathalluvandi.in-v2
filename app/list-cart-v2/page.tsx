@@ -78,7 +78,17 @@ type GeoState = {
   address: string;
 };
 
-const EMPTY_GEO: GeoState = { status: "idle", latitude: null, longitude: null, area: "", district: "", address: "" };
+// Initial geographic coordinates fall back to Coimbatore default map
+const INITIAL_GEO: GeoState = {
+  status: "success",
+  latitude: 11.0168,
+  longitude: 76.9558,
+  area: "Coimbatore",
+  district: "Coimbatore",
+  address: "Coimbatore, Tamil Nadu",
+};
+
+const LOCAL_STORAGE_KEY = "ntv_list_cart_flow_data";
 
 async function detectGpsLocation(): Promise<{ latitude: number; longitude: number; area: string; district: string } | null> {
   if (typeof navigator === "undefined" || !navigator.geolocation) return null;
@@ -129,6 +139,62 @@ async function detectGpsLocation(): Promise<{ latitude: number; longitude: numbe
   });
 }
 
+// Compress images client-side before upload to prevent mobile network time-outs
+async function compressImage(file: File): Promise<File> {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (event) => {
+      const img = new window.Image();
+      img.src = event.target?.result as string;
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          resolve(file);
+          return;
+        }
+
+        const maxDim = 1200;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > maxDim || height > maxDim) {
+          if (width > height) {
+            height = Math.round((height * maxDim) / width);
+            width = maxDim;
+          } else {
+            width = Math.round((width * maxDim) / height);
+            height = maxDim;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        ctx.drawImage(img, 0, 0, width, height);
+
+        canvas.toBlob(
+          (blob) => {
+            if (!blob) {
+              resolve(file);
+              return;
+            }
+            const compressedFile = new File([blob], file.name.replace(/\.[^/.]+$/, "") + ".jpg", {
+              type: "image/jpeg",
+              lastModified: Date.now(),
+            });
+            resolve(compressedFile);
+          },
+          "image/jpeg",
+          0.8
+        );
+      };
+      img.onerror = () => resolve(file);
+    };
+    reader.onerror = () => resolve(file);
+  });
+}
+
 function ListCartV2Content() {
   const router = useRouter();
   const supabase = useMemo(() => createClient(), []);
@@ -144,19 +210,6 @@ function ListCartV2Content() {
   const [submitLoading, setSubmitLoading] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [error, setError] = useState("");
-
-  // Sync state with global HTML data attribute
-  useEffect(() => {
-    const updateLang = () => {
-      const current = document.documentElement.getAttribute("data-lang") || "en";
-      setLang(current as "en" | "ta");
-    };
-    updateLang();
-
-    const observer = new MutationObserver(updateLang);
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-lang"] });
-    return () => observer.disconnect();
-  }, []);
 
   // Step 1: Intent
   const [intentRent, setIntentRent] = useState(true);
@@ -175,13 +228,80 @@ function ListCartV2Content() {
   const [negotiable, setNegotiable] = useState(false);
 
   // Step 4: Location
-  const [location, setLocation] = useState<GeoState>(EMPTY_GEO);
+  const [location, setLocation] = useState<GeoState>(INITIAL_GEO);
   const [geocodeLoading, setGeocodeLoading] = useState(false);
 
   // Step 5: Photos (Drag & Drop sorting)
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+
+  // Sync state with global HTML data attribute
+  useEffect(() => {
+    const updateLang = () => {
+      const current = document.documentElement.getAttribute("data-lang") || "en";
+      setLang(current as "en" | "ta");
+    };
+    updateLang();
+
+    const observer = new MutationObserver(updateLang);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-lang"] });
+    return () => observer.disconnect();
+  }, []);
+
+  // Load state from localStorage on mount
+  useEffect(() => {
+    const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (parsed.step !== undefined) setStep(parsed.step);
+        if (parsed.intentRent !== undefined) setIntentRent(parsed.intentRent);
+        if (parsed.intentSale !== undefined) setIntentSale(parsed.intentSale);
+        if (parsed.cartType !== undefined) setCartType(parsed.cartType);
+        if (parsed.condition !== undefined) setCondition(parsed.condition);
+        if (parsed.cartSize !== undefined) setCartSize(parsed.cartSize);
+        if (parsed.stoveType !== undefined) setStoveType(parsed.stoveType);
+        if (parsed.dailyRent !== undefined) setDailyRent(parsed.dailyRent);
+        if (parsed.minRentalPeriod !== undefined) setMinRentalPeriod(parsed.minRentalPeriod);
+        if (parsed.salePrice !== undefined) setSalePrice(parsed.salePrice);
+        if (parsed.negotiable !== undefined) setNegotiable(parsed.negotiable);
+        if (parsed.location !== undefined) setLocation(parsed.location);
+      } catch (e) {
+        console.error("Failed to parse saved flow data", e);
+      }
+    } else if (vendorProfile?.latitude && vendorProfile?.longitude) {
+      // Initialize with vendor coordinates if localStorage is empty
+      setLocation({
+        status: "success",
+        latitude: vendorProfile.latitude,
+        longitude: vendorProfile.longitude,
+        area: vendorProfile.area || "",
+        district: vendorProfile.district || "",
+        address: `${vendorProfile.area || ""}, ${vendorProfile.district || ""}`.trim(),
+      });
+    }
+  }, [vendorProfile]);
+
+  // Persist state to localStorage on changes
+  useEffect(() => {
+    if (step === 0 && submitSuccess) return;
+    const dataToSave = {
+      step,
+      intentRent,
+      intentSale,
+      cartType,
+      condition,
+      cartSize,
+      stoveType,
+      dailyRent,
+      minRentalPeriod,
+      salePrice,
+      negotiable,
+      location,
+    };
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dataToSave));
+  }, [step, intentRent, intentSale, cartType, condition, cartSize, stoveType, dailyRent, minRentalPeriod, salePrice, negotiable, location, submitSuccess]);
 
   // File Change Handler
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -350,16 +470,17 @@ function ListCartV2Content() {
     setError("");
 
     try {
-      // 1. Upload photos to Supabase Storage
+      // 1. Compress and Upload photos to Supabase Storage
       const uploadedUrls: string[] = [];
       if (selectedFiles.length > 0) {
         for (const file of selectedFiles) {
-          const fileExt = file.name.substring(file.name.lastIndexOf(".")) || ".jpg";
+          const compressed = await compressImage(file);
+          const fileExt = compressed.name.substring(compressed.name.lastIndexOf(".")) || ".jpg";
           const filename = `cart-${Date.now()}-${Math.random().toString(36).substring(2, 9)}${fileExt}`;
           
           const { data, error: uploadErr } = await supabase.storage
             .from("carts")
-            .upload(filename, file);
+            .upload(filename, compressed);
 
           if (uploadErr) {
             throw new Error(`Failed to upload ${file.name}: ${uploadErr.message}`);
@@ -410,6 +531,8 @@ function ListCartV2Content() {
         throw new Error(res.error || "Failed to submit cart listing");
       }
 
+      // Clear local storage on success
+      localStorage.removeItem(LOCAL_STORAGE_KEY);
       setSubmitSuccess(true);
     } catch (err: any) {
       console.error(err);
@@ -420,6 +543,7 @@ function ListCartV2Content() {
   };
 
   const handleReset = () => {
+    localStorage.removeItem(LOCAL_STORAGE_KEY);
     setStep(0);
     setIntentRent(true);
     setIntentSale(false);
@@ -431,21 +555,19 @@ function ListCartV2Content() {
     setMinRentalPeriod("daily");
     setSalePrice("");
     setNegotiable(false);
-    setLocation(EMPTY_GEO);
+    setLocation(INITIAL_GEO);
     setSelectedFiles([]);
     setPreviews([]);
     setSubmitSuccess(false);
     setError("");
   };
 
-  // Auth Loading
+  // Auth Loading Screen - Renders full new brand logo
   if (authLoading) {
     return (
-      <main className="min-h-screen bg-background flex items-center justify-center">
-        <div className="flex flex-col items-center gap-2">
-          <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-          <span className="text-primary font-semibold text-sm">Loading NTV Portal...</span>
-        </div>
+      <main className="min-h-screen bg-background flex flex-col items-center justify-center gap-4">
+        <img src="/brand/full-logo-new.png" alt="Namma Thalluvandi" className="w-40 h-40 object-contain animate-pulse" />
+        <span className="text-primary font-bold text-xs uppercase tracking-wide">Loading Portal...</span>
       </main>
     );
   }
@@ -454,6 +576,9 @@ function ListCartV2Content() {
   if (!user) {
     return (
       <main className="min-h-screen bg-background pt-24 pb-16 px-4 flex items-center justify-center">
+        {/* Hide global WhatsApp floating widget button only on this page */}
+        <style dangerouslySetInnerHTML={{__html: `a[aria-label="WhatsApp booking"] { display: none !important; }`}} />
+        
         <div className="max-w-md w-full text-center bg-surface p-8 rounded-2xl border border-outline-variant/30 shadow-sm">
           <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-5">
             <LogIn className="w-8 h-8 text-primary" />
@@ -478,9 +603,12 @@ function ListCartV2Content() {
   if (!isVendor) {
     return (
       <main className="min-h-screen bg-background pt-24 pb-16 px-4 flex items-center justify-center">
+        {/* Hide global WhatsApp floating widget button only on this page */}
+        <style dangerouslySetInnerHTML={{__html: `a[aria-label="WhatsApp booking"] { display: none !important; }`}} />
+
         <div className="max-w-md w-full text-center bg-surface p-8 rounded-2xl border border-outline-variant/30 shadow-sm">
-          <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-5">
-            <img src="/brand/text-logo.webp" alt="NTV" className="w-10 h-10 object-contain" />
+          <div className="w-20 h-20 rounded-full bg-surface flex items-center justify-center mx-auto mb-5 shadow-sm border border-outline-variant/30 p-2">
+            <img src="/brand/text-logo.webp" alt="NTV" className="w-12 h-12 object-contain" />
           </div>
           <h1 className="text-2xl font-bold text-on-surface mb-3">
             {lang === "ta" ? "சுயவிவரத்தை உருவாக்கவும்" : "Create Vendor Profile"}
@@ -505,6 +633,9 @@ function ListCartV2Content() {
   if (submitSuccess) {
     return (
       <main className="min-h-screen bg-background pt-24 pb-16 px-4 flex items-center justify-center">
+        {/* Hide global WhatsApp floating widget button only on this page */}
+        <style dangerouslySetInnerHTML={{__html: `a[aria-label="WhatsApp booking"] { display: none !important; }`}} />
+
         <div className="max-w-md w-full text-center bg-surface p-8 rounded-2xl border border-outline-variant/30 shadow-sm">
           <div className="w-20 h-20 rounded-full bg-primary flex items-center justify-center mx-auto mb-6 shadow-md border-4 border-background">
             <Check className="w-10 h-10 text-white" />
@@ -564,6 +695,14 @@ function ListCartV2Content() {
 
   return (
     <div className="min-h-screen bg-background text-on-surface pb-24 pt-24 px-4">
+      
+      {/* Hide global WhatsApp float widget button only on this page */}
+      <style dangerouslySetInnerHTML={{__html: `
+        a[aria-label="WhatsApp booking"] {
+          display: none !important;
+        }
+      `}} />
+
       {/* ──────────────── SCREEN 0: LANDING ──────────────── */}
       {step === 0 && (
         <main className="max-w-md mx-auto py-12 flex flex-col items-center">
@@ -666,7 +805,7 @@ function ListCartV2Content() {
 
           {/* Form Error Banner */}
           {error && (
-            <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-800 rounded-xl text-sm flex gap-2 items-start">
+            <div className="mb-4 p-4 bg-red-100 border border-red-200 text-red-800 rounded-xl text-sm flex gap-2 items-start">
               <AlertCircle size={16} className="mt-0.5 shrink-0" />
               <span>{error}</span>
             </div>
@@ -957,7 +1096,7 @@ function ListCartV2Content() {
                       </div>
                     </div>
 
-                    {/* Toggle Switch - Styled cleanly to match standard forms */}
+                    {/* Toggle Switch - standard height / width so it is fully visible */}
                     <div className="flex items-center justify-between p-3.5 bg-background rounded-xl border border-outline-variant/20">
                       <div>
                         <span className="text-xs font-bold block">{lang === "ta" ? "பேச்சுவார்த்தைக்கு உட்பட்டது" : "Negotiable"}</span>
@@ -968,13 +1107,13 @@ function ListCartV2Content() {
                       <button
                         type="button"
                         onClick={() => setNegotiable(!negotiable)}
-                        className={`relative inline-flex h-6.5 w-12 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none
-                          ${negotiable ? "bg-[#F97316]" : "bg-outline-variant/50"}
+                        className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none
+                          ${negotiable ? "bg-[#F97316]" : "bg-outline-variant/60"}
                         `}
                       >
                         <span 
-                          className={`pointer-events-none inline-block h-5.5 w-5.5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out
-                            ${negotiable ? "translate-x-5.5" : "translate-x-0"}
+                          className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow transition duration-200 ease-in-out
+                            ${negotiable ? "translate-x-5" : "translate-x-0"}
                           `}
                         />
                       </button>
@@ -1047,28 +1186,17 @@ function ListCartV2Content() {
                   </div>
                 </div>
 
-                {/* Live Google Maps Integration */}
-                <div className="relative h-60 rounded-xl border border-outline-variant/30 bg-background overflow-hidden flex items-center justify-center">
-                  {location.latitude && location.longitude ? (
-                    <iframe
-                      title="NTV Google Map"
-                      width="100%"
-                      height="100%"
-                      style={{ border: 0 }}
-                      src={`https://maps.google.com/maps?q=${location.latitude},${location.longitude}&z=16&output=embed`}
-                      allowFullScreen
-                      loading="lazy"
-                    />
-                  ) : (
-                    <div className="flex flex-col items-center gap-2 p-4 text-center">
-                      <MapPin size={32} className="text-on-surface-variant/40 animate-bounce" />
-                      <span className="text-xs text-on-surface-variant">
-                        {lang === "ta" 
-                          ? "வரைபடத்தை ஏற்ற ஜிபிஎஸ் இருப்பிடத்தைக் கண்டறியவும் அல்லது பகுதியைத் தேடவும்." 
-                          : "Detect GPS or search your area to load live interactive Google Map."}
-                      </span>
-                    </div>
-                  )}
+                {/* Google Maps Integration (Always loaded using Coimbatore fallback or resolved lat/lng) */}
+                <div className="relative h-60 rounded-xl border border-outline-variant/30 bg-background overflow-hidden">
+                  <iframe
+                    title="NTV Google Map"
+                    width="100%"
+                    height="100%"
+                    style={{ border: 0 }}
+                    src={`https://maps.google.com/maps?q=${location.latitude || 11.0168},${location.longitude || 76.9558}&z=15&output=embed`}
+                    allowFullScreen
+                    loading="lazy"
+                  />
                 </div>
 
               </div>
@@ -1166,7 +1294,6 @@ function ListCartV2Content() {
 
                 {/* Camera / Gallery explicit buttons */}
                 <div className="flex gap-3">
-                  {/* Take Photo direct camera trigger input */}
                   <input
                     type="file"
                     ref={cameraInputRef}
@@ -1186,7 +1313,6 @@ function ListCartV2Content() {
                     {lang === "ta" ? "படம் எடு" : "Take Photo"}
                   </button>
 
-                  {/* Upload photo direct gallery trigger input */}
                   <input
                     type="file"
                     ref={galleryInputRef}
@@ -1408,8 +1534,9 @@ export default function ListCartV2Page() {
   return (
     <Suspense
       fallback={
-        <main className="min-h-screen bg-background flex items-center justify-center">
-          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+        <main className="min-h-screen bg-background flex flex-col items-center justify-center gap-4">
+          <img src="/brand/full-logo-new.png" alt="Namma Thalluvandi" className="w-40 h-40 object-contain animate-pulse" />
+          <span className="text-primary font-bold text-xs uppercase tracking-wide">Loading Portal...</span>
         </main>
       }
     >
