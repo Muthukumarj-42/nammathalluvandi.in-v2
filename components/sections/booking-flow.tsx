@@ -10,6 +10,7 @@ import { saveBooking } from "@/app/actions";
 import { reverseGeocode } from "@/lib/geocoding";
 import { useAuth } from "@/context/auth-context";
 import { createClient } from "@/lib/supabase-browser";
+import { useWhatsappOTP } from "@/hooks/useWhatsappOTP";
 
 const TAMIL_DICTIONARY: Record<string, string> = {
   // Pronouns / Particles
@@ -270,11 +271,17 @@ export function BookingFlow() {
   const { user } = useAuth();
   const supabase = createClient();
 
+  const {
+    loading: otpLoading,
+    verified: phoneVerified,
+    error: otpError,
+    sendOTP,
+    verifyOTP,
+    setVerified: setPhoneVerified
+  } = useWhatsappOTP();
+
   const [otp, setOtp] = useState("");
   const [otpSent, setOtpSent] = useState(false);
-  const [phoneVerified, setPhoneVerified] = useState(false);
-  const [otpLoading, setOtpLoading] = useState(false);
-  const [otpError, setOtpError] = useState("");
   const [vendorPhone, setVendorPhone] = useState("918838292849"); // admin fallback
 
   // Form State
@@ -327,46 +334,20 @@ export function BookingFlow() {
   const handleSendBookingOtp = async () => {
     const cleanPhone = formData.phone.trim();
     if (!cleanPhone) return;
-    setOtpLoading(true);
-    setOtpError("");
-    try {
-      const { error } = await supabase.functions.invoke("generate-otp", {
-        body: { phone: cleanPhone },
-      });
-      if (error) {
-        setOtpError(error.message || "Failed to send OTP.");
-      } else {
-        setOtpSent(true);
-      }
-    } catch (err: any) {
-      setOtpError(err.message || "Failed to send OTP.");
-    } finally {
-      setOtpLoading(false);
+    const sent = await sendOTP(cleanPhone);
+    if (sent) {
+      setOtpSent(true);
+      setOtp("");
     }
   };
 
   const handleVerifyBookingOtp = async () => {
     const cleanPhone = formData.phone.trim();
     if (!cleanPhone || !otp.trim()) return;
-    setOtpLoading(true);
-    setOtpError("");
-    try {
-      const { data, error } = await supabase.functions.invoke("verify-otp", {
-        body: { phone: cleanPhone, code: otp.trim() },
-      });
-      if (error) {
-        setOtpError(error.message || "Verification failed.");
-      } else if (data && data.success !== false) {
-        setPhoneVerified(true);
-        setOtpSent(false);
-        setOtpError("");
-      } else {
-        setOtpError("Invalid verification code. Please check and try again.");
-      }
-    } catch (err: any) {
-      setOtpError(err.message || "Failed to verify OTP.");
-    } finally {
-      setOtpLoading(false);
+    const success = await verifyOTP(cleanPhone, otp);
+    if (success) {
+      setOtpSent(false);
+      setOtp("");
     }
   };
   const [geoStatus, setGeoStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
@@ -560,20 +541,35 @@ export function BookingFlow() {
       if (res && res.success && res.data) {
         bookingCode = res.data.booking_code || bookingCode;
 
-        // Trigger WhatsApp confirmation template via Edge Function
+        // 1. Trigger WhatsApp confirmation template to renter
         try {
-          await supabase.functions.invoke("booking-confirmation", {
+          await supabase.functions.invoke("send-booking-confirmation", {
             body: {
               phone: formData.phone.trim(),
               booking_code: bookingCode,
               renter_name: formData.name.trim(),
               cart_name: cart.nameEn,
-              date: formData.date,
-              location: formData.location.trim()
+              date: formData.date
             }
           });
         } catch (err) {
-          console.error("Failed to invoke booking-confirmation Edge Function:", err);
+          console.error("Failed to invoke send-booking-confirmation Edge Function:", err);
+        }
+
+        // 2. Trigger WhatsApp vendor alert template to vendor
+        try {
+          await supabase.functions.invoke("send-vendor-notification", {
+            body: {
+              phone: vendorPhone,
+              booking_code: bookingCode,
+              renter_name: formData.name.trim(),
+              renter_phone: formData.phone.trim(),
+              cart_name: cart.nameEn,
+              date: formData.date
+            }
+          });
+        } catch (err) {
+          console.error("Failed to invoke send-vendor-notification Edge Function:", err);
         }
       }
     } catch (err) {
