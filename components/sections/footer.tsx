@@ -123,7 +123,7 @@ export function Footer() {
             ))}
           </div>
         </div>
-        <div className="mt-14 flex flex-col gap-3 border-t border-outline-variant/20 pt-6 text-xs uppercase tracking-[0.14em] text-on-surface-variant md:flex-row md:justify-between">
+        <div className="mt-14 flex flex-col gap-3 border-t border-outline-variant/20 pt-6 text-xs uppercase tracking-[0.14em] text-on-surface-variant md:flex-row md:justify-between md:items-end">
           <div className="flex flex-col gap-1 normal-case tracking-normal">
             <span className="font-display uppercase tracking-[0.14em] text-sm text-primary-container">© 2026 Namma Thalluvandi</span>
             <span>
@@ -134,6 +134,16 @@ export function Footer() {
               <span className="en">Ondipudur, Coimbatore</span>
               <span className="ta tamil-text">ஒண்டிப்புதூர், கோவை</span>
             </span>
+          </div>
+          <div className="flex gap-6 mt-4 md:mt-0 normal-case tracking-normal text-xs font-semibold text-on-surface-variant">
+            <Link href="/privacy-policy" className="hover:text-primary transition">
+              <span className="en">Privacy Policy</span>
+              <span className="ta tamil-text">தனியுரிமைக் கொள்கை</span>
+            </Link>
+            <Link href="/terms-and-conditions" className="hover:text-primary transition">
+              <span className="en">Terms & Conditions</span>
+              <span className="ta tamil-text">விதிமுறைகள் மற்றும் நிபந்தனைகள்</span>
+            </Link>
           </div>
         </div>
       </div>
