@@ -149,24 +149,48 @@ export async function sendWhatsAppAuthOTP(
     }
   };
 
-  console.log(`Sending WhatsApp Authentication OTP to ${cleanPhone} [Template: ${templateName}]`);
+  console.log("==================== WHATSAPP OUTGOING REQUEST DEBUG ====================");
+  console.log("URL:", url);
+  console.log("Phone Number ID:", WHATSAPP_PHONE_NUMBER_ID);
+  console.log("Recipient Phone:", cleanPhone);
+  console.log("Template Name:", templateName);
+  console.log("OTP Code:", otpCode);
+  console.log("Payload:", JSON.stringify(payload, null, 2));
+  console.log("=========================================================================");
 
-  const response = await fetch(url, {
-    method: "POST",
-    headers: {
-      "Authorization": `Bearer ${WHATSAPP_ACCESS_TOKEN}`,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(payload)
-  });
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${WHATSAPP_ACCESS_TOKEN}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    });
 
-  const responseText = await response.text();
-  console.log(`WhatsApp Auth API response for ${cleanPhone}:`, responseText);
+    const responseText = await response.text();
 
-  if (!response.ok) {
-    throw new Error(`WhatsApp Auth API request failed: ${responseText}`);
+    console.log("==================== WHATSAPP INCOMING RESPONSE DEBUG ====================");
+    console.log("Status:", response.status, response.statusText);
+    const headersObj: Record<string, string> = {};
+    response.headers.forEach((value, key) => {
+      headersObj[key] = value;
+    });
+    console.log("Headers:", JSON.stringify(headersObj, null, 2));
+    console.log("Response Body:", responseText);
+    console.log("==========================================================================");
+
+    if (!response.ok) {
+      throw new Error(`WhatsApp Auth API request failed: ${responseText}`);
+    }
+
+    return JSON.parse(responseText);
+  } catch (error: any) {
+    console.error("==================== WHATSAPP REQUEST EXCEPTION ====================");
+    console.error("Error Message:", error.message);
+    console.error("Stack Trace:", error.stack);
+    console.error("====================================================================");
+    throw error;
   }
-
-  return JSON.parse(responseText);
 }
 
