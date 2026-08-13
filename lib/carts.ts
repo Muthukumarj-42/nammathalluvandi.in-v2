@@ -23,6 +23,11 @@ export interface Cart {
   verified?: boolean;
   uniqueCode?: string | null;
   ownerId?: string | null;
+  // Sale support
+  isForRent?: boolean;
+  isForSale?: boolean;
+  salePrice?: number | null;
+  negotiable?: boolean;
 }
 
 export const filters = [
@@ -157,7 +162,11 @@ export function mapDbCartToCart(item: any): Cart {
     longitude: Number(item.longitude) || 76.9558,
     verified: item.verified || false,
     uniqueCode: item.unique_code || item.uniqueCode || null,
-    ownerId: item.owner_id || item.ownerId || null
+    ownerId: item.owner_id || item.ownerId || null,
+    isForRent: item.is_for_rent !== undefined ? item.is_for_rent : true,
+    isForSale: item.is_for_sale || false,
+    salePrice: item.sale_price ? Number(item.sale_price) : null,
+    negotiable: item.negotiable || false
   };
 }
 
