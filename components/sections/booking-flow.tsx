@@ -11,6 +11,7 @@ import { reverseGeocode } from "@/lib/geocoding";
 import { useAuth } from "@/context/auth-context";
 import { createClient } from "@/lib/supabase-browser";
 import { useWhatsappOTP } from "@/hooks/useWhatsappOTP";
+import { getSaleCarts, type SaleCart } from "@/data/sale-carts"; // >>> NEW
 
 const TAMIL_DICTIONARY: Record<string, string> = {
   // Pronouns / Particles
@@ -261,6 +262,8 @@ export function BookingFlow() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const cartId = searchParams.get("cart");
+  const mode = searchParams.get("mode"); // "sale" or null (rent) // >>> NEW
+  const isSaleMode = mode === "sale"; // >>> NEW
   const [cart, setCart] = useState<Cart | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -422,18 +425,55 @@ export function BookingFlow() {
   const [phoneError, setPhoneError] = useState("");
   const [agreed, setAgreed] = useState(false);
 
-  // Fetch Cart Details on mount/cartId change
+  // Fetch Cart Details on mount/cartId change // >>> MODIFIED (edit 3)
   useEffect(() => {
-    if (cartId) {
-      setLoading(true);
+    if (!cartId) {
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+
+    if (isSaleMode) {
+      getSaleCarts().then((sales) => {
+        const found = sales.find((s) => s.id === cartId);
+        if (found) {
+          // Map SaleCart -> Cart shape so the rest of the form works unchanged
+          const mapped: Cart = {
+            id: found.id,
+            nameEn: found.nameEn,
+            nameTa: found.nameEn,
+            type: [found.type],
+            pricePerDay: found.price, // used as the displayed price for sale too
+            depositAmount: 0,
+            available: true,
+            availableCount: 1,
+            city: [found.location || "Coimbatore"],
+            featuresEn: found.features || [],
+            featuresTa: found.features || [],
+            images: found.images && found.images.length > 0 ? found.images : [],
+            whatsappMessageTa: "",
+            descriptionEn: found.descriptionEn,
+            descriptionTa: found.descriptionEn,
+            condition: found.condition,
+            latitude: found.latitude,
+            longitude: found.longitude,
+            verified: found.verified,
+            uniqueCode: found.id,
+          } as Cart;
+          setCart(mapped);
+        } else {
+          setCart(null);
+        }
+        setLoading(false);
+      });
+    } else {
       getCart(cartId).then((data) => {
         setCart(data);
         setLoading(false);
       });
-    } else {
-      setLoading(false);
     }
-  }, [cartId]);
+  }, [cartId, isSaleMode]);
 
   // Sync language toggle
   useEffect(() => {
@@ -576,9 +616,19 @@ export function BookingFlow() {
       console.error("Failed to save booking to database:", err);
     }
 
-    // Build message dynamically strictly in Tamil as required
+    // Build message dynamically strictly in Tamil as required // >>> MODIFIED (edit 4)
     const code = cart.uniqueCode || cart.id;
-    const message = `வணக்கம், நான் ${cart.nameTa} (வண்டி ஐடி: ${code}) வாடகைக்கு எடுக்க விரும்புகிறேன்.
+    const message = isSaleMode
+      ? `வணக்கம், நான் ${cart.nameTa} (வண்டி ஐடி: ${code}) வாங்க விரும்புகிறேன்.
+
+பெயர்: ${translatedName}
+தொலைபேசி: ${formData.phone.trim()}
+தேவையான தேதி: ${formData.date}
+இடம் (கோவையில்): ${translatedLocation}
+மேலும் விவரம்: ${translatedDetails}
+
+விவரங்களைப் படித்து ஒப்புக்கொண்டேன். ✓`
+      : `வணக்கம், நான் ${cart.nameTa} (வண்டி ஐடி: ${code}) வாடகைக்கு எடுக்க விரும்புகிறேன்.
 
 பெயர்: ${translatedName}
 தொலைபேசி: ${formData.phone.trim()}
@@ -707,10 +757,12 @@ export function BookingFlow() {
               </div>
             </div>
 
-            {/* Rental Rules (Desktop Only) */}
-            <div className="hidden md:block">
-              <RentalRules lang={lang} />
-            </div>
+            {/* Rental Rules (Desktop Only) */} {/* >>> MODIFIED (edit 5) */}
+            {!isSaleMode && (
+              <div className="hidden md:block">
+                <RentalRules lang={lang} />
+              </div>
+            )}
           </div>
 
           {/* Right Column (Form Details) */}
@@ -950,10 +1002,12 @@ export function BookingFlow() {
                 />
               </div>
 
-              {/* Rental Rules (Mobile Only) */}
-              <div className="block md:hidden">
-                <RentalRules lang={lang} />
-              </div>
+              {/* Rental Rules (Mobile Only) */} {/* >>> MODIFIED (edit 5) */}
+              {!isSaleMode && (
+                <div className="block md:hidden">
+                  <RentalRules lang={lang} />
+                </div>
+              )}
 
               {/* SECTION E — CHECKBOX + SUBMIT */}
               <div className="pt-4 space-y-4">

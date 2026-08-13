@@ -11,6 +11,7 @@ import { mapDbCartToCart } from "@/lib/carts";
 import { isDbConfigured } from "@/lib/supabase";
 import { IconSearchStove, IconTent, IconIceCream, IconCoffee } from "@/components/ui/icons";
 import { reverseGeocode, getLocalFallbackLocationName } from "@/lib/geocoding";
+import { getSaleCarts, SaleCart } from "@/data/sale-carts"; // >>> NEW
 
 const SUGGESTIONS = [
   "stove",
@@ -62,6 +63,12 @@ function BrowseCartsPageContent() {
   const [lang, setLang] = useState<"en" | "ta">("en");
   const [activeTypeFilter, setActiveTypeFilter] = useState("All");
   const [sortBy, setSortBy] = useState("nearest");
+
+  // >>> NEW: Rent / Sale toggle state
+  const [viewMode, setViewMode] = useState<"rent" | "sale">("rent");
+  const [saleCarts, setSaleCarts] = useState<SaleCart[]>([]);
+  const [saleLoading, setSaleLoading] = useState(true);
+  const [maxSalePrice, setMaxSalePrice] = useState(100000); // one-time sale price ceiling
 
   // Sync language toggle dynamically
   useEffect(() => {
@@ -140,16 +147,58 @@ function BrowseCartsPageContent() {
     }
     loadData();
 
+    // >>> NEW: load sale carts in parallel, independent of rental data
+    async function loadSaleData() {
+      try {
+        const sales = await getSaleCarts();
+        setSaleCarts(sales);
+      } catch (err) {
+        console.error("Failed to load sale carts:", err);
+      } finally {
+        setSaleLoading(false);
+      }
+    }
+    loadSaleData();
+
     const qSearch = searchParams.get("search");
     const qType = searchParams.get("type");
     const qCondition = searchParams.get("condition");
     const qPrice = searchParams.get("price");
+    const qMode = searchParams.get("mode"); // >>> NEW: allow ?mode=sale in URL
 
     if (qSearch) setSearch(qSearch);
     if (qType) setSelectedTypes(qType.split(","));
     if (qCondition) setSelectedConditions(qCondition.split(","));
     if (qPrice) setMaxPrice(Number(qPrice) || 200);
+    if (qMode === "sale" || qMode === "rent") setViewMode(qMode); // >>> NEW
   }, [searchParams]);
+
+  // Sale / Buy enquiry: use the existing WhatsApp enquiry flow directly.
+  // Replace this number with the real NTV WhatsApp number (country code + number, no + or spaces).
+  const NTV_WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "919XXXXXXXXXX";
+
+  const handleSaleEnquiry = (cart: SaleCart) => {
+    if (NTV_WHATSAPP_NUMBER.includes("X")) {
+      alert("Please configure NEXT_PUBLIC_WHATSAPP_NUMBER in your .env.local file before using Enquire / Buy.");
+      return;
+    }
+
+    const message = [
+      "Hi Namma Thalluvandi, I am interested in buying this cart.",
+      "",
+      `Cart: ${cart.nameEn}`,
+      `Type: ${cart.type}`,
+      `Price: ₹${cart.price.toLocaleString()}`,
+      `Condition: ${cart.condition}`,
+      `Location: ${cart.location}`,
+      cart.negotiable ? "Price: Negotiable" : "Price: Fixed",
+      "",
+      "Please share more details about this cart."
+    ].join("\n");
+
+    const whatsappUrl = `https://wa.me/${NTV_WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, "_blank", "noopener,noreferrer");
+  };
 
   // Request browser geolocation to sort carts by closest distance
   const handleEnableLocationSort = (forceReDetect = false) => {
@@ -187,7 +236,6 @@ function BrowseCartsPageContent() {
       setUserCoords(coords);
       window.localStorage.setItem("thalluvandi-user-coords", JSON.stringify(coords));
       
-      // Fetch human-readable location name
       reverseGeocode(lat, lng)
         .then((locationName) => {
           setDetectedLocationName(locationName);
@@ -204,7 +252,6 @@ function BrowseCartsPageContent() {
 
     const onError = (error: GeolocationPositionError) => {
       console.warn("High accuracy geolocation failed or timed out, trying fallback...", error);
-      // Fallback with enableHighAccuracy: false
       navigator.geolocation.getCurrentPosition(
         onSuccess,
         (fallbackError) => {
@@ -242,7 +289,7 @@ function BrowseCartsPageContent() {
     );
   };
 
-  // Filter and sort carts
+  // Filter and sort RENTAL carts (unchanged from your original)
   const filteredCarts = useMemo(() => {
     const qLocation = searchParams.get("location");
     const list = dbCarts.filter(cart => {
@@ -284,7 +331,6 @@ function BrowseCartsPageContent() {
       const dailyPrice = cart.pricePerDay;
       const matchesPrice = dailyPrice <= maxPrice;
 
-      // Handle location query filter
       let matchesLocation = true;
       if (qLocation && qLocation !== "all") {
         const cartLoc = getCartLocationName(cart).toLowerCase();
@@ -302,7 +348,6 @@ function BrowseCartsPageContent() {
       return matchesSearch && matchesType && matchesCondition && matchesPrice && matchesLocation && matchesActiveTypeFilter;
     });
 
-    // Attach distance when geolocation is available
     let result = userCoords
       ? list.map(cart => {
           const dist = calculateHaversineDistance(userCoords, {
@@ -313,7 +358,6 @@ function BrowseCartsPageContent() {
         })
       : list;
 
-    // Client-side sort of the already-fetched data (no new API calls)
     switch (sortBy) {
       case "price-asc":
         result = [...result].sort((a, b) => a.pricePerDay - b.pricePerDay);
@@ -338,6 +382,73 @@ function BrowseCartsPageContent() {
 
     return result;
   }, [dbCarts, search, selectedTypes, selectedConditions, maxPrice, userCoords, searchParams, activeTypeFilter, sortBy]);
+
+  // >>> NEW: Filter and sort SALE carts — reuses the same search/type/condition/location logic
+  const filteredSaleCarts = useMemo(() => {
+    const qLocation = searchParams.get("location");
+    let list = saleCarts.filter(cart => {
+      const matchesSearch =
+        cart.type.toLowerCase().includes(search.toLowerCase()) ||
+        cart.nameEn.toLowerCase().includes(search.toLowerCase()) ||
+        (cart.descriptionEn && cart.descriptionEn.toLowerCase().includes(search.toLowerCase()));
+
+      const chipKeywordMap: Record<string, string> = {
+        "With Store": "stove",
+        "With Roof": "roof",
+        "Ice Cream": "ice cream",
+        "Tea & Coffee": "tea",
+        "E-Rickshaw": "rickshaw",
+      };
+      const matchesActiveTypeFilter = activeTypeFilter === "All" || (() => {
+        const keyword = chipKeywordMap[activeTypeFilter] || activeTypeFilter.toLowerCase();
+        return cart.type.toLowerCase().includes(keyword) || cart.nameEn.toLowerCase().includes(keyword);
+      })();
+
+      const matchesCondition = selectedConditions.length === 0 || selectedConditions.some(cond =>
+        cart.condition.toLowerCase().includes(cond.toLowerCase())
+      );
+
+      const matchesPrice = cart.price <= maxSalePrice;
+
+      let matchesLocation = true;
+      if (qLocation && qLocation !== "all") {
+        const cartLoc = (cart.location || "").toLowerCase();
+        const queryLoc = qLocation.toLowerCase();
+        matchesLocation = cartLoc.includes(queryLoc);
+      }
+
+      return matchesSearch && matchesActiveTypeFilter && matchesCondition && matchesPrice && matchesLocation;
+    });
+
+    if (userCoords) {
+      list = list.map(cart => ({
+        ...cart,
+        distanceKm: Number(
+          calculateHaversineDistance(userCoords, {
+            latitude: cart.latitude || 11.0168,
+            longitude: cart.longitude || 76.9558,
+          }).toFixed(2)
+        ),
+      }));
+    }
+
+    switch (sortBy) {
+      case "price-asc":
+        list = [...list].sort((a, b) => a.price - b.price);
+        break;
+      case "price-desc":
+        list = [...list].sort((a, b) => b.price - a.price);
+        break;
+      case "nearest":
+      default:
+        if (userCoords) {
+          list = [...list].sort((a: any, b: any) => (a.distanceKm || 0) - (b.distanceKm || 0));
+        }
+        break;
+    }
+
+    return list;
+  }, [saleCarts, search, selectedConditions, maxSalePrice, userCoords, searchParams, activeTypeFilter, sortBy]);
 
   return (
     <main className="min-h-screen bg-[#0a0a08] pb-20 md:pb-10 pt-14 md:pt-20 text-[#f6ded3]">
@@ -366,7 +477,6 @@ function BrowseCartsPageContent() {
               onBlur={() => setIsFocused(false)}
               className="w-full bg-[#1c110b] text-[#fffdf7] border border-[#ffb690]/25 px-4 py-2.5 pl-9 pr-24 text-xs outline-none placeholder:text-[#f6ded3]/40 focus:border-[#f97316] rounded-xl z-0"
             />
-            {/* Animated suggestion placeholder */}
             {!search && !isFocused && (
               <div className="absolute left-9 pointer-events-none text-xs text-[#f6ded3]/40 flex items-center gap-1 select-none z-10">
                 <span>
@@ -415,6 +525,32 @@ function BrowseCartsPageContent() {
             </button>
           </div>
         </div>
+
+        {/* >>> NEW: Rent / Sale toggle, placed right under the header */}
+        <div className="site-container max-w-7xl mx-auto mt-5 flex items-center gap-2">
+          <div className="inline-flex bg-[#1c110b] border border-[#ffb690]/25 rounded-xl p-1">
+            <button
+              onClick={() => setViewMode("rent")}
+              className={`px-5 py-2 rounded-lg text-xs font-display uppercase tracking-wider font-bold transition-all ${
+                viewMode === "rent"
+                  ? "bg-[#f97316] text-[#0a0a08]"
+                  : "text-[#ffb690] hover:bg-[#ffb690]/10"
+              }`}
+            >
+              <Text en="Rent" ta="வாடகை" />
+            </button>
+            <button
+              onClick={() => setViewMode("sale")}
+              className={`px-5 py-2 rounded-lg text-xs font-display uppercase tracking-wider font-bold transition-all ${
+                viewMode === "sale"
+                  ? "bg-[#f97316] text-[#0a0a08]"
+                  : "text-[#ffb690] hover:bg-[#ffb690]/10"
+              }`}
+            >
+              <Text en="Sale / Buy" ta="விற்பனை" />
+            </button>
+          </div>
+        </div>
       </section>
 
 
@@ -433,6 +569,7 @@ function BrowseCartsPageContent() {
                     setSelectedTypes([]);
                     setSelectedConditions([]);
                     setMaxPrice(200);
+                    setMaxSalePrice(100000); {/* >>> NEW */}
                     setSearch("");
                     setUserCoords(null);
                     setDetectedLocationName(null);
@@ -568,29 +705,46 @@ function BrowseCartsPageContent() {
               </div>
             </div>
 
-            {/* Price Range Filter */}
-            <div>
-              <label className="font-display text-xs tracking-widest text-[#f6ded3]/70 uppercase block mb-2">
-                <Text en={`Max Daily Rent (₹${maxPrice}/day)`} ta={`அதிகபட்ச ஒரு நாள் வாடகை (₹${maxPrice}/நாள்)`} />
-              </label>
-              <input 
-                type="range"
-                min="50"
-                max="200"
-                step="5"
-                value={maxPrice}
-                onChange={e => setMaxPrice(Number(e.target.value))}
-                className="w-full accent-[#f97316] bg-[#0a0a08] h-1"
-              />
-              <div className="flex justify-between text-[10px] text-[#f6ded3]/40 mt-1">
-                <span>
-                  <Text en="₹50/day" ta="₹50/நாள்" />
-                </span>
-                <span>
-                  <Text en="₹200/day" ta="₹200/நாள்" />
-                </span>
+            {/* Price Range Filter — >>> NEW: shows daily-rent slider or sale-price slider depending on mode */}
+            {viewMode === "rent" ? (
+              <div>
+                <label className="font-display text-xs tracking-widest text-[#f6ded3]/70 uppercase block mb-2">
+                  <Text en={`Max Daily Rent (₹${maxPrice}/day)`} ta={`அதிகபட்ச ஒரு நாள் வாடகை (₹${maxPrice}/நாள்)`} />
+                </label>
+                <input 
+                  type="range"
+                  min="50"
+                  max="200"
+                  step="5"
+                  value={maxPrice}
+                  onChange={e => setMaxPrice(Number(e.target.value))}
+                  className="w-full accent-[#f97316] bg-[#0a0a08] h-1"
+                />
+                <div className="flex justify-between text-[10px] text-[#f6ded3]/40 mt-1">
+                  <span><Text en="₹50/day" ta="₹50/நாள்" /></span>
+                  <span><Text en="₹200/day" ta="₹200/நாள்" /></span>
+                </div>
               </div>
-            </div>
+            ) : (
+              <div>
+                <label className="font-display text-xs tracking-widest text-[#f6ded3]/70 uppercase block mb-2">
+                  <Text en={`Max Price (₹${maxSalePrice.toLocaleString()})`} ta={`அதிகபட்ச விலை (₹${maxSalePrice.toLocaleString()})`} />
+                </label>
+                <input 
+                  type="range"
+                  min="5000"
+                  max="100000"
+                  step="1000"
+                  value={maxSalePrice}
+                  onChange={e => setMaxSalePrice(Number(e.target.value))}
+                  className="w-full accent-[#f97316] bg-[#0a0a08] h-1"
+                />
+                <div className="flex justify-between text-[10px] text-[#f6ded3]/40 mt-1">
+                  <span><Text en="₹5,000" ta="₹5,000" /></span>
+                  <span><Text en="₹1,00,000" ta="₹1,00,000" /></span>
+                </div>
+              </div>
+            )}
           </aside>
         )}
 
@@ -619,13 +773,13 @@ function BrowseCartsPageContent() {
           <div className="flex flex-wrap justify-between items-center gap-4 mb-6">
             <div className="flex flex-wrap items-center gap-3">
               <span className="font-display text-xs tracking-wider text-[#f6ded3]/60 uppercase">
+                {/* >>> NEW: count reflects active viewMode */}
                 <Text
-                  en={`${filteredCarts.length} carts matching your query`}
-                  ta={`உங்கள் தேடலுக்கு ${filteredCarts.length} வண்டிகள் உள்ளன`}
+                  en={`${viewMode === "rent" ? filteredCarts.length : filteredSaleCarts.length} carts matching your query`}
+                  ta={`உங்கள் தேடலுக்கு ${viewMode === "rent" ? filteredCarts.length : filteredSaleCarts.length} வண்டிகள் உள்ளன`}
                 />
               </span>
 
-              {/* Location chip (kept separate from type filter chips) */}
               {userCoords ? (
                 <div className="flex items-center gap-2 text-xs text-green-500 font-bold bg-[#160c06] border border-green-500/20 px-3 py-1.5 rounded-xl">
                   <MapPin className="w-3.5 h-3.5" />
@@ -675,127 +829,249 @@ function BrowseCartsPageContent() {
               <option value="nearest">{lang === "ta" ? "அருகிலுள்ளவை முதலில்" : "Nearest First"}</option>
               <option value="price-asc">{lang === "ta" ? "விலை: குறைந்ததிலிருந்து அதிகம்" : "Price: Low to High"}</option>
               <option value="price-desc">{lang === "ta" ? "விலை: அதிகத்திலிருந்து குறைவு" : "Price: High to Low"}</option>
-              <option value="newest">{lang === "ta" ? "புதியவை முதலில்" : "Newest First"}</option>
+              {viewMode === "rent" && (
+                <option value="newest">{lang === "ta" ? "புதியவை முதலில்" : "Newest First"}</option>
+              )}
             </select>
           </div>
 
-          {loading ? (
-            <div className="py-20 text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#f97316] mx-auto mb-4"></div>
-              <p className="text-sm text-[#f6ded3]/70">
-                <Text en="Loading fleet directory..." ta="பட்டியல் ஏற்றப்படுகிறது..." />
-              </p>
-            </div>
-          ) : filteredCarts.length === 0 ? (
-            <div className="bg-[#160c06] border border-[#ffb690]/15 py-20 text-center rounded-xl">
-              <p className="text-base">
-                <Text en="No food carts found matching your filter criteria." ta="உங்கள் தேடலுக்கு தகுந்த தள்ளுவண்டிகள் எதுவும் இல்லை." />
-              </p>
-              <button 
-                onClick={() => {
-                  setSelectedTypes([]);
-                  setSelectedConditions([]);
-                  setMaxPrice(5000);
-                  setSearch("");
-                  setUserCoords(null);
-                }}
-                className="font-display text-xs text-[#f97316] tracking-wider uppercase mt-4 hover:underline"
-              >
-                <Text en="Clear all filters" ta="வடிகட்டிகளை நீக்கு" />
-              </button>
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
-              {filteredCarts.map(cart => {
-                const conditionLabel = (cart.condition || "Used - Good").toUpperCase();
-                const conditionClasses =
-                  conditionLabel === "NEW"
-                    ? "bg-green-500 text-white"
-                    : conditionLabel === "USED - VERY GOOD"
-                      ? "bg-yellow-400 text-gray-900"
-                      : "bg-orange-400 text-white";
+          {/* >>> NEW: branch rendering based on viewMode */}
+          {viewMode === "rent" ? (
+            loading ? (
+              <div className="py-20 text-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#f97316] mx-auto mb-4"></div>
+                <p className="text-sm text-[#f6ded3]/70">
+                  <Text en="Loading fleet directory..." ta="பட்டியல் ஏற்றப்படுகிறது..." />
+                </p>
+              </div>
+            ) : filteredCarts.length === 0 ? (
+              <div className="bg-[#160c06] border border-[#ffb690]/15 py-20 text-center rounded-xl">
+                <p className="text-base">
+                  <Text en="No food carts found matching your filter criteria." ta="உங்கள் தேடலுக்கு தகுந்த தள்ளுவண்டிகள் எதுவும் இல்லை." />
+                </p>
+                <button 
+                  onClick={() => {
+                    setSelectedTypes([]);
+                    setSelectedConditions([]);
+                    setMaxPrice(5000);
+                    setSearch("");
+                    setUserCoords(null);
+                  }}
+                  className="font-display text-xs text-[#f97316] tracking-wider uppercase mt-4 hover:underline"
+                >
+                  <Text en="Clear all filters" ta="வடிகட்டிகளை நீக்கு" />
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
+                {filteredCarts.map(cart => {
+                  const conditionLabel = (cart.condition || "Used - Good").toUpperCase();
+                  const conditionClasses =
+                    conditionLabel === "NEW"
+                      ? "bg-green-500 text-white"
+                      : conditionLabel === "USED - VERY GOOD"
+                        ? "bg-yellow-400 text-gray-900"
+                        : "bg-orange-400 text-white";
 
-                const typeLabel = ((Array.isArray(cart.type) ? cart.type[0] : cart.type) || "Cart");
+                  const typeLabel = ((Array.isArray(cart.type) ? cart.type[0] : cart.type) || "Cart");
 
-                const descriptionText = lang === "ta" ? (cart.descriptionTa || cart.descriptionEn) : cart.descriptionEn;
-                const showDescription = !!descriptionText && descriptionText.trim().toLowerCase() !== "self-listed cart";
+                  const descriptionText = lang === "ta" ? (cart.descriptionTa || cart.descriptionEn) : cart.descriptionEn;
+                  const showDescription = !!descriptionText && descriptionText.trim().toLowerCase() !== "self-listed cart";
 
-                return (
-                  <div key={cart.id} className="group bg-white border border-gray-200 hover:shadow-lg transition-all duration-300 flex flex-col rounded-2xl overflow-hidden relative h-full">
-
-                    {/* Photo section - Clickable to details */}
-                    <Link
-                      href={`/carts/${cart.uniqueCode || cart.id}`}
-                      className="relative w-full h-[180px] md:h-[220px] bg-gray-50 shrink-0 flex items-center justify-center overflow-hidden block hover:opacity-95 transition-opacity"
-                    >
-                      <span className={`absolute top-3 left-3 z-10 text-[9px] md:text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full ${conditionClasses}`}>
-                        <Text en={CONDITION_TRANSLATIONS[conditionLabel]?.en || conditionLabel} ta={CONDITION_TRANSLATIONS[conditionLabel]?.ta || conditionLabel} />
-                      </span>
-                      {cart.distanceKm !== undefined && cart.distanceKm <= 1000 && (
-                        <span className="absolute bottom-3 left-3 z-10 bg-green-800 text-white text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1 shadow-sm">
-                          📍 {cart.distanceKm.toFixed(2)} km
+                  return (
+                    <div key={cart.id} className="group bg-white border border-gray-200 hover:shadow-lg transition-all duration-300 flex flex-col rounded-2xl overflow-hidden relative h-full">
+                      <Link
+                        href={`/carts/${cart.uniqueCode || cart.id}`}
+                        className="relative w-full h-[180px] md:h-[220px] bg-gray-50 shrink-0 flex items-center justify-center overflow-hidden block hover:opacity-95 transition-opacity"
+                      >
+                        <span className={`absolute top-3 left-3 z-10 text-[9px] md:text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full ${conditionClasses}`}>
+                          <Text en={CONDITION_TRANSLATIONS[conditionLabel]?.en || conditionLabel} ta={CONDITION_TRANSLATIONS[conditionLabel]?.ta || conditionLabel} />
                         </span>
-                      )}
-                      {cart.images && cart.images[0] ? (
-                        <img
-                          src={cart.images[0]}
-                          alt={cart.nameEn}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        />
-                      ) : (
-                        <svg viewBox="0 0 100 80" className="w-16 h-16 text-gray-300" fill="currentColor">
-                          <path d="M20 20 h60 v40 h-60 z M30 60 v10 M70 60 v10 M25 70 h50 M35 70 v5 M65 70 v5"/>
-                        </svg>
-                      )}
-                    </Link>
-
-                    {/* Card content - Clean spacing */}
-                    <div className="flex flex-col flex-grow p-4 md:p-5 gap-3">
-                      <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-bold uppercase tracking-widest border border-green-700 text-green-700 px-2.5 py-1 rounded-full">
-                          {typeLabel}
-                        </span>
-                        {cart.verified && (
-                          <span className="text-xs text-green-600 font-bold flex items-center gap-1">
-                            <span>✓</span>
-                            <Text en="Verified" ta="சரிபார்க்கப்பட்டது" />
+                        {cart.distanceKm !== undefined && cart.distanceKm <= 1000 && (
+                          <span className="absolute bottom-3 left-3 z-10 bg-green-800 text-white text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1 shadow-sm">
+                            📍 {cart.distanceKm.toFixed(2)} km
                           </span>
+                        )}
+                        {cart.images && cart.images[0] ? (
+                          <img
+                            src={cart.images[0]}
+                            alt={cart.nameEn}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          />
+                        ) : (
+                          <svg viewBox="0 0 100 80" className="w-16 h-16 text-gray-300" fill="currentColor">
+                            <path d="M20 20 h60 v40 h-60 z M30 60 v10 M70 60 v10 M25 70 h50 M35 70 v5 M65 70 v5"/>
+                          </svg>
+                        )}
+                      </Link>
+
+                      <div className="flex flex-col flex-grow p-4 md:p-5 gap-3">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-bold uppercase tracking-widest border border-green-700 text-green-700 px-2.5 py-1 rounded-full">
+                            {typeLabel}
+                          </span>
+                          {cart.verified && (
+                            <span className="text-xs text-green-600 font-bold flex items-center gap-1">
+                              <span>✓</span>
+                              <Text en="Verified" ta="சரிபார்க்கப்பட்டது" />
+                            </span>
+                          )}
+                        </div>
+
+                        {showDescription && (
+                          <p
+                            className="text-xs md:text-sm text-gray-500 leading-relaxed min-h-[38px]"
+                            style={{
+                              display: "-webkit-box",
+                              WebkitLineClamp: 2,
+                              WebkitBoxOrient: "vertical",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis"
+                            }}
+                          >
+                            {descriptionText}
+                          </p>
+                        )}
+
+                        <div className="mt-auto pt-3 border-t border-gray-100 flex flex-col gap-2">
+                          <span className="text-base md:text-xl font-extrabold text-green-800">
+                            ₹{cart.pricePerDay}/day
+                          </span>
+                          <Button asChild className="w-full bg-green-800 hover:bg-green-900 text-white font-bold rounded-xl h-10 text-xs md:text-sm shadow-sm transition-all">
+                            <Link href={`/book?cart=${cart.uniqueCode || cart.id}`}>
+                              <Text en="BOOK NOW" ta="பதிவு செய்யவும்" />
+                            </Link>
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )
+          ) : (
+            /* >>> NEW: SALE cart listing */
+            saleLoading ? (
+              <div className="py-20 text-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#f97316] mx-auto mb-4"></div>
+                <p className="text-sm text-[#f6ded3]/70">
+                  <Text en="Loading carts for sale..." ta="விற்பனை பட்டியல் ஏற்றப்படுகிறது..." />
+                </p>
+              </div>
+            ) : filteredSaleCarts.length === 0 ? (
+              <div className="bg-[#160c06] border border-[#ffb690]/15 py-20 text-center rounded-xl">
+                <p className="text-base">
+                  <Text en="No carts found for sale matching your filter criteria." ta="உங்கள் தேடலுக்கு தகுந்த விற்பனை வண்டிகள் இல்லை." />
+                </p>
+                <button
+                  onClick={() => {
+                    setSelectedConditions([]);
+                    setMaxSalePrice(100000);
+                    setSearch("");
+                    setUserCoords(null);
+                  }}
+                  className="font-display text-xs text-[#f97316] tracking-wider uppercase mt-4 hover:underline"
+                >
+                  <Text en="Clear all filters" ta="வடிகட்டிகளை நீக்கு" />
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
+                {filteredSaleCarts.map((cart: any) => {
+                  const conditionLabel = cart.condition.toUpperCase();
+                  const conditionClasses =
+                    conditionLabel === "NEW"
+                      ? "bg-green-500 text-white"
+                      : conditionLabel === "USED - VERY GOOD"
+                        ? "bg-yellow-400 text-gray-900"
+                        : "bg-orange-400 text-white";
+
+                  return (
+                    <div key={cart.id} className="group bg-white border border-gray-200 hover:shadow-lg transition-all duration-300 flex flex-col rounded-2xl overflow-hidden relative h-full">
+                      <div className="relative w-full h-[180px] md:h-[220px] bg-gray-50 shrink-0 flex items-center justify-center overflow-hidden">
+                        <span className={`absolute top-3 left-3 z-10 text-[9px] md:text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full ${conditionClasses}`}>
+                          <Text en={CONDITION_TRANSLATIONS[conditionLabel]?.en || conditionLabel} ta={CONDITION_TRANSLATIONS[conditionLabel]?.ta || conditionLabel} />
+                        </span>
+                        {cart.distanceKm !== undefined && (
+                          <span className="absolute bottom-3 left-3 z-10 bg-green-800 text-white text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1 shadow-sm">
+                            📍 {cart.distanceKm.toFixed(2)} km
+                          </span>
+                        )}
+                        {cart.images && cart.images[0] ? (
+                          <img
+                            src={cart.images[0]}
+                            alt={cart.nameEn}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          />
+                        ) : (
+                          <svg viewBox="0 0 100 80" className="w-16 h-16 text-gray-300" fill="currentColor">
+                            <path d="M20 20 h60 v40 h-60 z M30 60 v10 M70 60 v10 M25 70 h50 M35 70 v5 M65 70 v5"/>
+                          </svg>
                         )}
                       </div>
 
-                      {showDescription && (
-                        <p
-                          className="text-xs md:text-sm text-gray-500 leading-relaxed min-h-[38px]"
-                          style={{
-                            display: "-webkit-box",
-                            WebkitLineClamp: 2,
-                            WebkitBoxOrient: "vertical",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis"
-                          }}
-                        >
-                          {descriptionText}
-                        </p>
-                      )}
+                      <div className="flex flex-col flex-grow p-4 md:p-5 gap-3">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-bold uppercase tracking-widest border border-green-700 text-green-700 px-2.5 py-1 rounded-full">
+                            {cart.type}
+                          </span>
+                          {cart.verified && (
+                            <span className="text-xs text-green-600 font-bold flex items-center gap-1">
+                              <span>✓</span>
+                              <Text en="Verified" ta="சரிபார்க்கப்பட்டது" />
+                            </span>
+                          )}
+                        </div>
 
-                      <div className="mt-auto pt-3 border-t border-gray-100 flex flex-col gap-2">
-                        <span className="text-base md:text-xl font-extrabold text-green-800">
-                          ₹{cart.pricePerDay}/day
-                        </span>
-                        <Button asChild className="w-full bg-green-800 hover:bg-green-900 text-white font-bold rounded-xl h-10 text-xs md:text-sm shadow-sm transition-all">
-                          <Link href={`/book?cart=${cart.uniqueCode || cart.id}`}>
-                            <Text en="BOOK NOW" ta="பதிவு செய்யவும்" />
-                          </Link>
-                        </Button>
+                        <h3 className="text-sm md:text-base font-bold text-gray-800">
+                          {cart.nameEn}
+                        </h3>
+
+                        {cart.descriptionEn && (
+                          <p
+                            className="text-xs md:text-sm text-gray-500 leading-relaxed min-h-[38px]"
+                            style={{
+                              display: "-webkit-box",
+                              WebkitLineClamp: 2,
+                              WebkitBoxOrient: "vertical",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis"
+                            }}
+                          >
+                            {cart.descriptionEn}
+                          </p>
+                        )}
+
+                        {cart.features && cart.features.length > 0 && (
+                          <div className="flex flex-wrap gap-1.5">
+                            {cart.features.slice(0, 3).map((f: string) => (
+                              <span key={f} className="text-[10px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
+                                {f}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+
+                        <div className="mt-auto pt-3 border-t border-gray-100 flex flex-col gap-2">
+                          <span className="text-base md:text-xl font-extrabold text-green-800">
+                            ₹{cart.price.toLocaleString()}
+                          </span>
+                          {/* Sale enquiry uses WhatsApp; no payment/checkout is implemented yet. */}
+                          <Button
+                            type="button"
+                            onClick={() => handleSaleEnquiry(cart)}
+                            className="w-full bg-green-800 hover:bg-green-900 text-white font-bold rounded-xl h-10 text-xs md:text-sm shadow-sm transition-all"
+                          >
+                            <Text en="ENQUIRE / BUY" ta="விசாரிக்க / வாங்க" />
+                          </Button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
+            )
           )}
-
-
         </section>
       </div>
     </main>
