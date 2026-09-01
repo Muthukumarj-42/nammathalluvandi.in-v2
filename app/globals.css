@@ -376,9 +376,9 @@ html[data-lang="ta"] body {
   left: 0;
   width: 100%;
   height: 100%;
-  pointer-events: none;
+  pointer-events: none !important;
   opacity: 0.03;
-  z-index: 9999;
+  z-index: 10 !important;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
 }
 
@@ -688,3 +688,18 @@ html[data-lang] .font-brand-logo *,
   overflow-wrap: normal !important;
   white-space: nowrap !important;
 }
+
+/* Ensure Razorpay modal and iframes always receive top z-index and active pointer events */
+.razorpay-container,
+.razorpay-backdrop,
+.razorpay-checkout-frame,
+iframe[name^="razorpay"],
+iframe[src*="razorpay"] {
+  z-index: 2147483647 !important;
+  pointer-events: auto !important;
+}
+
+.razorpay-container iframe {
+  pointer-events: auto !important;
+}
+

@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { ShieldCheck, Lock, CheckCircle2, ArrowRight, AlertCircle, RefreshCw, CreditCard, Sparkles } from "lucide-react";
 import { ListingPlan, BillingCycle, getPlanPricing, formatCurrency } from "@/lib/plans";
+import { RazorpaySubscriptionWidget } from "@/components/payment/razorpay-subscription-widget";
 import { Button } from "@/components/ui/button";
 
 declare global {
@@ -52,6 +53,7 @@ export function RazorpayPlanCheckout({
   const [verifiedSubscription, setVerifiedSubscription] = useState<any>(null);
 
   // Helper to ensure page scrolling is NEVER locked or frozen after failure or modal dismissal
+  // NOTE: NEVER set pointer-events: none on Razorpay elements!
   const unlockPageScroll = useCallback(() => {
     if (typeof document === "undefined") return;
     try {
@@ -64,26 +66,18 @@ export function RazorpayPlanCheckout({
       document.documentElement.style.position = "";
       document.documentElement.style.pointerEvents = "";
       document.documentElement.classList.remove("overflow-hidden");
-
-      // Reset any stuck pointer-events from third-party iframes or backdrops
-      const stuckElements = document.querySelectorAll(
-        ".razorpay-container, .razorpay-backdrop, [class*='razorpay-modal']"
-      );
-      stuckElements.forEach((el) => {
-        (el as HTMLElement).style.pointerEvents = "none";
-      });
     } catch (e) {
       console.warn("Scroll unlock error:", e);
     }
   }, []);
 
-  // Guarantee scroll restoration on mount, unmount, and status updates
+  // Guarantee scroll restoration on mount and unmount
   useEffect(() => {
     unlockPageScroll();
     return () => {
       unlockPageScroll();
     };
-  }, [unlockPageScroll, paymentStatus]);
+  }, [unlockPageScroll]);
 
   // Load Razorpay Standard Web Checkout script (<script src="https://checkout.razorpay.com/v1/checkout.js"></script>)
   useEffect(() => {
@@ -379,13 +373,13 @@ export function RazorpayPlanCheckout({
           )}
         </div>
 
-        {/* Custom NTV Pay Now Button */}
-        <div className="space-y-2.5 pt-1">
+        {/* Option A: Custom NTV Pay Now Button (Direct Checkout modal) */}
+        <div className="space-y-3 pt-1">
           <Button
             type="button"
             onClick={handlePayNow}
             disabled={isLoading}
-            className="w-full py-4 h-auto rounded-xl bg-primary hover:bg-primary/90 text-on-primary font-bold text-sm uppercase tracking-widest shadow-md transition active:scale-[0.99] flex items-center justify-center gap-2"
+            className="w-full py-4 h-auto rounded-xl bg-primary hover:bg-primary/90 text-on-primary font-bold text-sm uppercase tracking-widest shadow-md transition active:scale-[0.99] flex items-center justify-center gap-2 cursor-pointer"
           >
             {isLoading ? (
               <span className="flex items-center gap-2">
@@ -393,7 +387,7 @@ export function RazorpayPlanCheckout({
                 {paymentStatus === "verifying" ? (
                   <T en="Verifying Payment Signature…" ta="கட்டணம் சரிபார்க்கப்படுகிறது…" />
                 ) : (
-                  <T en="Initializing Razorpay Checkout…" ta="கட்டண தளம் திறக்கப்படுகிறது…" />
+                  <T en="Opening Razorpay Checkout…" ta="கட்டண தளம் திறக்கப்படுகிறது…" />
                 )}
               </span>
             ) : (
@@ -406,6 +400,21 @@ export function RazorpayPlanCheckout({
               </span>
             )}
           </Button>
+
+          {/* Option B: Official Razorpay Subscription Widget fallback */}
+          {plan.subscriptionButtonId && (
+            <div className="pt-2 flex flex-col items-center justify-center gap-1.5 border-t border-outline-variant/10">
+              <span className="text-[11px] text-on-surface-variant/70">
+                <T en="Or subscribe via official widget:" ta="அல்லது அதிகாரப்பூர்வ விட்ஜெட் மூலம் சந்தா பெறுக:" />
+              </span>
+              <div className="w-full flex justify-center py-1">
+                <RazorpaySubscriptionWidget
+                  key={`${plan.id}-${billingCycle}`}
+                  subscriptionButtonId={plan.subscriptionButtonId}
+                />
+              </div>
+            </div>
+          )}
 
           {onCancel && (
             <Button
@@ -427,7 +436,7 @@ export function RazorpayPlanCheckout({
         <div className="flex items-center justify-between text-xs text-on-surface-variant pt-2 border-t border-outline-variant/10">
           <div className="flex items-center gap-1.5 text-emerald-600 font-medium">
             <ShieldCheck className="w-4 h-4" />
-            <T en="Secured by Razorpay Standard Checkout" ta="ரேசர்பே பாதுகாப்பானது" />
+            <T en="Secured by Razorpay" ta="ரேசர்பே பாதுகாப்பானது" />
           </div>
           <div className="flex items-center gap-1 text-on-surface-variant/60 text-[11px]">
             <Lock className="w-3.5 h-3.5" />
