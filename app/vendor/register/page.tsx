@@ -167,21 +167,43 @@ export default function VendorRegisterPage() {
       // NOTE: requires supabase/migrations/002_vendor_and_cart_listing_redesign.sql
       // to have been run — it adds full_name/whatsapp_number/profile_photo_url/
       // latitude/longitude/area/district/cart_count/about_text to vendor_profiles.
-      const { error: insertError } = await supabase
+      const profileData: any = {
+        id: user.id,
+        full_name: form.fullName.trim(),
+        whatsapp_number: form.whatsappNumber.trim(),
+        profile_photo_url: profilePhotoUrl,
+        latitude: geo.latitude,
+        longitude: geo.longitude,
+        area: geo.area,
+        district: geo.district,
+        cart_count: form.cartCount,
+        about_text: form.aboutText.trim(),
+        status: "approved",
+      };
+
+      if (vendorProfile?.unique_code) {
+        profileData.unique_code = vendorProfile.unique_code;
+      }
+
+      let { error: insertError } = await supabase
         .from("vendor_profiles")
-        .upsert({
-          id: user.id,
-          full_name: form.fullName.trim(),
-          whatsapp_number: form.whatsappNumber.trim(),
-          profile_photo_url: profilePhotoUrl,
-          latitude: geo.latitude,
-          longitude: geo.longitude,
-          area: geo.area,
-          district: geo.district,
-          cart_count: form.cartCount,
-          about_text: form.aboutText.trim(),
-          status: "approved",
-        });
+        .upsert(profileData);
+
+      // If a unique_code key violation occurs, calculate next available unique_code and retry
+      if (insertError && insertError.message?.includes("vendor_profiles_unique_code_key")) {
+        const { count } = await supabase
+          .from("vendor_profiles")
+          .select("id", { count: "exact", head: true });
+
+        const safeCode = `ntv-0${String((count || 0) + 10 + Math.floor(Math.random() * 90)).padStart(4, "0")}`;
+        profileData.unique_code = safeCode;
+
+        const retryResult = await supabase
+          .from("vendor_profiles")
+          .upsert(profileData);
+
+        insertError = retryResult.error;
+      }
 
       if (insertError) throw insertError;
       await refreshProfile();
