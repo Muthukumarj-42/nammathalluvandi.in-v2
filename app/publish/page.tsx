@@ -29,6 +29,7 @@ import {
   createSubscriptionAction,
   getOwnerListingUsageAction,
 } from "@/app/actions";
+import { saveLocalSubscription, getLocalSubscription } from "@/lib/subscription-storage";
 import { useAuth } from "@/context/auth-context";
 import { createClient } from "@/lib/supabase-browser";
 import {
@@ -255,42 +256,79 @@ function PublishPageContent() {
     };
   }, []);
 
-  // Load user subscription and listing usage
+  // Load user subscription and listing usage (Local Storage + Supabase dual persistence)
   const fetchUsageData = useCallback(async () => {
     if (!user) return;
     try {
+      const localSub = getLocalSubscription(user.id);
       const res = await getOwnerListingUsageAction(user.id);
-      if (res.success && res.data) {
-        setUserSubscription(res.data.subscription);
-        setUsageStats({
-          totalListings: res.data.totalListings,
-          remainingListings: res.data.remainingListings,
-          maxCarts: res.data.maxCarts,
-          canPublish: res.data.canPublish,
-        });
 
-        // Determine step based on subscription
-        if (editCartId) {
-          setCurrentStep("cart_form");
-        } else if (forcePlanSelect) {
-          setCurrentStep("plan_select");
-        } else if (res.data.canPublish) {
-          setCurrentStep("cart_form");
-        } else if (res.data.subscription && res.data.remainingListings <= 0) {
-          // Limit reached, prompt upgrade
-          setCurrentStep("plan_select");
-        } else {
-          // No active plan yet
-          setCurrentStep("plan_select");
-        }
+      let activeSub = res.success && res.data ? res.data.subscription : null;
+      let totalListings = res.success && res.data ? res.data.totalListings : 0;
+
+      if (!activeSub && localSub) {
+        // Fallback to local storage subscription if server had transient RLS or table sync delay
+        activeSub = localSub;
+        // Background sync to Supabase
+        createSubscriptionAction({
+          userId: user.id,
+          vendorId: vendorProfile?.id || null,
+          planId: localSub.plan_id,
+          billingCycle: localSub.billing_cycle,
+          amount: localSub.amount,
+          paymentId: localSub.payment_id || undefined,
+          paymentStatus: "completed",
+          durationDays: Math.max(1, Math.ceil((new Date(localSub.expires_at).getTime() - Date.now()) / (1000 * 60 * 60 * 24))),
+          maxCarts: localSub.max_carts,
+        }).catch(console.warn);
+      } else if (activeSub) {
+        // Sync fresh server subscription to localStorage
+        saveLocalSubscription(user.id, activeSub);
+      }
+
+      const maxCarts = activeSub ? activeSub.max_carts : 0;
+      const remainingListings = Math.max(0, maxCarts - totalListings);
+      const canPublish = activeSub !== null && remainingListings > 0;
+
+      setUserSubscription(activeSub);
+      setUsageStats({
+        totalListings,
+        remainingListings,
+        maxCarts,
+        canPublish,
+      });
+
+      // Determine step based on subscription
+      if (editCartId) {
+        setCurrentStep("cart_form");
+      } else if (forcePlanSelect) {
+        setCurrentStep("plan_select");
+      } else if (canPublish) {
+        setCurrentStep("cart_form");
+      } else if (activeSub && remainingListings <= 0) {
+        // Limit reached, prompt upgrade
+        setCurrentStep("plan_select");
       } else {
+        // No active plan yet
         setCurrentStep("plan_select");
       }
     } catch (err) {
       console.error("Failed to fetch subscription data:", err);
-      setCurrentStep("plan_select");
+      const localSub = getLocalSubscription(user.id);
+      if (localSub) {
+        setUserSubscription(localSub);
+        setUsageStats({
+          totalListings: 0,
+          remainingListings: localSub.max_carts,
+          maxCarts: localSub.max_carts,
+          canPublish: true,
+        });
+        setCurrentStep("cart_form");
+      } else {
+        setCurrentStep("plan_select");
+      }
     }
-  }, [user, editCartId, forcePlanSelect]);
+  }, [user, editCartId, forcePlanSelect, vendorProfile?.id]);
 
   useEffect(() => {
     if (!authLoading && user) {
@@ -419,9 +457,11 @@ function PublishPageContent() {
   const handlePaymentSuccess = async (subscription: any) => {
     if (!user) return;
     try {
+      // 1. Immediately store in localStorage so refresh/back navigation never prompts again
+      saveLocalSubscription(user.id, subscription);
       setUserSubscription(subscription);
       await fetchUsageData();
-      // Redirect immediately into the cart listing submission form
+      // 2. Redirect immediately into the cart listing submission form
       setCurrentStep("cart_form");
     } catch (err: any) {
       console.error("Subscription activation failed:", err);

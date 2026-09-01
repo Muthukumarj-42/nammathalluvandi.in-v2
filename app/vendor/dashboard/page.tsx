@@ -8,6 +8,7 @@ import { useAuth } from "@/context/auth-context";
 import { useRouter } from "next/navigation";
 import { mapDbCartToCart, type Cart } from "@/lib/carts";
 import { getOwnerListingUsageAction } from "@/app/actions";
+import { getLocalSubscription, saveLocalSubscription } from "@/lib/subscription-storage";
 import { getPlan, formatCurrency } from "@/lib/plans";
 import { Button } from "@/components/ui/button";
 
@@ -116,7 +117,19 @@ export default function VendorDashboardPage() {
 
     // 2. Fetch owner subscription & usage limits
     getOwnerListingUsageAction(user.id).then((res) => {
-      if (res.success && res.data) {
+      const localSub = getLocalSubscription(user.id);
+      if (res.success && res.data && res.data.subscription) {
+        setUsageStats(res.data);
+        saveLocalSubscription(user.id, res.data.subscription);
+      } else if (localSub) {
+        setUsageStats((prev) => ({
+          subscription: localSub,
+          totalListings: prev.totalListings,
+          remainingListings: Math.max(0, localSub.max_carts - prev.totalListings),
+          maxCarts: localSub.max_carts,
+          canPublish: localSub.max_carts > prev.totalListings,
+        }));
+      } else if (res.success && res.data) {
         setUsageStats(res.data);
       }
     });
