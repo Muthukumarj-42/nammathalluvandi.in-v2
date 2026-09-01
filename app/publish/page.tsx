@@ -298,6 +298,19 @@ function PublishPageContent() {
     }
   }, [authLoading, user, fetchUsageData]);
 
+  // Ensure scroll is fully unlocked and window resets to top on any step change
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      document.body.style.overflow = "";
+      document.body.style.position = "";
+      document.body.style.pointerEvents = "";
+      document.documentElement.style.overflow = "";
+      document.documentElement.style.position = "";
+      document.documentElement.style.pointerEvents = "";
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }, [currentStep]);
+
   // Load existing cart for edit mode
   useEffect(() => {
     if (!editCartId) return;

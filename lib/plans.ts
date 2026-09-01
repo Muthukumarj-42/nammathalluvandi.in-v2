@@ -25,6 +25,7 @@ export interface ListingPlan {
   bgHex: string;
   isRecommended?: boolean;
   maxCarts: number;
+  subscriptionButtonId: string;
   pricing: Record<BillingCycle, PlanPricing>;
   featuresEn: string[];
   featuresTa: string[];
@@ -42,6 +43,7 @@ export const LISTING_PLANS: Record<PlanTier, ListingPlan> = {
     borderHex: "#10b981/30",
     bgHex: "rgba(16, 185, 129, 0.05)",
     maxCarts: 2,
+    subscriptionButtonId: "pl_TWnbGO0xqCqylLa",
     pricing: {
       "1_month": {
         price: 99,
@@ -95,6 +97,7 @@ export const LISTING_PLANS: Record<PlanTier, ListingPlan> = {
     bgHex: "rgba(59, 130, 246, 0.08)",
     isRecommended: true,
     maxCarts: 5,
+    subscriptionButtonId: "pl_TWnfRDNwSuckjv",
     pricing: {
       "1_month": {
         price: 249,
@@ -151,6 +154,7 @@ export const LISTING_PLANS: Record<PlanTier, ListingPlan> = {
     borderHex: "#a855f7/40",
     bgHex: "rgba(168, 85, 247, 0.08)",
     maxCarts: 10,
+    subscriptionButtonId: "pl_TWniVIcizCDktA",
     pricing: {
       "1_month": {
         price: 459,
