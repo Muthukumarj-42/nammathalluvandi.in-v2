@@ -525,3 +525,71 @@ export async function getOwnerListingUsageAction(ownerId: string) {
   }
 }
 
+// --------------------------------------------------
+// RAZORPAY SERVER-SIDE ORDER & VERIFICATION ACTIONS
+// --------------------------------------------------
+
+export async function createRazorpayOrderAction(
+  planId: "basic" | "growth" | "pro",
+  billingCycle: "1_month" | "3_months",
+  userId: string
+): Promise<import("@/lib/razorpay").CreateOrderResult> {
+  try {
+    const { createRazorpayOrder } = await import("@/lib/razorpay");
+    const result = await createRazorpayOrder(planId, billingCycle, userId);
+    return result;
+  } catch (err: any) {
+    console.error("createRazorpayOrderAction error:", err);
+    return { success: false, error: err.message || "Failed to initialize payment" };
+  }
+}
+
+export async function verifyAndActivateSubscriptionAction(data: {
+  razorpayOrderId: string;
+  razorpayPaymentId: string;
+  razorpaySignature?: string;
+  planId: "basic" | "growth" | "pro";
+  billingCycle: "1_month" | "3_months";
+  userId: string;
+  vendorId?: string | null;
+}) {
+  try {
+    const { verifyRazorpaySignature } = await import("@/lib/razorpay");
+    const { getPlan, getPlanPricing } = await import("@/lib/plans");
+
+    // 1. Verify Razorpay signature securely on server
+    const verification = verifyRazorpaySignature(
+      data.razorpayOrderId,
+      data.razorpayPaymentId,
+      data.razorpaySignature
+    );
+
+    if (!verification.success) {
+      return { success: false, error: verification.error || "Payment verification failed" };
+    }
+
+    // 2. Fetch validated pricing and quota directly from server-side config
+    const plan = getPlan(data.planId);
+    const pricing = getPlanPricing(plan.id, data.billingCycle);
+
+    // 3. Mark subscription as paid and active in database
+    const sub = await createOrUpdateSubscription({
+      user_id: data.userId,
+      vendor_id: data.vendorId,
+      plan_id: plan.id,
+      billing_cycle: data.billingCycle,
+      amount: pricing.price,
+      payment_id: data.razorpayPaymentId,
+      payment_status: "completed",
+      max_carts: plan.maxCarts,
+      duration_days: pricing.durationDays,
+    });
+
+    return { success: true, data: sub };
+  } catch (err: any) {
+    console.error("verifyAndActivateSubscriptionAction error:", err);
+    return { success: false, error: err.message || "Failed to activate subscription" };
+  }
+}
+
+

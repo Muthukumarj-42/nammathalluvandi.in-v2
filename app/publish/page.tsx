@@ -402,39 +402,17 @@ function PublishPageContent() {
     confirmed &&
     (editCartId ? true : totalPhotos >= 2);
 
-  // Handle Razorpay Payment Success
-  const handlePaymentSuccess = async (paymentDetails: {
-    paymentId: string;
-    amount: number;
-    planId: string;
-    billingCycle: string;
-  }) => {
+  // Handle Verified Razorpay Payment Success
+  const handlePaymentSuccess = async (subscription: any) => {
     if (!user) return;
     try {
-      const plan = getPlan(paymentDetails.planId);
-      const pricing = getPlanPricing(plan.id, paymentDetails.billingCycle as BillingCycle);
-
-      const res = await createSubscriptionAction({
-        userId: user.id,
-        vendorId: vendorProfile?.id,
-        planId: plan.id,
-        billingCycle: paymentDetails.billingCycle as BillingCycle,
-        amount: paymentDetails.amount,
-        paymentId: paymentDetails.paymentId,
-        paymentStatus: "completed",
-        durationDays: pricing.durationDays,
-        maxCarts: plan.maxCarts,
-      });
-
-      if (res.success && res.data) {
-        setUserSubscription(res.data);
-        await fetchUsageData();
-        // Redirect directly into the cart listing form
-        setCurrentStep("cart_form");
-      }
+      setUserSubscription(subscription);
+      await fetchUsageData();
+      // Redirect immediately into the cart listing submission form
+      setCurrentStep("cart_form");
     } catch (err: any) {
       console.error("Subscription activation failed:", err);
-      setError("Payment succeeded but subscription activation failed. Please contact support.");
+      setError("Subscription activation error. Please contact support.");
     }
   };
 
@@ -774,6 +752,7 @@ function PublishPageContent() {
               email: user.email,
               phone: vendorProfile?.whatsapp_number || vendorProfile?.phone,
             }}
+            vendorId={vendorProfile?.id}
             onSuccess={handlePaymentSuccess}
             onCancel={() => setCurrentStep("plan_select")}
           />
