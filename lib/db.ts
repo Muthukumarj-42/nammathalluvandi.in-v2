@@ -72,6 +72,25 @@ export interface Dispute {
   created_at?: string;
 }
 
+export interface VendorSubscription {
+  id: string;
+  user_id: string;
+  vendor_id?: string | null;
+  plan_id: "basic" | "growth" | "pro";
+  billing_cycle: "1_month" | "3_months";
+  amount: number;
+  payment_id?: string | null;
+  payment_status: "initiated" | "completed" | "failed" | "cancelled" | "pending";
+  status: "active" | "expired" | "pending";
+  max_carts: number;
+  starts_at: string;
+  expires_at: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+let mockSubscriptions: VendorSubscription[] = [];
+
 // In-Memory Database Fallback (populated with seed coordinates and details for local demo)
 let mockUsers: User[] = [
   { id: "a1111111-1111-1111-1111-111111111111", role: "admin", name: "Muthu Admin", phone: "918838292849" },
@@ -892,3 +911,126 @@ export async function updateDisputeStatus(id: string, status: Dispute["status"])
   }
   return null;
 }
+
+// --------------------------------------------------
+// VENDOR SUBSCRIPTIONS DATABASE FUNCTIONS
+// --------------------------------------------------
+
+export async function getActiveSubscriptionByUserId(userId: string): Promise<VendorSubscription | null> {
+  if (isDbConfigured) {
+    try {
+      const now = new Date().toISOString();
+      const { data, error } = await supabase
+        .from("vendor_subscriptions")
+        .select("*")
+        .eq("user_id", userId)
+        .eq("status", "active")
+        .gt("expires_at", now)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (error && error.code !== "PGRST116") {
+        console.warn("Supabase query for vendor_subscriptions error, falling back:", error.message);
+      }
+      if (data) return data;
+    } catch (err: any) {
+      console.warn("Subscription check failed in DB, checking mock store:", err.message);
+    }
+  }
+
+  const now = new Date();
+  const sub = mockSubscriptions
+    .filter((s) => s.user_id === userId && s.status === "active" && new Date(s.expires_at) > now)
+    .sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime())[0];
+
+  return sub || null;
+}
+
+export async function createOrUpdateSubscription(data: {
+  user_id: string;
+  vendor_id?: string | null;
+  plan_id: "basic" | "growth" | "pro";
+  billing_cycle: "1_month" | "3_months";
+  amount: number;
+  payment_id?: string | null;
+  payment_status?: "initiated" | "completed" | "failed" | "cancelled" | "pending";
+  max_carts: number;
+  duration_days: number;
+}): Promise<VendorSubscription> {
+  const startsAt = new Date().toISOString();
+  const expiresAt = new Date(Date.now() + data.duration_days * 24 * 60 * 60 * 1000).toISOString();
+
+  const record: Omit<VendorSubscription, "id"> = {
+    user_id: data.user_id,
+    vendor_id: data.vendor_id || null,
+    plan_id: data.plan_id,
+    billing_cycle: data.billing_cycle,
+    amount: data.amount,
+    payment_id: data.payment_id || `pay_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+    payment_status: data.payment_status || "completed",
+    status: "active",
+    max_carts: data.max_carts,
+    starts_at: startsAt,
+    expires_at: expiresAt,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  };
+
+  if (isDbConfigured) {
+    try {
+      const { data: inserted, error } = await supabase
+        .from("vendor_subscriptions")
+        .insert([record])
+        .select()
+        .single();
+
+      if (!error && inserted) {
+        return inserted;
+      }
+      console.warn("Failed to insert subscription into Supabase table, saving in memory:", error?.message);
+    } catch (err: any) {
+      console.warn("Error inserting subscription, saving to memory fallback:", err.message);
+    }
+  }
+
+  const created: VendorSubscription = {
+    id: `sub-${Math.random().toString(36).substring(2, 9)}`,
+    ...record,
+  };
+
+  // Replace any existing active sub for this user
+  mockSubscriptions = mockSubscriptions.filter((s) => s.user_id !== data.user_id);
+  mockSubscriptions.push(created);
+
+  return created;
+}
+
+export async function getOwnerListingUsage(ownerId: string): Promise<{
+  subscription: VendorSubscription | null;
+  totalListings: number;
+  remainingListings: number;
+  maxCarts: number;
+  canPublish: boolean;
+}> {
+  const [sub, carts] = await Promise.all([
+    getActiveSubscriptionByUserId(ownerId),
+    getCartsByOwnerId(ownerId),
+  ]);
+
+  const totalListings = carts.length;
+  // If user has an active subscription, use its max_carts limit
+  // Default to 0 listings allowed without plan to enforce plan selection
+  const maxCarts = sub ? sub.max_carts : 0;
+  const remainingListings = Math.max(0, maxCarts - totalListings);
+  const canPublish = sub !== null && remainingListings > 0;
+
+  return {
+    subscription: sub,
+    totalListings,
+    remainingListings,
+    maxCarts,
+    canPublish,
+  };
+}
+

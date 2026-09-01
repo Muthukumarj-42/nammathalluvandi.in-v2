@@ -24,9 +24,13 @@ import {
   getWhatsappMessages,
   getDisputes,
   getUsers,
+  getActiveSubscriptionByUserId,
+  createOrUpdateSubscription,
+  getOwnerListingUsage,
   DbCart,
   Booking,
-  Dispute
+  Dispute,
+  VendorSubscription
 } from "@/lib/db";
 
 export async function uploadImagesAction(formData: FormData) {
@@ -462,3 +466,62 @@ export async function getCart(id: string) {
 export async function getCarts() {
   return getLiveCarts();
 }
+
+// --------------------------------------------------
+// SUBSCRIPTION SERVER ACTIONS
+// --------------------------------------------------
+
+export async function getUserSubscriptionAction(userId: string) {
+  try {
+    const sub = await getActiveSubscriptionByUserId(userId);
+    return { success: true, data: sub };
+  } catch (err: any) {
+    console.error("getUserSubscriptionAction error:", err);
+    return { success: false, error: err.message, data: null };
+  }
+}
+
+export async function createSubscriptionAction(data: {
+  userId: string;
+  vendorId?: string | null;
+  planId: "basic" | "growth" | "pro";
+  billingCycle: "1_month" | "3_months";
+  amount: number;
+  paymentId?: string;
+  paymentStatus?: "initiated" | "completed" | "failed" | "cancelled" | "pending";
+  durationDays: number;
+  maxCarts: number;
+}) {
+  try {
+    const sub = await createOrUpdateSubscription({
+      user_id: data.userId,
+      vendor_id: data.vendorId,
+      plan_id: data.planId,
+      billing_cycle: data.billingCycle,
+      amount: data.amount,
+      payment_id: data.paymentId,
+      payment_status: data.paymentStatus,
+      max_carts: data.maxCarts,
+      duration_days: data.durationDays,
+    });
+    return { success: true, data: sub };
+  } catch (err: any) {
+    console.error("createSubscriptionAction error:", err);
+    return { success: false, error: err.message };
+  }
+}
+
+export async function getOwnerListingUsageAction(ownerId: string) {
+  try {
+    const usage = await getOwnerListingUsage(ownerId);
+    return { success: true, data: usage };
+  } catch (err: any) {
+    console.error("getOwnerListingUsageAction error:", err);
+    return {
+      success: false,
+      error: err.message,
+      data: { subscription: null, totalListings: 0, remainingListings: 0, maxCarts: 0, canPublish: false },
+    };
+  }
+}
+
