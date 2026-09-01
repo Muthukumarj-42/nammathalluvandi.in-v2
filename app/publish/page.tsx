@@ -197,10 +197,9 @@ function PublishPageContent() {
     return () => observer.disconnect();
   }, []);
 
-  // Flow State
-  // "loading" | "plan_select" | "review_payment" | "payment_success" | "cart_form" | "submitted_success"
+  // Flow State: "loading" | "plan_select" | "review_payment" | "cart_form" | "submitted_success"
   const [currentStep, setCurrentStep] = useState<
-    "loading" | "plan_select" | "review_payment" | "payment_success" | "cart_form" | "submitted_success"
+    "loading" | "plan_select" | "review_payment" | "cart_form" | "submitted_success"
   >("loading");
 
   // Subscription state
@@ -430,7 +429,8 @@ function PublishPageContent() {
       if (res.success && res.data) {
         setUserSubscription(res.data);
         await fetchUsageData();
-        setCurrentStep("payment_success");
+        // Redirect directly into the cart listing form
+        setCurrentStep("cart_form");
       }
     } catch (err: any) {
       console.error("Subscription activation failed:", err);
@@ -699,52 +699,7 @@ function PublishPageContent() {
     );
   }
 
-  // ── 4. Payment Success Transition Screen ──
-  if (currentStep === "payment_success") {
-    const activePlan = getPlan(selectedPlanId);
-    return (
-      <main className="min-h-screen bg-background pt-24 pb-16 px-4 flex items-center justify-center">
-        <div className="max-w-md w-full bg-surface rounded-3xl p-8 border border-emerald-500/30 shadow-xl text-center">
-          <div className="w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto mb-4 text-emerald-600">
-            <Check className="w-8 h-8 stroke-[3]" />
-          </div>
-          <h2 className="font-display text-2xl font-bold text-on-surface mb-2">
-            <T en="Payment Successful!" ta="கட்டணம் வெற்றிகரமாக செலுத்தப்பட்டது!" />
-          </h2>
-          <p className="text-on-surface-variant text-sm mb-6">
-            <T
-              en={`Your ${activePlan.nameEn} Plan is now active. You can list up to ${activePlan.maxCarts} carts.`}
-              ta={`உங்கள் ${activePlan.nameTa} திட்டம் இப்போது செயல்பாட்டில் உள்ளது. நீங்கள் ${activePlan.maxCarts} வண்டிகள் வரை பட்டியலிடலாம்.`}
-            />
-          </p>
-
-          <div className="bg-surface-container rounded-2xl p-4 border border-outline-variant/20 mb-6 text-left">
-            <div className="flex justify-between text-sm py-1">
-              <span className="text-on-surface-variant"><T en="Plan Tier:" ta="திட்டம்:" /></span>
-              <span className="font-bold text-on-surface">{activePlan.badgeEn}</span>
-            </div>
-            <div className="flex justify-between text-sm py-1">
-              <span className="text-on-surface-variant"><T en="Listing Limit:" ta="வரம்பு:" /></span>
-              <span className="font-bold text-emerald-600">{activePlan.maxCarts} <T en="Carts" ta="வண்டிகள்" /></span>
-            </div>
-            <div className="flex justify-between text-sm py-1">
-              <span className="text-on-surface-variant"><T en="Next Step:" ta="அடுத்த கட்டம்:" /></span>
-              <span className="font-medium text-primary"><T en="Submit Cart Details" ta="வண்டி விவரங்களை உள்ளிடவும்" /></span>
-            </div>
-          </div>
-
-          <Button
-            onClick={() => setCurrentStep("cart_form")}
-            className="w-full py-4 h-auto rounded-xl bg-primary hover:bg-primary/90 text-on-primary font-bold text-sm uppercase tracking-widest shadow-md"
-          >
-            <T en="PROCEED TO SUBMIT CART" ta="வண்டி விவரங்களை உள்ளிடவும்" /> →
-          </Button>
-        </div>
-      </main>
-    );
-  }
-
-  // ── 5. Review & Payment Step ──
+  // ── Review & Payment Step ──
   if (currentStep === "review_payment") {
     const selectedPlan = getPlan(selectedPlanId);
     const pricing = getPlanPricing(selectedPlan.id, billingCycle);
