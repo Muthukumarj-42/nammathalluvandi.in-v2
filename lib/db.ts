@@ -977,13 +977,23 @@ export async function createOrUpdateSubscription(data: {
     updated_at: new Date().toISOString(),
   };
 
-  if (isDbConfigured) {
+    if (isDbConfigured) {
     try {
       const { data: inserted, error } = await supabase
         .from("vendor_subscriptions")
         .insert([record])
         .select()
         .single();
+
+      // Also ensure vendor profile and user account reflect the active plan
+      try {
+        await supabase
+          .from("vendor_profiles")
+          .update({
+            status: "approved",
+          })
+          .eq("id", data.user_id);
+      } catch {}
 
       if (!error && inserted) {
         return inserted;

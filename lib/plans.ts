@@ -44,14 +44,14 @@ export const LISTING_PLANS: Record<PlanTier, ListingPlan> = {
     borderHex: "#10b981/30",
     bgHex: "rgba(16, 185, 129, 0.05)",
     maxCarts: 2,
-    subscriptionButtonId: "pl_TWnbGO0xqCqylLa",
+    subscriptionButtonId: "pl_TWnbGO0xqCylLa",
     pricing: {
       "1_month": {
         price: 99,
         durationDays: 30,
         perMonthLabelEn: "₹99/month",
         perMonthLabelTa: "₹99/மாதம்",
-        subscriptionButtonId: "pl_TWqrH2ojPiVLG8",
+        subscriptionButtonId: "pl_TWnbGO0xqCylLa",
       },
       "3_months": {
         price: 249,
@@ -60,7 +60,7 @@ export const LISTING_PLANS: Record<PlanTier, ListingPlan> = {
         perMonthLabelTa: "₹249/3 மாதங்கள்",
         savingsNoteEn: "Save ₹48",
         savingsNoteTa: "₹48 சேமிக்கவும்",
-        subscriptionButtonId: "pl_TWnbGO0xqCqylLa",
+        subscriptionButtonId: "pl_TWnbGO0xqCylLa",
       },
     },
     featuresEn: [
