@@ -154,7 +154,7 @@ export const LISTING_PLANS: Record<PlanTier, ListingPlan> = {
     borderHex: "#a855f7/40",
     bgHex: "rgba(168, 85, 247, 0.08)",
     maxCarts: 10,
-    subscriptionButtonId: "pl_TWniVIcizCDktA",
+    subscriptionButtonId: "pl_TWqFNGqo0AMvQF",
     pricing: {
       "1_month": {
         price: 459,
