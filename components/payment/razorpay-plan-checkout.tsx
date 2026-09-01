@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { ShieldCheck, Lock, CheckCircle2, ArrowRight, AlertCircle, RefreshCw, CreditCard, Sparkles } from "lucide-react";
-import { ListingPlan, BillingCycle, getPlanPricing, formatCurrency } from "@/lib/plans";
+import { ListingPlan, BillingCycle, getPlanPricing, getPlanSubscriptionButtonId, formatCurrency } from "@/lib/plans";
 import { RazorpaySubscriptionWidget } from "@/components/payment/razorpay-subscription-widget";
 import { Button } from "@/components/ui/button";
 
@@ -402,15 +402,15 @@ export function RazorpayPlanCheckout({
           </Button>
 
           {/* Option B: Official Razorpay Subscription Widget fallback */}
-          {plan.subscriptionButtonId && (
+          {getPlanSubscriptionButtonId(plan.id, billingCycle) && (
             <div className="pt-2 flex flex-col items-center justify-center gap-1.5 border-t border-outline-variant/10">
               <span className="text-[11px] text-on-surface-variant/70">
                 <T en="Or subscribe via official widget:" ta="அல்லது அதிகாரப்பூர்வ விட்ஜெட் மூலம் சந்தா பெறுக:" />
               </span>
               <div className="w-full flex justify-center py-1">
                 <RazorpaySubscriptionWidget
-                  key={`${plan.id}-${billingCycle}`}
-                  subscriptionButtonId={plan.subscriptionButtonId}
+                  key={`${plan.id}-${billingCycle}-${getPlanSubscriptionButtonId(plan.id, billingCycle)}`}
+                  subscriptionButtonId={getPlanSubscriptionButtonId(plan.id, billingCycle)}
                 />
               </div>
             </div>

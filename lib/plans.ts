@@ -11,6 +11,7 @@ export interface PlanPricing {
   perMonthLabelTa: string;
   savingsNoteEn?: string;
   savingsNoteTa?: string;
+  subscriptionButtonId?: string;
 }
 
 export interface ListingPlan {
@@ -50,6 +51,7 @@ export const LISTING_PLANS: Record<PlanTier, ListingPlan> = {
         durationDays: 30,
         perMonthLabelEn: "₹99/month",
         perMonthLabelTa: "₹99/மாதம்",
+        subscriptionButtonId: "pl_TWqrH2ojPiVLG8",
       },
       "3_months": {
         price: 249,
@@ -58,6 +60,7 @@ export const LISTING_PLANS: Record<PlanTier, ListingPlan> = {
         perMonthLabelTa: "₹249/3 மாதங்கள்",
         savingsNoteEn: "Save ₹48",
         savingsNoteTa: "₹48 சேமிக்கவும்",
+        subscriptionButtonId: "pl_TWnbGO0xqCqylLa",
       },
     },
     featuresEn: [
@@ -104,6 +107,7 @@ export const LISTING_PLANS: Record<PlanTier, ListingPlan> = {
         durationDays: 30,
         perMonthLabelEn: "₹249/month",
         perMonthLabelTa: "₹249/மாதம்",
+        subscriptionButtonId: "pl_TWnfRDNwSuckjv",
       },
       "3_months": {
         price: 599,
@@ -112,6 +116,7 @@ export const LISTING_PLANS: Record<PlanTier, ListingPlan> = {
         perMonthLabelTa: "₹599/3 மாதங்கள்",
         savingsNoteEn: "Save ₹148 (Popular)",
         savingsNoteTa: "₹148 சேமிக்கவும் (பிரபலம்)",
+        subscriptionButtonId: "pl_TWnfRDNwSuckjv",
       },
     },
     featuresEn: [
@@ -161,6 +166,7 @@ export const LISTING_PLANS: Record<PlanTier, ListingPlan> = {
         durationDays: 30,
         perMonthLabelEn: "₹459/month",
         perMonthLabelTa: "₹459/மாதம்",
+        subscriptionButtonId: "pl_TWqFNGqo0AMvQF",
       },
       "3_months": {
         price: 999,
@@ -169,6 +175,7 @@ export const LISTING_PLANS: Record<PlanTier, ListingPlan> = {
         perMonthLabelTa: "₹999/3 மாதங்கள்",
         savingsNoteEn: "Save ₹378 (Best Value)",
         savingsNoteTa: "₹378 சேமிக்கவும் (சிறந்த மதிப்பு)",
+        subscriptionButtonId: "pl_TWqFNGqo0AMvQF",
       },
     },
     featuresEn: [
@@ -211,6 +218,11 @@ export function getPlan(id: string): ListingPlan {
 export function getPlanPricing(planId: string, cycle: BillingCycle): PlanPricing {
   const plan = getPlan(planId);
   return plan.pricing[cycle] || plan.pricing["1_month"];
+}
+
+export function getPlanSubscriptionButtonId(planId: string, cycle: BillingCycle): string {
+  const plan = getPlan(planId);
+  return plan.pricing[cycle]?.subscriptionButtonId || plan.subscriptionButtonId;
 }
 
 export function formatCurrency(amount: number): string {
