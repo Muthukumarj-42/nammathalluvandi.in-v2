@@ -51,6 +51,9 @@ export function RazorpayPlanCheckout({
   >("idle");
   const [errorMessage, setErrorMessage] = useState("");
   const [activeEntitlement, setActiveEntitlement] = useState<any>(null);
+  const [manualPaymentId, setManualPaymentId] = useState("");
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [syncError, setSyncError] = useState<string | null>(null);
 
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -71,6 +74,42 @@ export function RazorpayPlanCheckout({
       console.warn("Scroll unlock error:", e);
     }
   }, []);
+
+  const handleSyncPayment = useCallback(async (inputPaymentId?: string) => {
+    if (!user?.id) return;
+    setIsSyncing(true);
+    setSyncError(null);
+    try {
+      const res = await fetch("/api/user/sync-subscription", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: user.id,
+          paymentId: inputPaymentId || manualPaymentId.trim(),
+          planId: plan.id,
+          billingCycle,
+        }),
+      });
+      const data = await res.json();
+      if (data.success && data.entitlement?.canPublish) {
+        setPaymentStatus("success");
+        setActiveEntitlement(data.entitlement);
+        setTimeout(() => {
+          unlockPageScroll();
+          onSuccess?.(data.entitlement);
+        }, 1200);
+      } else {
+        setSyncError(
+          data.message ||
+            "Payment confirmation pending. Please enter your Razorpay Payment ID (e.g. pay_xxx from receipt) to unlock immediately."
+        );
+      }
+    } catch (err: any) {
+      setSyncError(err.message || "Sync failed");
+    } finally {
+      setIsSyncing(false);
+    }
+  }, [user?.id, manualPaymentId, plan.id, billingCycle, onSuccess, unlockPageScroll]);
 
   // Guarantee scroll restoration on mount and unmount
   useEffect(() => {
@@ -534,7 +573,7 @@ export function RazorpayPlanCheckout({
 
           {/* Official Razorpay Subscription Widget fallback */}
           {getPlanSubscriptionButtonId(plan.id, billingCycle) && (
-            <div className="pt-2 flex flex-col items-center justify-center gap-1.5 border-t border-outline-variant/10">
+            <div className="pt-2 flex flex-col items-center justify-center gap-2 border-t border-outline-variant/10">
               <span className="text-[11px] text-on-surface-variant/70">
                 <T en="Or subscribe via Razorpay widget:" ta="அல்லது ரேசர்பே விட்ஜெட் மூலம் சந்தா பெறுக:" />
               </span>
@@ -543,6 +582,61 @@ export function RazorpayPlanCheckout({
                   key={`${plan.id}-${billingCycle}-${getPlanSubscriptionButtonId(plan.id, billingCycle)}`}
                   subscriptionButtonId={getPlanSubscriptionButtonId(plan.id, billingCycle)}
                 />
+              </div>
+
+              {/* Post-Widget Sync & Confirmation Box */}
+              <div className="w-full bg-surface-container-low/70 rounded-xl p-2.5 border border-outline-variant/20 flex flex-col gap-2">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[11px] font-medium text-on-surface">
+                    <T en="Paid via widget above?" ta="விட்ஜெட்டில் பணம் செலுத்தினீர்களா?" />
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => handleSyncPayment()}
+                    disabled={isSyncing}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-white text-xs font-semibold hover:bg-primary/90 transition-colors shadow-sm cursor-pointer disabled:opacity-50"
+                  >
+                    {isSyncing ? (
+                      <>
+                        <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                        <span>Verifying…</span>
+                      </>
+                    ) : (
+                      <>
+                        <RefreshCw className="w-3.5 h-3.5" />
+                        <span>Confirm & Unlock</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+
+                {/* Manual Payment ID fallback if webhook delayed */}
+                <div className="flex items-center gap-1.5 pt-1 border-t border-outline-variant/10">
+                  <input
+                    type="text"
+                    placeholder="Have Payment ID? (e.g. pay_xxx from receipt)"
+                    value={manualPaymentId}
+                    onChange={(e) => setManualPaymentId(e.target.value)}
+                    className="flex-1 bg-surface border border-outline-variant/30 rounded-lg px-2.5 py-1 text-xs text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:border-primary"
+                  />
+                  {manualPaymentId.trim() && (
+                    <button
+                      type="button"
+                      onClick={() => handleSyncPayment(manualPaymentId.trim())}
+                      disabled={isSyncing}
+                      className="px-2.5 py-1 rounded-lg bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-700 transition-colors cursor-pointer"
+                    >
+                      Activate
+                    </button>
+                  )}
+                </div>
+
+                {syncError && (
+                  <p className="text-[11px] text-rose-500 flex items-center gap-1">
+                    <AlertCircle className="w-3 h-3 flex-shrink-0" />
+                    <span>{syncError}</span>
+                  </p>
+                )}
               </div>
             </div>
           )}
