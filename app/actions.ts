@@ -592,4 +592,38 @@ export async function verifyAndActivateSubscriptionAction(data: {
   }
 }
 
+export async function getUserEntitlementAction(userId: string) {
+  try {
+    const { getUserEntitlement } = await import("@/lib/db");
+    const entitlement = await getUserEntitlement(userId);
+    return { success: true, data: entitlement };
+  } catch (err: any) {
+    console.error("getUserEntitlementAction error:", err);
+    return { success: false, error: err.message || "Failed to fetch user entitlement" };
+  }
+}
+
+export async function getAllSubscriptionsAdminAction() {
+  try {
+    const { getAllSubscriptionsAdmin } = await import("@/lib/db");
+    const subscriptions = await getAllSubscriptionsAdmin();
+    return { success: true, data: subscriptions };
+  } catch (err: any) {
+    console.error("getAllSubscriptionsAdminAction error:", err);
+    return { success: false, error: err.message || "Failed to fetch subscriptions" };
+  }
+}
+
+export async function reconcileSubscriptionAdminAction(identifier: string) {
+  try {
+    const { reconcileSubscriptionWithRazorpay } = await import("@/lib/db");
+    const result = await reconcileSubscriptionWithRazorpay(identifier);
+    return result;
+  } catch (err: any) {
+    console.error("reconcileSubscriptionAdminAction error:", err);
+    return { success: false, message: err.message || "Reconciliation failed" };
+  }
+}
+
+
 

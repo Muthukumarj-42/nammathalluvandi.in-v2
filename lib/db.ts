@@ -81,15 +81,65 @@ export interface VendorSubscription {
   amount: number;
   payment_id?: string | null;
   payment_status: "initiated" | "completed" | "failed" | "cancelled" | "pending";
-  status: "active" | "expired" | "pending";
+  status: "active" | "expired" | "pending" | "cancelled" | "halted";
   max_carts: number;
   starts_at: string;
   expires_at: string;
+  razorpay_subscription_id?: string | null;
+  razorpay_order_id?: string | null;
+  razorpay_customer_id?: string | null;
+  razorpay_plan_id?: string | null;
+  total_count?: number;
+  paid_count?: number;
+  payment_method?: string | null;
+  raw_event_reference?: any;
   created_at?: string;
   updated_at?: string;
 }
 
+export interface SubscriptionPayment {
+  id: string;
+  user_id: string;
+  vendor_id?: string | null;
+  subscription_id?: string | null;
+  razorpay_payment_id: string;
+  razorpay_order_id?: string | null;
+  razorpay_subscription_id?: string | null;
+  amount: number;
+  currency: string;
+  status: string;
+  payment_method?: string | null;
+  error_code?: string | null;
+  error_description?: string | null;
+  raw_payload?: any;
+  created_at?: string;
+}
+
+export interface WebhookEventRecord {
+  event_id: string;
+  event_type: string;
+  razorpay_entity_id: string;
+  payload?: any;
+  processed_at?: string;
+  processing_status: "processed" | "ignored" | "failed";
+}
+
+export interface UserEntitlement {
+  plan: "basic" | "growth" | "pro" | null;
+  billingCycle: "1_month" | "3_months" | null;
+  status: "active" | "pending" | "expired" | "cancelled" | "halted" | null;
+  listingLimit: number;
+  startsAt: string | null;
+  expiresAt: string | null;
+  canPublish: boolean;
+  totalListings: number;
+  remainingListings: number;
+  subscriptionId: string | null;
+}
+
 let mockSubscriptions: VendorSubscription[] = [];
+let mockPayments: SubscriptionPayment[] = [];
+let mockWebhookEvents: WebhookEventRecord[] = [];
 
 // In-Memory Database Fallback (populated with seed coordinates and details for local demo)
 let mockUsers: User[] = [
@@ -444,6 +494,16 @@ export async function getCartById(id: string): Promise<DbCart | null> {
 }
 
 export async function saveCart(cart: Omit<DbCart, "id" | "verified" | "status"> & { id?: string; status?: DbCart["status"]; verified?: boolean }): Promise<DbCart> {
+  // Server-side enforcement of listing limit for new listings
+  if (!cart.id && cart.owner_id) {
+    const entitlement = await getUserEntitlement(cart.owner_id);
+    if (!entitlement.canPublish || entitlement.status !== "active") {
+      throw new Error(
+        `Listing limit reached (${entitlement.totalListings}/${entitlement.listingLimit} used). Please upgrade your plan to list more food carts.`
+      );
+    }
+  }
+
   if (isDbConfigured) {
     if (!cart.unique_code) {
       const rtoRaw = getTnRtoCodeForLocation(cart.area, cart.district, (cart as any).location, (cart as any).vendorLocation);
@@ -1016,6 +1076,157 @@ export async function createOrUpdateSubscription(data: {
   return created;
 }
 
+export async function getUserEntitlement(userId: string): Promise<UserEntitlement> {
+  const [sub, carts] = await Promise.all([
+    getActiveSubscriptionByUserId(userId),
+    getCartsByOwnerId(userId),
+  ]);
+
+  const totalListings = carts.length;
+  if (!sub) {
+    return {
+      plan: null,
+      billingCycle: null,
+      status: null,
+      listingLimit: 0,
+      startsAt: null,
+      expiresAt: null,
+      canPublish: false,
+      totalListings,
+      remainingListings: 0,
+      subscriptionId: null,
+    };
+  }
+
+  const listingLimit = sub.max_carts || 2;
+  const remainingListings = Math.max(0, listingLimit - totalListings);
+  const canPublish = sub.status === "active" && remainingListings > 0;
+
+  return {
+    plan: sub.plan_id,
+    billingCycle: sub.billing_cycle,
+    status: sub.status,
+    listingLimit,
+    startsAt: sub.starts_at,
+    expiresAt: sub.expires_at,
+    canPublish,
+    totalListings,
+    remainingListings,
+    subscriptionId: sub.id,
+  };
+}
+
+export async function isWebhookEventProcessed(eventId: string): Promise<boolean> {
+  if (isDbConfigured) {
+    try {
+      const { data } = await supabase
+        .from("webhook_events")
+        .select("event_id")
+        .eq("event_id", eventId)
+        .maybeSingle();
+      return !!data;
+    } catch {
+      return false;
+    }
+  }
+  return mockWebhookEvents.some((e) => e.event_id === eventId);
+}
+
+export async function recordWebhookEvent(event: {
+  event_id: string;
+  event_type: string;
+  razorpay_entity_id: string;
+  payload?: any;
+  processing_status?: "processed" | "ignored" | "failed";
+}): Promise<void> {
+  const record: WebhookEventRecord = {
+    event_id: event.event_id,
+    event_type: event.event_type,
+    razorpay_entity_id: event.razorpay_entity_id,
+    payload: event.payload || null,
+    processed_at: new Date().toISOString(),
+    processing_status: event.processing_status || "processed",
+  };
+
+  if (isDbConfigured) {
+    try {
+      await supabase.from("webhook_events").upsert([record]);
+      return;
+    } catch (err: any) {
+      console.warn("Failed to record webhook event in Supabase:", err.message);
+    }
+  }
+
+  mockWebhookEvents = mockWebhookEvents.filter((e) => e.event_id !== event.event_id);
+  mockWebhookEvents.push(record);
+}
+
+export async function recordPaymentTransaction(payment: {
+  user_id: string;
+  vendor_id?: string | null;
+  subscription_id?: string | null;
+  razorpay_payment_id: string;
+  razorpay_order_id?: string | null;
+  razorpay_subscription_id?: string | null;
+  amount: number;
+  currency?: string;
+  status: string;
+  payment_method?: string | null;
+  error_code?: string | null;
+  error_description?: string | null;
+  raw_payload?: any;
+}): Promise<SubscriptionPayment> {
+  const record: Omit<SubscriptionPayment, "id"> = {
+    user_id: payment.user_id,
+    vendor_id: payment.vendor_id || null,
+    subscription_id: payment.subscription_id || null,
+    razorpay_payment_id: payment.razorpay_payment_id,
+    razorpay_order_id: payment.razorpay_order_id || null,
+    razorpay_subscription_id: payment.razorpay_subscription_id || null,
+    amount: payment.amount,
+    currency: payment.currency || "INR",
+    status: payment.status,
+    payment_method: payment.payment_method || null,
+    error_code: payment.error_code || null,
+    error_description: payment.error_description || null,
+    raw_payload: payment.raw_payload || null,
+    created_at: new Date().toISOString(),
+  };
+
+  if (isDbConfigured) {
+    try {
+      const { data, error } = await supabase
+        .from("subscription_payments")
+        .upsert([record], { onConflict: "razorpay_payment_id" })
+        .select()
+        .single();
+      if (!error && data) return data;
+    } catch (err: any) {
+      console.warn("Error inserting payment transaction in DB:", err.message);
+    }
+  }
+
+  const created: SubscriptionPayment = {
+    id: `pay_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+    ...record,
+  };
+  mockPayments = mockPayments.filter((p) => p.razorpay_payment_id !== payment.razorpay_payment_id);
+  mockPayments.push(created);
+  return created;
+}
+
+export async function getVendorProfiles(): Promise<any[]> {
+  if (isDbConfigured) {
+    try {
+      const { data } = await supabase.from("vendor_profiles").select("*").order("created_at", { ascending: false });
+      return data || [];
+    } catch {
+      return [];
+    }
+  }
+  return [];
+}
+
 export async function getOwnerListingUsage(ownerId: string): Promise<{
   subscription: VendorSubscription | null;
   totalListings: number;
@@ -1029,8 +1240,6 @@ export async function getOwnerListingUsage(ownerId: string): Promise<{
   ]);
 
   const totalListings = carts.length;
-  // If user has an active subscription, use its max_carts limit
-  // Default to 0 listings allowed without plan to enforce plan selection
   const maxCarts = sub ? sub.max_carts : 0;
   const remainingListings = Math.max(0, maxCarts - totalListings);
   const canPublish = sub !== null && remainingListings > 0;
@@ -1043,4 +1252,104 @@ export async function getOwnerListingUsage(ownerId: string): Promise<{
     canPublish,
   };
 }
+
+export async function getAllSubscriptionsAdmin(): Promise<any[]> {
+  if (isDbConfigured) {
+    try {
+      const { data: subs } = await supabase
+        .from("vendor_subscriptions")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      const allSubs = subs || [];
+      const [allUsers, allVendors, allCarts] = await Promise.all([
+        getUsers(),
+        getVendorProfiles(),
+        getAllCarts(),
+      ]);
+
+      return allSubs.map((sub: any) => {
+        const user = allUsers.find((u: any) => u.id === sub.user_id);
+        const vendor = allVendors.find((v: any) => v.id === sub.user_id || v.id === sub.vendor_id);
+        const cartsCount = allCarts.filter((c: any) => c.owner_id === sub.user_id).length;
+
+        return {
+          ...sub,
+          userName: vendor?.full_name || vendor?.shop_name || user?.name || "Unknown User",
+          userEmail: (user as any)?.email || null,
+          userPhone: vendor?.whatsapp_number || vendor?.phone || user?.phone || null,
+          cartsCount,
+        };
+      });
+    } catch (err: any) {
+      console.warn("Failed to query subscriptions in Supabase:", err.message);
+    }
+  }
+
+  return mockSubscriptions.map((sub) => {
+    const user = mockUsers.find((u: any) => u.id === sub.user_id);
+    const cartsCount = mockCarts.filter((c: any) => c.owner_id === sub.user_id).length;
+    return {
+      ...sub,
+      userName: user?.name || "Demo User",
+      userEmail: null,
+      userPhone: user?.phone || null,
+      cartsCount,
+    };
+  });
+}
+
+export async function reconcileSubscriptionWithRazorpay(
+  identifier: string
+): Promise<{ success: boolean; message: string; data?: any }> {
+  const keyId = process.env.RAZORPAY_KEY_ID || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
+  const keySecret = process.env.RAZORPAY_KEY_SECRET;
+
+  if (!keyId || !keySecret) {
+    return { success: false, message: "Razorpay credentials not configured on server" };
+  }
+
+  try {
+    const Razorpay = (await import("razorpay")).default;
+    const razorpay = new Razorpay({ key_id: keyId, key_secret: keySecret });
+
+    let fetchedData: any = null;
+    let newStatus: "active" | "pending" | "cancelled" | "expired" | "halted" = "active";
+
+    if (identifier.startsWith("sub_")) {
+      fetchedData = await razorpay.subscriptions.fetch(identifier);
+      newStatus = fetchedData.status === "active" || fetchedData.status === "authenticated" ? "active" : fetchedData.status;
+    } else if (identifier.startsWith("pay_")) {
+      fetchedData = await razorpay.payments.fetch(identifier);
+      newStatus = fetchedData.status === "captured" ? "active" : "pending";
+    } else if (identifier.startsWith("order_")) {
+      fetchedData = await razorpay.orders.fetch(identifier);
+      newStatus = fetchedData.status === "paid" ? "active" : "pending";
+    }
+
+    if (!fetchedData) {
+      return { success: false, message: `Could not fetch ${identifier} from Razorpay` };
+    }
+
+    if (isDbConfigured) {
+      await supabase
+        .from("vendor_subscriptions")
+        .update({
+          status: newStatus,
+          payment_status: "completed",
+          updated_at: new Date().toISOString(),
+        })
+        .or(`razorpay_subscription_id.eq.${identifier},payment_id.eq.${identifier},razorpay_order_id.eq.${identifier}`);
+    }
+
+    return {
+      success: true,
+      message: `Reconciled with Razorpay successfully. Current state: ${newStatus}`,
+      data: fetchedData,
+    };
+  } catch (err: any) {
+    return { success: false, message: `Reconciliation error: ${err.message}` };
+  }
+}
+
 

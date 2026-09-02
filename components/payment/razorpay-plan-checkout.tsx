@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { ShieldCheck, Lock, CheckCircle2, ArrowRight, AlertCircle, RefreshCw, CreditCard, Sparkles } from "lucide-react";
 import { ListingPlan, BillingCycle, getPlanPricing, getPlanSubscriptionButtonId, formatCurrency } from "@/lib/plans";
 import { RazorpaySubscriptionWidget } from "@/components/payment/razorpay-subscription-widget";
@@ -31,7 +31,7 @@ interface RazorpayPlanCheckoutProps {
     phone?: string | null;
   };
   vendorId?: string | null;
-  onSuccess: (subscription: any) => void;
+  onSuccess: (entitlement: any) => void;
   onCancel?: () => void;
 }
 
@@ -47,13 +47,14 @@ export function RazorpayPlanCheckout({
   const amount = pricing.price;
 
   const [paymentStatus, setPaymentStatus] = useState<
-    "idle" | "creating_order" | "checkout_open" | "verifying" | "success" | "failed" | "cancelled"
+    "idle" | "creating_order" | "checkout_open" | "verifying" | "success" | "failed" | "cancelled" | "pending_verification"
   >("idle");
   const [errorMessage, setErrorMessage] = useState("");
-  const [verifiedSubscription, setVerifiedSubscription] = useState<any>(null);
+  const [activeEntitlement, setActiveEntitlement] = useState<any>(null);
 
-  // Helper to ensure page scrolling is NEVER locked or frozen after failure or modal dismissal
-  // NOTE: NEVER set pointer-events: none on Razorpay elements!
+  const pollingRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Helper to ensure page scrolling and pointer-events are NEVER frozen or locked
   const unlockPageScroll = useCallback(() => {
     if (typeof document === "undefined") return;
     try {
@@ -76,70 +77,71 @@ export function RazorpayPlanCheckout({
     unlockPageScroll();
     return () => {
       unlockPageScroll();
+      if (pollingRef.current) clearInterval(pollingRef.current);
     };
   }, [unlockPageScroll]);
 
-  // Instant plan activation function
-  const handleInstantActivation = useCallback(
-    async (customPaymentId?: string) => {
-      setPaymentStatus("verifying");
-      setErrorMessage("");
+  // Load Razorpay Standard Web Checkout script dynamically
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (window.Razorpay) return;
 
-      try {
-        const pId = customPaymentId || `sub_${plan.id}_${Date.now()}`;
-        const { createSubscriptionAction } = await import("@/app/actions");
-        const { saveLocalSubscription } = await import("@/lib/subscription-storage");
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.async = true;
+    document.body.appendChild(script);
 
-        const res = await createSubscriptionAction({
-          userId: user.id,
-          vendorId: vendorId || null,
-          planId: plan.id,
-          billingCycle,
-          amount,
-          paymentId: pId,
-          paymentStatus: "completed",
-          durationDays: pricing.durationDays,
-          maxCarts: plan.maxCarts,
-        });
+    return () => {};
+  }, []);
 
-        if (res.success && res.data) {
-          saveLocalSubscription(user.id, res.data);
-          unlockPageScroll();
-          setPaymentStatus("success");
-          setVerifiedSubscription(res.data);
-          onSuccess(res.data);
-        } else {
-          // Even if Supabase action fails, save locally so the user is never blocked
-          const fallbackSub = {
-            id: `sub_${Date.now()}`,
-            user_id: user.id,
-            vendor_id: vendorId || null,
-            plan_id: plan.id,
-            billing_cycle: billingCycle,
-            amount,
-            payment_id: pId,
-            payment_status: "completed" as const,
-            status: "active" as const,
-            max_carts: plan.maxCarts,
-            starts_at: new Date().toISOString(),
-            expires_at: new Date(Date.now() + pricing.durationDays * 24 * 60 * 60 * 1000).toISOString(),
-          };
-          saveLocalSubscription(user.id, fallbackSub);
-          unlockPageScroll();
-          setPaymentStatus("success");
-          setVerifiedSubscription(fallbackSub);
-          onSuccess(fallbackSub);
+  // ── Authoritative Backend Entitlement Poller ──
+  // Polls /api/user/entitlement every 1.5s for up to 15s to confirm webhook activation
+  const startEntitlementPolling = useCallback(
+    (onConfirmed?: (entitlement: any) => void) => {
+      if (pollingRef.current) clearInterval(pollingRef.current);
+
+      let attempts = 0;
+      const maxAttempts = 10; // 15 seconds total
+
+      pollingRef.current = setInterval(async () => {
+        attempts++;
+        try {
+          const res = await fetch(`/api/user/entitlement?userId=${encodeURIComponent(user.id)}`, {
+            cache: "no-store",
+          });
+          const data = await res.json().catch(() => ({}));
+
+          if (data.success && data.entitlement && data.entitlement.status === "active") {
+            if (pollingRef.current) clearInterval(pollingRef.current);
+            unlockPageScroll();
+            setActiveEntitlement(data.entitlement);
+            setPaymentStatus("success");
+
+            if (onConfirmed) {
+              onConfirmed(data.entitlement);
+            } else {
+              setTimeout(() => {
+                onSuccess(data.entitlement);
+              }, 1200);
+            }
+            return;
+          }
+
+          if (attempts >= maxAttempts) {
+            if (pollingRef.current) clearInterval(pollingRef.current);
+            unlockPageScroll();
+            // Webhook delayed or still processing — do NOT claim payment failed
+            setPaymentStatus("pending_verification");
+          }
+        } catch (pollErr) {
+          console.warn("Entitlement poll error:", pollErr);
         }
-      } catch (err: any) {
-        console.error("Instant activation error:", err);
-        setPaymentStatus("failed");
-        setErrorMessage(err.message || "Failed to confirm activation. Please try again.");
-      }
+      }, 1500);
     },
-    [user.id, vendorId, plan.id, plan.maxCarts, billingCycle, amount, pricing.durationDays, unlockPageScroll, onSuccess]
+    [user.id, unlockPageScroll, onSuccess]
   );
 
-  // Listen for Razorpay widget completion messages from the iframe
+  // Listen for Razorpay widget completion messages from iframe
   useEffect(() => {
     if (typeof window === "undefined") return;
 
@@ -149,20 +151,14 @@ export function RazorpayPlanCheckout({
         if (!data) return;
 
         let isSuccess = false;
-        let pId = "";
 
         if (typeof data === "string") {
           if (
             data.includes("razorpay_payment_id") ||
             data.includes("payment.authorized") ||
-            data.includes("subscription.charged") ||
-            data.includes("payment_id")
+            data.includes("subscription.charged")
           ) {
             isSuccess = true;
-            try {
-              const parsed = JSON.parse(data);
-              pId = parsed.razorpay_payment_id || parsed.payment_id || "";
-            } catch {}
           }
         } else if (typeof data === "object") {
           if (
@@ -175,43 +171,29 @@ export function RazorpayPlanCheckout({
             data.type === "payment.success"
           ) {
             isSuccess = true;
-            pId = data.razorpay_payment_id || data.payment_id || data.subscription_id || "";
           }
         }
 
-        if (isSuccess) {
-          handleInstantActivation(pId);
+        if (isSuccess && paymentStatus !== "verifying" && paymentStatus !== "success") {
+          setPaymentStatus("verifying");
+          startEntitlementPolling();
         }
       } catch (e) {
-        console.warn("Error processing Razorpay message event:", e);
+        console.warn("Error processing Razorpay message:", e);
       }
     };
 
     window.addEventListener("message", handleMessage);
     return () => window.removeEventListener("message", handleMessage);
-  }, [handleInstantActivation]);
+  }, [paymentStatus, startEntitlementPolling]);
 
-  // Load Razorpay Standard Web Checkout script (<script src="https://checkout.razorpay.com/v1/checkout.js"></script>)
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    if (window.Razorpay) return;
-
-    const script = document.createElement("script");
-    script.src = "https://checkout.razorpay.com/v1/checkout.js";
-    script.async = true;
-    document.body.appendChild(script);
-
-    return () => {
-      // script cleanup
-    };
-  }, []);
-
+  // ── Primary Razorpay Standard Checkout Flow ──
   const handlePayNow = async () => {
     setPaymentStatus("creating_order");
     setErrorMessage("");
 
     try {
-      // STEP 1: Call Backend /api/create-order
+      // 1. Call Backend /api/create-order with authenticated user ID and selected plan
       const orderResponse = await fetch("/api/create-order", {
         method: "POST",
         headers: {
@@ -235,7 +217,7 @@ export function RazorpayPlanCheckout({
         throw new Error("Invalid order response from server");
       }
 
-      // Ensure Razorpay script is ready
+      // Ensure Razorpay SDK is loaded
       if (typeof window === "undefined" || !window.Razorpay) {
         await new Promise((resolve) => setTimeout(resolve, 500));
       }
@@ -246,7 +228,7 @@ export function RazorpayPlanCheckout({
 
       const cycleLabel = billingCycle === "1_month" ? "1 Month" : "3 Months";
 
-      // STEP 2: Open Razorpay Standard Checkout modal with returned order_id
+      // 2. Open Razorpay Checkout modal
       const options = {
         key: orderData.key_id || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
         amount: orderData.amount,
@@ -266,49 +248,37 @@ export function RazorpayPlanCheckout({
         modal: {
           ondismiss: () => {
             unlockPageScroll();
-            setPaymentStatus("cancelled");
+            // If user closed modal while idle or before finishing, set cancelled
+            setPaymentStatus((prev) => (prev === "verifying" || prev === "success" ? prev : "cancelled"));
           },
         },
-        // STEP 3: On Success receive payment_id, order_id, signature and verify on backend
         handler: async (response: {
           razorpay_payment_id: string;
           razorpay_order_id: string;
           razorpay_signature: string;
         }) => {
+          unlockPageScroll();
           setPaymentStatus("verifying");
 
-          try {
-            const verifyResponse = await fetch("/api/verify-payment", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                razorpay_order_id: response.razorpay_order_id,
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_signature: response.razorpay_signature,
-                planId: plan.id,
-                billingCycle,
-                userId: user.id,
-                vendorId: vendorId || null,
-              }),
-            });
+          // Trigger background server verification as client fallback while polling entitlement
+          fetch("/api/verify-payment", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+              planId: plan.id,
+              billingCycle,
+              userId: user.id,
+              vendorId: vendorId || null,
+            }),
+          }).catch(console.warn);
 
-            const verifyData = await verifyResponse.json().catch(() => ({}));
-
-            if (!verifyResponse.ok || !verifyData.success) {
-              throw new Error(verifyData.error || "Payment signature verification failed");
-            }
-
-            unlockPageScroll();
-            setPaymentStatus("success");
-            setVerifiedSubscription(verifyData.subscription);
-          } catch (verifyErr: any) {
-            unlockPageScroll();
-            console.error("Verification error:", verifyErr);
-            setPaymentStatus("failed");
-            setErrorMessage(verifyErr.message || "Payment verification failed. Please contact support.");
-          }
+          // Authoritatively poll backend entitlement
+          startEntitlementPolling();
         },
       };
 
@@ -328,29 +298,21 @@ export function RazorpayPlanCheckout({
       rzp.open();
     } catch (err: any) {
       unlockPageScroll();
-      console.error("Checkout initiation error:", err);
+      console.error("Checkout error:", err);
       setPaymentStatus("failed");
       setErrorMessage(err.message || "Could not open checkout. Please try again.");
     }
   };
 
-  const handleContinueToCart = () => {
-    unlockPageScroll();
-    if (verifiedSubscription) {
-      onSuccess(verifiedSubscription);
-    }
-  };
-
-  const handleResetError = () => {
+  const handleReset = () => {
     unlockPageScroll();
     setPaymentStatus("idle");
     setErrorMessage("");
   };
 
   const cycleLabelEn = billingCycle === "1_month" ? "1 Month" : "3 Months";
-  const cycleLabelTa = billingCycle === "1_month" ? "1 மாதம்" : "3 மாதங்கள்";
 
-  // ── SUCCESS STATE UI ──
+  // ── 1. SUCCESS STATE UI (Automatic Unlock Trigger) ──
   if (paymentStatus === "success") {
     return (
       <div className="bg-surface rounded-3xl p-8 border border-emerald-500/30 shadow-xl text-center space-y-5 animate-in fade-in zoom-in-95 duration-200">
@@ -360,12 +322,12 @@ export function RazorpayPlanCheckout({
 
         <div>
           <h3 className="font-display text-2xl font-bold text-on-surface mb-1">
-            <T en="✓ Payment Successful" ta="✓ கட்டணம் வெற்றிகரமாக செலுத்தப்பட்டது" />
+            <T en="✓ Payment Successful!" ta="✓ கட்டணம் வெற்றிகரமாக செலுத்தப்பட்டது!" />
           </h3>
           <p className="text-on-surface-variant text-sm">
             <T
-              en="Your listing plan has been activated."
-              ta="உங்கள் பட்டியல் திட்டம் செயல்படுத்தப்பட்டது."
+              en={`${plan.nameEn} plan activated. Unlocking your listing form…`}
+              ta={`${plan.nameTa} திட்டம் செயல்படுத்தப்பட்டது. படிவம் திறக்கப்படுகிறது…`}
             />
           </p>
         </div>
@@ -386,7 +348,10 @@ export function RazorpayPlanCheckout({
         </div>
 
         <Button
-          onClick={handleContinueToCart}
+          onClick={() => {
+            unlockPageScroll();
+            onSuccess(activeEntitlement);
+          }}
           className="w-full py-4 h-auto rounded-xl bg-primary hover:bg-primary/90 text-on-primary font-bold text-sm uppercase tracking-widest shadow-md flex items-center justify-center gap-2"
         >
           <span><T en="CONTINUE TO SUBMIT CART →" ta="வண்டி விவரங்களை சமர்ப்பிக்க தொடரவும் →" /></span>
@@ -396,8 +361,66 @@ export function RazorpayPlanCheckout({
     );
   }
 
-  // ── CHECKOUT / PAYMENT CARD UI ──
-  const isLoading = paymentStatus === "creating_order" || paymentStatus === "verifying";
+  // ── 2. VERIFYING STATE UI (Automatic Polling) ──
+  if (paymentStatus === "verifying") {
+    return (
+      <div className="bg-surface rounded-3xl p-8 border border-primary/30 shadow-xl text-center space-y-5 animate-in fade-in duration-200">
+        <div className="w-16 h-16 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto text-primary">
+          <RefreshCw className="w-8 h-8 animate-spin" />
+        </div>
+
+        <div>
+          <h3 className="font-display text-2xl font-bold text-on-surface mb-2">
+            <T en="Verifying your payment…" ta="கட்டணம் சரிபார்க்கப்படுகிறது…" />
+          </h3>
+          <p className="text-on-surface-variant text-sm max-w-sm mx-auto leading-relaxed">
+            <T
+              en="Connecting with Razorpay to confirm your subscription. This page will automatically unlock in a moment."
+              ta="உங்கள் கட்டணத்தை உறுதிப்படுத்துகிறது. ஒரு நொடியில் பக்கம் தானாகவே திறக்கப்படும்."
+            />
+          </p>
+        </div>
+
+        <div className="flex items-center justify-center gap-2 text-xs text-on-surface-variant/70 pt-2">
+          <ShieldCheck className="w-4 h-4 text-emerald-600" />
+          <span><T en="Synchronizing backend entitlement…" ta="திட்டம் செயல்படுத்தப்படுகிறது…" /></span>
+        </div>
+      </div>
+    );
+  }
+
+  // ── 3. PENDING VERIFICATION STATE UI (Delayed Webhook) ──
+  if (paymentStatus === "pending_verification") {
+    return (
+      <div className="bg-surface rounded-3xl p-8 border border-amber-500/30 shadow-xl text-center space-y-5 animate-in fade-in duration-200">
+        <div className="w-16 h-16 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mx-auto text-amber-600">
+          <RefreshCw className="w-8 h-8 animate-spin" />
+        </div>
+
+        <div>
+          <h3 className="font-display text-xl font-bold text-on-surface mb-2">
+            <T en="Payment Received — Finalizing Activation" ta="கட்டணம் பெறப்பட்டது — செயல்படுத்தப்படுகிறது" />
+          </h3>
+          <p className="text-on-surface-variant text-xs max-w-sm mx-auto leading-relaxed">
+            <T
+              en="Your transaction was received and is being synchronized by our secure banking webhook. Please wait a moment."
+              ta="உங்கள் பரிவர்த்தனை பெறப்பட்டு வங்கி மூலம் சரிபார்க்கப்படுகிறது. தயவுசெய்து சிறிது நேரம் காத்திருக்கவும்."
+            />
+          </p>
+        </div>
+
+        <Button
+          onClick={() => startEntitlementPolling()}
+          className="w-full py-3 h-auto rounded-xl bg-primary text-on-primary font-bold text-xs uppercase tracking-wider shadow-sm"
+        >
+          <T en="Re-check Subscription Status" ta="நிலையை மீண்டும் சரிபார்க்கவும்" />
+        </Button>
+      </div>
+    );
+  }
+
+  // ── 4. CHECKOUT / PAYMENT CARD UI ──
+  const isLoading = paymentStatus === "creating_order";
 
   return (
     <div className="w-full space-y-4">
@@ -428,17 +451,17 @@ export function RazorpayPlanCheckout({
             <div className="flex items-start gap-2.5">
               <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
               <div>
-                <p className="font-bold"><T en="Payment Failed" ta="கட்டணம் தோல்வியடைந்தது" /></p>
-                <p className="mt-0.5 leading-relaxed">{errorMessage || "The transaction could not be completed."}</p>
+                <p className="font-bold"><T en="Payment Wasn't Completed" ta="கட்டணம் நிறைவடையவில்லை" /></p>
+                <p className="mt-0.5 leading-relaxed">{errorMessage || "The transaction could not be completed. Please try again."}</p>
               </div>
             </div>
             <div className="flex gap-2 pt-1">
               <button
                 type="button"
-                onClick={handleResetError}
-                className="px-3 py-1.5 rounded-lg bg-red-600 text-white font-bold text-[11px] uppercase tracking-wider hover:bg-red-700 transition"
+                onClick={handleReset}
+                className="px-3 py-1.5 rounded-lg bg-red-600 text-white font-bold text-[11px] uppercase tracking-wider hover:bg-red-700 transition cursor-pointer"
               >
-                <T en="Dismiss & Try Again" ta="மீண்டும் முயற்சி செய்க" />
+                <T en="Retry Payment" ta="மீண்டும் முயற்சி செய்க" />
               </button>
             </div>
           </div>
@@ -448,11 +471,11 @@ export function RazorpayPlanCheckout({
           <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-800 text-xs flex items-start gap-2.5">
             <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
             <div>
-              <p className="font-bold"><T en="Checkout Cancelled" ta="பரிவர்த்தனை ரத்து செய்யப்பட்டது" /></p>
+              <p className="font-bold"><T en="Checkout Closed" ta="சாளரம் மூடப்பட்டது" /></p>
               <p className="mt-0.5">
                 <T
-                  en="You closed the checkout modal. Click Pay Now below to try again."
-                  ta="நீங்கள் கட்டண சாளரத்தை மூடிவிட்டீர்கள். மீண்டும் முயற்சிக்க கீழே உள்ள பொத்தானை அழுத்தவும்."
+                  en="You closed the payment modal. Click Pay Now below to complete your listing."
+                  ta="நீங்கள் கட்டண சாளரத்தை மூடிவிட்டீர்கள். பட்டியலிட கீழே உள்ள பொத்தானை அழுத்தவும்."
                 />
               </p>
             </div>
@@ -485,7 +508,7 @@ export function RazorpayPlanCheckout({
           )}
         </div>
 
-        {/* Option A: Custom NTV Pay Now Button (Direct Checkout modal) */}
+        {/* Primary Checkout Button: Opens Razorpay Standard Checkout with Server Order */}
         <div className="space-y-3 pt-1">
           <Button
             type="button"
@@ -496,11 +519,7 @@ export function RazorpayPlanCheckout({
             {isLoading ? (
               <span className="flex items-center gap-2">
                 <RefreshCw className="w-4 h-4 animate-spin" />
-                {paymentStatus === "verifying" ? (
-                  <T en="Verifying Payment Signature…" ta="கட்டணம் சரிபார்க்கப்படுகிறது…" />
-                ) : (
-                  <T en="Opening Razorpay Checkout…" ta="கட்டண தளம் திறக்கப்படுகிறது…" />
-                )}
+                <T en="Opening Razorpay Checkout…" ta="கட்டண தளம் திறக்கப்படுகிறது…" />
               </span>
             ) : (
               <span className="flex items-center justify-center gap-2">
@@ -513,9 +532,9 @@ export function RazorpayPlanCheckout({
             )}
           </Button>
 
-          {/* Option B: Official Razorpay Subscription Widget */}
+          {/* Official Razorpay Subscription Widget fallback */}
           {getPlanSubscriptionButtonId(plan.id, billingCycle) && (
-            <div className="pt-2 flex flex-col items-center justify-center gap-2 border-t border-outline-variant/10">
+            <div className="pt-2 flex flex-col items-center justify-center gap-1.5 border-t border-outline-variant/10">
               <span className="text-[11px] text-on-surface-variant/70">
                 <T en="Or subscribe via Razorpay widget:" ta="அல்லது ரேசர்பே விட்ஜெட் மூலம் சந்தா பெறுக:" />
               </span>
@@ -525,22 +544,6 @@ export function RazorpayPlanCheckout({
                   subscriptionButtonId={getPlanSubscriptionButtonId(plan.id, billingCycle)}
                 />
               </div>
-
-              {/* Direct confirmation if payment was completed in widget */}
-              <button
-                type="button"
-                onClick={() => handleInstantActivation()}
-                disabled={isLoading}
-                className="w-full py-3 px-4 rounded-xl bg-emerald-600/10 hover:bg-emerald-600/20 text-emerald-700 text-xs font-bold transition flex items-center justify-center gap-2 border border-emerald-500/20 mt-1 cursor-pointer"
-              >
-                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                <span>
-                  <T
-                    en={`I Have Paid ₹${amount} — Activate Plan & Continue →`}
-                    ta={`நான் ₹${amount} செலுத்திவிட்டேன் — தொடரவும் →`}
-                  />
-                </span>
-              </button>
             </div>
           )}
 
@@ -553,14 +556,14 @@ export function RazorpayPlanCheckout({
                 onCancel();
               }}
               disabled={isLoading}
-              className="w-full py-2.5 h-auto text-xs text-on-surface-variant hover:text-on-surface"
+              className="w-full py-2.5 h-auto text-xs text-on-surface-variant hover:text-on-surface cursor-pointer"
             >
               <T en="← Choose a Different Plan" ta="← வேறு திட்டத்தைத் தேர்ந்தெடுக்கவும்" />
             </Button>
           )}
         </div>
 
-        {/* Security & Razorpay Badges */}
+        {/* Security & Badges */}
         <div className="flex items-center justify-between text-xs text-on-surface-variant pt-2 border-t border-outline-variant/10">
           <div className="flex items-center gap-1.5 text-emerald-600 font-medium">
             <ShieldCheck className="w-4 h-4" />

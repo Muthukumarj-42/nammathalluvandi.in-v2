@@ -15,9 +15,12 @@ import {
   escalateBookingAction,
   updateDisputeStatusAction,
   updateCartAction,
+  getAllSubscriptionsAdminAction,
+  reconcileSubscriptionAdminAction,
 } from "@/app/actions";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase-browser";
+import { getPlan, formatCurrency } from "@/lib/plans";
 
 const FALLBACK_PHOTO = "/carts/covered-premium-cart/photo-1.webp";
 
@@ -36,7 +39,7 @@ function timeAgo(dateString: string): string {
 }
 
 function formatDate(dateString: string): string {
-  return new Date(dateString).toLocaleDateString("en-IN", { day: "numeric", month: "short" });
+  return new Date(dateString).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
 }
 
 // Normalizes any phone format (+91 xxxxx xxxxx, 91xxxxxxxxxx, xxxxxxxxxx) to a wa.me link.
@@ -58,7 +61,7 @@ function getCartVendorInfo(cart: any, vendors: any[], users: any[]) {
   return { name: "Unknown Vendor", whatsapp: null };
 }
 
-type Tab = "pending" | "carts" | "vendors" | "bookings" | "disputes" | "whatsapp";
+type Tab = "pending" | "carts" | "vendors" | "subscriptions" | "bookings" | "disputes" | "whatsapp";
 
 export default function AdminDashboard() {
   const supabase = createClient();
@@ -77,6 +80,9 @@ export default function AdminDashboard() {
   const [messages, setMessages] = useState<any[]>([]);
   const [messagesAvailable, setMessagesAvailable] = useState(true);
   const [users, setUsers] = useState<any[]>([]);
+  const [subscriptions, setSubscriptions] = useState<any[]>([]);
+  const [subscriptionFilter, setSubscriptionFilter] = useState<string>("all");
+  const [reconcilingId, setReconcilingId] = useState<string | null>(null);
 
   const [loading, setLoading] = useState(true);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
@@ -122,13 +128,14 @@ export default function AdminDashboard() {
   const fetchAllData = async () => {
     setLoading(true);
     try {
-      const [resCarts, resVendors, resBookings, resDisputes, resMessages, resUsers] = await Promise.all([
+      const [resCarts, resVendors, resBookings, resDisputes, resMessages, resUsers, resSubs] = await Promise.all([
         getAllCartsAction(),
         getVendorProfilesAction(),
         getBookingsAction(),
         getDisputesAction(),
         getWhatsappMessagesAction(),
         getUsersAction(),
+        getAllSubscriptionsAdminAction(),
       ]);
 
       if (resCarts.success) setCarts(resCarts.data);
@@ -143,11 +150,29 @@ export default function AdminDashboard() {
       setMessagesAvailable(resMessages.success);
       if (resMessages.success) setMessages(resMessages.data);
 
-      if (resUsers.success) setUsers(resUsers.data);
+      if (resUsers.success && resUsers.data) setUsers(resUsers.data);
+      if (resSubs.success && resSubs.data) setSubscriptions(resSubs.data);
     } catch (err) {
       console.error("Failed to load admin dashboard data:", err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleReconcile = async (id: string) => {
+    setReconcilingId(id);
+    try {
+      const res = await reconcileSubscriptionAdminAction(id);
+      if (res.success) {
+        showToast(res.message || "Reconciled with Razorpay ✅");
+        fetchAllData();
+      } else {
+        showToast("Reconciliation failed: " + res.message);
+      }
+    } catch (e: any) {
+      showToast("Error: " + e.message);
+    } finally {
+      setReconcilingId(null);
     }
   };
 
@@ -493,10 +518,13 @@ export default function AdminDashboard() {
     { id: "pending", label: "Pending" },
     { id: "carts", label: "Live Carts" },
     { id: "vendors", label: "Vendors" },
+    { id: "subscriptions", label: "💳 Subscriptions" },
     { id: "bookings", label: "Bookings" },
     { id: "disputes", label: "Disputes" },
     { id: "whatsapp", label: "WhatsApp Log" },
   ];
+
+  const activeSubscriptionsCount = subscriptions.filter((s) => s.status === "active").length;
 
   return (
     <main className="min-h-screen bg-background pt-20 pb-16 px-4">
@@ -524,7 +552,7 @@ export default function AdminDashboard() {
         </div>
 
         {/* Stats Row */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 mb-6">
           <button
             onClick={() => setActiveTab("pending")}
             className={cn(
@@ -548,6 +576,22 @@ export default function AdminDashboard() {
             <p className="text-xs font-medium text-on-surface-variant mb-1">Live Carts</p>
             <p className="font-display text-3xl font-bold text-on-surface">{liveCarts.length}</p>
             <p className="text-xs text-on-surface-variant mt-1">active listings</p>
+          </button>
+
+          <button
+            onClick={() => setActiveTab("subscriptions")}
+            className={cn(
+              "rounded-2xl p-4 text-left transition w-full border",
+              activeSubscriptionsCount > 0
+                ? "bg-emerald-500/10 border-emerald-500/30"
+                : "bg-surface border-outline-variant/20 hover:border-primary/30 hover:bg-primary/5"
+            )}
+          >
+            <p className="text-xs font-medium text-on-surface-variant mb-1">Subscriptions</p>
+            <p className={cn("font-display text-3xl font-bold", activeSubscriptionsCount > 0 ? "text-emerald-700" : "text-on-surface")}>
+              {activeSubscriptionsCount}
+            </p>
+            <p className="text-xs text-on-surface-variant mt-1">{subscriptions.length} total purchased</p>
           </button>
 
           <button
@@ -972,7 +1016,6 @@ export default function AdminDashboard() {
                   <p className="text-sm text-on-surface-variant px-8">
                     Automated WhatsApp messages will appear here once the WhatsApp Cloud API is connected.
                   </p>
-                  {/* TODO: Connect WhatsApp Cloud API — Meta Business Account needed, new SIM being purchased. See NTV_V2_Dev_Plan.md */}
                 </div>
               ) : messages.length === 0 ? (
                 <div className="text-center py-16 bg-surface rounded-2xl border border-outline-variant/20">
@@ -1011,6 +1054,165 @@ export default function AdminDashboard() {
                   </div>
                 ))
               )}
+            </div>
+          )}
+
+          {/* SUBSCRIPTIONS & PURCHASES */}
+          {activeTab === "subscriptions" && (
+            <div className="space-y-4">
+              {/* Filter pills */}
+              <div className="flex gap-2 overflow-x-auto pb-2 hide-scrollbar">
+                {["all", "active", "pending", "failed", "cancelled", "expired"].map((f) => {
+                  const count =
+                    f === "all"
+                      ? subscriptions.length
+                      : subscriptions.filter((s) => s.status === f || (f === "pending" && s.status === "initiated")).length;
+                  return (
+                    <button
+                      key={f}
+                      onClick={() => setSubscriptionFilter(f)}
+                      className={cn(
+                        "px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap capitalize transition",
+                        subscriptionFilter === f
+                          ? "bg-primary text-on-primary"
+                          : "bg-surface border border-outline-variant/30 text-on-surface-variant hover:border-primary/40"
+                      )}
+                    >
+                      {f} ({count})
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Subscriptions List */}
+              {(() => {
+                const filtered = subscriptions.filter((s) => {
+                  if (subscriptionFilter === "all") return true;
+                  if (subscriptionFilter === "pending") return s.status === "pending" || s.status === "initiated";
+                  return s.status === subscriptionFilter;
+                });
+
+                if (filtered.length === 0) {
+                  return (
+                    <div className="text-center py-16 bg-surface rounded-2xl border border-outline-variant/20">
+                      <p className="text-4xl mb-3">💳</p>
+                      <p className="font-semibold text-on-surface mb-1">No Subscriptions Found</p>
+                      <p className="text-xs text-on-surface-variant">
+                        No purchases match the "{subscriptionFilter}" filter.
+                      </p>
+                    </div>
+                  );
+                }
+
+                return filtered.map((sub) => {
+                  const plan = getPlan(sub.plan_id);
+                  const cycleLabel = sub.billing_cycle === "3_months" ? "3 Months" : "1 Month";
+                  const wa = waLink(sub.userPhone);
+                  const isReconciling = reconcilingId === (sub.razorpay_subscription_id || sub.payment_id || sub.id);
+
+                  return (
+                    <div
+                      key={sub.id}
+                      className="bg-surface rounded-2xl border border-outline-variant/20 p-5 shadow-xs space-y-4 hover:border-primary/30 transition"
+                    >
+                      {/* Card Header: User, Plan Badge, Amount, Status */}
+                      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-outline-variant/10 pb-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center text-sm">
+                            {sub.userName?.[0]?.toUpperCase() || "U"}
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <h4 className="font-bold text-sm text-on-surface">{sub.userName}</h4>
+                              {wa && (
+                                <a
+                                  href={wa}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-[11px] font-bold text-emerald-600 bg-emerald-500/10 px-2 py-0.5 rounded-full hover:bg-emerald-500/20 transition flex items-center gap-1"
+                                >
+                                  <span>WhatsApp</span>
+                                </a>
+                              )}
+                            </div>
+                            <p className="text-xs text-on-surface-variant font-mono mt-0.5">
+                              {sub.userPhone || sub.userEmail || sub.user_id}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <span
+                            className="text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider"
+                            style={{ background: plan.bgHex, color: plan.accentHex }}
+                          >
+                            {plan.badgeEn}
+                          </span>
+                          <span className="text-base font-black font-display text-primary">
+                            {formatCurrency(sub.amount)}
+                          </span>
+                          <span
+                            className={cn(
+                              "text-xs font-bold px-2.5 py-1 rounded-full capitalize",
+                              sub.status === "active"
+                                ? "bg-emerald-500/10 text-emerald-600 border border-emerald-500/20"
+                                : sub.status === "failed"
+                                ? "bg-red-500/10 text-red-600 border border-red-500/20"
+                                : "bg-amber-500/10 text-amber-700 border border-amber-500/20"
+                            )}
+                          >
+                            {sub.status}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Details Grid */}
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs bg-surface-container p-3 rounded-xl">
+                        <div>
+                          <p className="text-on-surface-variant/70">Cycle</p>
+                          <p className="font-semibold text-on-surface">{cycleLabel}</p>
+                        </div>
+                        <div>
+                          <p className="text-on-surface-variant/70">Listings Quota</p>
+                          <p className="font-semibold text-on-surface">
+                            {sub.cartsCount} / {sub.max_carts} used
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-on-surface-variant/70">Starts At</p>
+                          <p className="font-semibold text-on-surface">{formatDate(sub.starts_at)}</p>
+                        </div>
+                        <div>
+                          <p className="text-on-surface-variant/70">Expires At</p>
+                          <p className="font-semibold text-on-surface">{formatDate(sub.expires_at)}</p>
+                        </div>
+                      </div>
+
+                      {/* IDs and Reconcile action */}
+                      <div className="flex flex-wrap items-center justify-between gap-2 pt-1 text-[11px] text-on-surface-variant">
+                        <div className="flex flex-wrap gap-x-4 gap-y-1 font-mono">
+                          {sub.payment_id && <span>Pay ID: {sub.payment_id}</span>}
+                          {sub.razorpay_order_id && <span>Order: {sub.razorpay_order_id}</span>}
+                          {sub.razorpay_subscription_id && <span>Sub ID: {sub.razorpay_subscription_id}</span>}
+                        </div>
+
+                        <button
+                          onClick={() =>
+                            handleReconcile(
+                              sub.razorpay_subscription_id || sub.payment_id || sub.razorpay_order_id || sub.id
+                            )
+                          }
+                          disabled={isReconciling}
+                          className="px-3 py-1.5 rounded-lg bg-surface border border-outline-variant/30 text-on-surface hover:bg-surface-container font-semibold transition flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
+                        >
+                          <span className={isReconciling ? "animate-spin" : ""}>↻</span>
+                          <span>{isReconciling ? "Checking Razorpay…" : "Reconcile with Razorpay"}</span>
+                        </button>
+                      </div>
+                    </div>
+                  );
+                });
+              })()}
             </div>
           )}
         </div>

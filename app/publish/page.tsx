@@ -28,10 +28,13 @@ import {
   getUserSubscriptionAction,
   createSubscriptionAction,
   getOwnerListingUsageAction,
+  getUserEntitlementAction,
 } from "@/app/actions";
 import { saveLocalSubscription, getLocalSubscription } from "@/lib/subscription-storage";
 import { useAuth } from "@/context/auth-context";
 import { createClient } from "@/lib/supabase-browser";
+import type { UserEntitlement } from "@/lib/db";
+import { SubscriptionStatus } from "@/components/subscription/subscription-status";
 import {
   LISTING_PLANS,
   PLANS_LIST,
@@ -256,79 +259,60 @@ function PublishPageContent() {
     };
   }, []);
 
-  // Load user subscription and listing usage (Local Storage + Supabase dual persistence)
+  const [userEntitlement, setUserEntitlement] = useState<UserEntitlement | null>(null);
+
+  // Load user subscription and listing entitlement from backend
   const fetchUsageData = useCallback(async () => {
     if (!user) return;
     try {
-      const localSub = getLocalSubscription(user.id);
-      const res = await getOwnerListingUsageAction(user.id);
-
-      let activeSub = res.success && res.data ? res.data.subscription : null;
-      let totalListings = res.success && res.data ? res.data.totalListings : 0;
-
-      if (!activeSub && localSub) {
-        // Fallback to local storage subscription if server had transient RLS or table sync delay
-        activeSub = localSub;
-        // Background sync to Supabase
-        createSubscriptionAction({
-          userId: user.id,
-          vendorId: vendorProfile?.id || null,
-          planId: localSub.plan_id,
-          billingCycle: localSub.billing_cycle,
-          amount: localSub.amount,
-          paymentId: localSub.payment_id || undefined,
-          paymentStatus: "completed",
-          durationDays: Math.max(1, Math.ceil((new Date(localSub.expires_at).getTime() - Date.now()) / (1000 * 60 * 60 * 24))),
-          maxCarts: localSub.max_carts,
-        }).catch(console.warn);
-      } else if (activeSub) {
-        // Sync fresh server subscription to localStorage
-        saveLocalSubscription(user.id, activeSub);
-      }
-
-      const maxCarts = activeSub ? activeSub.max_carts : 0;
-      const remainingListings = Math.max(0, maxCarts - totalListings);
-      const canPublish = activeSub !== null && remainingListings > 0;
-
-      setUserSubscription(activeSub);
-      setUsageStats({
-        totalListings,
-        remainingListings,
-        maxCarts,
-        canPublish,
-      });
-
-      // Determine step based on subscription
-      if (editCartId) {
-        setCurrentStep("cart_form");
-      } else if (forcePlanSelect) {
-        setCurrentStep("plan_select");
-      } else if (canPublish) {
-        setCurrentStep("cart_form");
-      } else if (activeSub && remainingListings <= 0) {
-        // Limit reached, prompt upgrade
-        setCurrentStep("plan_select");
-      } else {
-        // No active plan yet
-        setCurrentStep("plan_select");
-      }
-    } catch (err) {
-      console.error("Failed to fetch subscription data:", err);
-      const localSub = getLocalSubscription(user.id);
-      if (localSub) {
-        setUserSubscription(localSub);
+      const entitlementRes = await getUserEntitlementAction(user.id);
+      if (entitlementRes.success && entitlementRes.data) {
+        const ent = entitlementRes.data;
+        setUserEntitlement(ent);
         setUsageStats({
-          totalListings: 0,
-          remainingListings: localSub.max_carts,
-          maxCarts: localSub.max_carts,
-          canPublish: true,
+          totalListings: ent.totalListings,
+          remainingListings: ent.remainingListings,
+          maxCarts: ent.listingLimit,
+          canPublish: ent.canPublish,
         });
-        setCurrentStep("cart_form");
-      } else {
-        setCurrentStep("plan_select");
+
+        if (ent.plan && ent.status === "active") {
+          setUserSubscription({
+            id: ent.subscriptionId || `sub_${user.id}`,
+            user_id: user.id,
+            plan_id: ent.plan,
+            billing_cycle: ent.billingCycle || "1_month",
+            amount: 0,
+            payment_status: "completed",
+            status: "active",
+            max_carts: ent.listingLimit,
+            starts_at: ent.startsAt || new Date().toISOString(),
+            expires_at: ent.expiresAt || new Date(Date.now() + 30 * 86400000).toISOString(),
+          });
+        } else {
+          setUserSubscription(null);
+        }
+
+        // Determine step based on authoritative entitlement
+        if (editCartId) {
+          setCurrentStep("cart_form");
+        } else if (forcePlanSelect) {
+          setCurrentStep("plan_select");
+        } else if (ent.canPublish) {
+          setCurrentStep("cart_form");
+        } else {
+          setCurrentStep("plan_select");
+        }
+        return;
       }
+
+      // Fallback
+      setCurrentStep("plan_select");
+    } catch (err) {
+      console.error("Failed to fetch user entitlement:", err);
+      setCurrentStep("plan_select");
     }
-  }, [user, editCartId, forcePlanSelect, vendorProfile?.id]);
+  }, [user, editCartId, forcePlanSelect]);
 
   useEffect(() => {
     if (!authLoading && user) {
@@ -1009,54 +993,31 @@ function PublishPageContent() {
 
   return (
     <main className="min-h-screen bg-background pt-20 pb-16 px-4">
-      <div className="w-full max-w-[620px] mx-auto">
-        {/* Active Plan Usage Banner */}
-        {activePlan && (
-          <div className="bg-surface rounded-2xl p-4 border border-outline-variant/30 mb-6 shadow-sm flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div
-                className="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-base"
-                style={{ background: activePlan.bgHex, color: activePlan.accentHex }}
-              >
-                🛒
-              </div>
-              <div>
-                <p className="text-xs text-on-surface-variant font-medium">
-                  <T en="Active Plan:" ta="செயலில் உள்ள திட்டம்:" />{" "}
-                  <strong className="text-on-surface">{activePlan.nameEn}</strong>
-                </p>
-                <p className="text-sm font-bold text-on-surface font-display">
-                  {usageStats.totalListings} / {usageStats.maxCarts}{" "}
-                  <T en="Listings Used" ta="வண்டிகள் பயன்படுத்தப்பட்டது" /> (
-                  <span className="text-emerald-600">{usageStats.remainingListings} <T en="remaining" ta="மீதம்" /></span>)
-                </p>
-              </div>
-            </div>
-            <Link
-              href="/publish?change_plan=true"
-              className="text-xs text-primary font-bold hover:underline px-3 py-1.5 rounded-lg hover:bg-primary/5 transition"
-            >
-              <T en="Change Plan" ta="திட்டம் மாற்ற" />
-            </Link>
-          </div>
-        )}
-
-        <div className="text-center mb-6">
-          <h1 className="font-display text-3xl font-bold text-on-surface mb-1.5">
-            {editCartId ? (
-              <T en="Edit Cart Listing" ta="வண்டி விவரங்களை மாற்றியமைக்கவும்" />
-            ) : (
-              <T en="Submit Cart for Verification" ta="வண்டி விவரங்களை சமர்ப்பிக்கவும்" />
-            )}
-          </h1>
-          <p className="text-on-surface-variant text-sm">
-            {editCartId ? (
-              <T en="Update your listing details" ta="உங்கள் வண்டியின் விவரங்களைப் புதுப்பிக்கவும்" />
-            ) : (
-              <T en="Reviewed & published within 24 hours" ta="24 மணி நேரத்திற்குள் சரிபார்க்கப்படும்" />
-            )}
-          </p>
+      <div className="w-full max-w-7xl mx-auto">
+        {/* Mobile Plan Banner (Visible on mobile only) */}
+        <div className="lg:hidden mb-6">
+          <SubscriptionStatus entitlement={userEntitlement} compact />
         </div>
+
+        <div className="lg:grid lg:grid-cols-12 lg:gap-8 items-start">
+          {/* Left Column: Form & Details (8 cols on desktop) */}
+          <div className="lg:col-span-8 space-y-6">
+            <div className="mb-4">
+              <h1 className="font-display text-3xl font-bold text-on-surface mb-1.5">
+                {editCartId ? (
+                  <T en="Edit Cart Listing" ta="வண்டி விவரங்களை மாற்றியமைக்கவும்" />
+                ) : (
+                  <T en="Submit Cart for Verification" ta="வண்டி விவரங்களை சமர்ப்பிக்கவும்" />
+                )}
+              </h1>
+              <p className="text-on-surface-variant text-sm">
+                {editCartId ? (
+                  <T en="Update your listing details" ta="உங்கள் வண்டியின் விவரங்களைப் புதுப்பிக்கவும்" />
+                ) : (
+                  <T en="Reviewed & published within 24 hours" ta="24 மணி நேரத்திற்குள் சரிபார்க்கப்படும்" />
+                )}
+              </p>
+            </div>
 
         {/* Listing as Vendor Profile Card */}
         <div className="bg-surface rounded-2xl p-4 mb-6 border border-outline-variant/30 flex items-center gap-3 shadow-xs">
@@ -1445,7 +1406,83 @@ function PublishPageContent() {
           </Button>
         </form>
       </div>
-    </main>
+
+      {/* Right Column: Sticky Sidebar on Desktop (4 cols) */}
+      <div className="hidden lg:block lg:col-span-4 sticky top-24 space-y-5">
+        {/* 1. Authoritative Subscription Status Card */}
+        <SubscriptionStatus entitlement={userEntitlement} />
+
+        {/* 2. Live Submission Progress Checklist */}
+        <div className="bg-surface rounded-2xl p-5 border border-outline-variant/30 shadow-xs space-y-3.5">
+          <h3 className="font-display text-sm font-bold text-on-surface">
+            <T en="Submission Progress" ta="சமர்ப்பிப்பு முன்னேற்றம்" />
+          </h3>
+          <div className="space-y-2.5 text-xs">
+            <div className="flex items-center justify-between">
+              <span className="text-on-surface-variant flex items-center gap-2">
+                <span className={`w-2 h-2 rounded-full ${formData.cartType ? "bg-emerald-500" : "bg-outline-variant"}`} />
+                <T en="1. Cart Details" ta="1. வண்டி விவரங்கள்" />
+              </span>
+              <span className={formData.cartType && formData.condition ? "text-emerald-600 font-bold" : "text-on-surface-variant/50"}>
+                {formData.cartType && formData.condition ? "✓ Done" : "Pending"}
+              </span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-on-surface-variant flex items-center gap-2">
+                <span className={`w-2 h-2 rounded-full ${totalPhotos >= 2 ? "bg-emerald-500" : "bg-outline-variant"}`} />
+                <T en="2. Cart Photos (min 2)" ta="2. புகைப்படங்கள் (குறைந்தது 2)" />
+              </span>
+              <span className={totalPhotos >= 2 ? "text-emerald-600 font-bold" : "text-amber-600 font-bold"}>
+                {totalPhotos >= 2 ? `✓ ${totalPhotos} photos` : `${totalPhotos}/2 photos`}
+              </span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-on-surface-variant flex items-center gap-2">
+                <span className={`w-2 h-2 rounded-full ${(formData.isForRent && formData.dailyRent) || (formData.isForSale && formData.salePrice) ? "bg-emerald-500" : "bg-outline-variant"}`} />
+                <T en="3. Pricing & Terms" ta="3. வாடகை / விலை" />
+              </span>
+              <span className={(formData.isForRent && formData.dailyRent) || (formData.isForSale && formData.salePrice) ? "text-emerald-600 font-bold" : "text-on-surface-variant/50"}>
+                {(formData.isForRent && formData.dailyRent) || (formData.isForSale && formData.salePrice) ? "✓ Set" : "Pending"}
+              </span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-on-surface-variant flex items-center gap-2">
+                <span className={`w-2 h-2 rounded-full ${location.status === "success" ? "bg-emerald-500" : "bg-outline-variant"}`} />
+                <T en="4. Location" ta="4. இருப்பிடம்" />
+              </span>
+              <span className={location.status === "success" ? "text-emerald-600 font-bold" : "text-on-surface-variant/50"}>
+                {location.status === "success" ? "✓ Saved" : "Required"}
+              </span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-on-surface-variant flex items-center gap-2">
+                <span className={`w-2 h-2 rounded-full ${confirmed ? "bg-emerald-500" : "bg-outline-variant"}`} />
+                <T en="5. Confirmation" ta="5. உறுதிப்படுத்தல்" />
+              </span>
+              <span className={confirmed ? "text-emerald-600 font-bold" : "text-on-surface-variant/50"}>
+                {confirmed ? "✓ Confirmed" : "Required"}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* 3. SLA & Trust Guarantee */}
+        <div className="bg-surface-container rounded-2xl p-5 border border-outline-variant/20 space-y-2 text-xs">
+          <div className="flex items-center gap-2 text-primary font-bold">
+            <ShieldCheck className="w-4 h-4" />
+            <T en="24-Hour Review SLA" ta="24 மணி நேர சரிபார்ப்பு" />
+          </div>
+          <p className="text-on-surface-variant leading-relaxed">
+            <T
+              en="Our operations team verifies each cart's condition and GPS location to guarantee genuine inquiries from street food vendors."
+              ta="உண்மையான விசாரணைகளை உறுதிப்படுத்த எங்கள் குழு ஒவ்வொரு வண்டியின் இருப்பிடத்தையும் சரிபார்க்கிறது."
+            />
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
   );
 }
 
