@@ -1,4 +1,5 @@
 import { supabase, isDbConfigured } from "./supabase";
+import { supabaseAdmin } from "./supabase-admin";
 import { getTnRtoCodeForLocation } from "./rto";
 import { calculateHaversineDistance } from "./routing";
 
@@ -81,7 +82,7 @@ export interface VendorSubscription {
   amount: number;
   payment_id?: string | null;
   payment_status: "initiated" | "completed" | "failed" | "cancelled" | "pending";
-  status: "active" | "expired" | "pending" | "cancelled" | "halted";
+  status: "active" | "expired" | "pending" | "cancelled" | "halted" | "completed" | "paused" | "authenticated";
   max_carts: number;
   starts_at: string;
   expires_at: string;
@@ -91,6 +92,13 @@ export interface VendorSubscription {
   razorpay_plan_id?: string | null;
   total_count?: number;
   paid_count?: number;
+  current_start?: string | null;
+  current_end?: string | null;
+  charge_at?: string | null;
+  ended_at?: string | null;
+  paused_at?: string | null;
+  resumed_at?: string | null;
+  invoice_id?: string | null;
   payment_method?: string | null;
   raw_event_reference?: any;
   created_at?: string;
@@ -121,13 +129,13 @@ export interface WebhookEventRecord {
   razorpay_entity_id: string;
   payload?: any;
   processed_at?: string;
-  processing_status: "processed" | "ignored" | "failed";
+  processing_status: "processed" | "ignored" | "failed" | "processing";
 }
 
 export interface UserEntitlement {
   plan: "basic" | "growth" | "pro" | null;
   billingCycle: "1_month" | "3_months" | null;
-  status: "active" | "pending" | "expired" | "cancelled" | "halted" | null;
+  status: "active" | "pending" | "expired" | "cancelled" | "halted" | "completed" | "paused" | "authenticated" | null;
   listingLimit: number;
   startsAt: string | null;
   expiresAt: string | null;
@@ -980,7 +988,7 @@ export async function getActiveSubscriptionByUserId(userId: string): Promise<Ven
   if (isDbConfigured) {
     try {
       const now = new Date().toISOString();
-      const { data, error } = await supabase
+      const { data, error } = await supabaseAdmin
         .from("vendor_subscriptions")
         .select("*")
         .eq("user_id", userId)
@@ -993,7 +1001,7 @@ export async function getActiveSubscriptionByUserId(userId: string): Promise<Ven
       if (error && error.code !== "PGRST116") {
         console.warn("Supabase query for vendor_subscriptions error, falling back:", error.message);
       }
-      if (data) return data;
+      if (data) return data as VendorSubscription;
     } catch (err: any) {
       console.warn("Subscription check failed in DB, checking mock store:", err.message);
     }
@@ -1007,6 +1015,70 @@ export async function getActiveSubscriptionByUserId(userId: string): Promise<Ven
   return sub || null;
 }
 
+export async function findSubscriptionByRazorpayId(identifier: string): Promise<VendorSubscription | null> {
+  if (!identifier) return null;
+
+  if (isDbConfigured) {
+    try {
+      const { data, error } = await supabaseAdmin
+        .from("vendor_subscriptions")
+        .select("*")
+        .or(`razorpay_subscription_id.eq.${identifier},razorpay_order_id.eq.${identifier},payment_id.eq.${identifier}`)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (!error && data) return data as VendorSubscription;
+    } catch (err: any) {
+      console.warn("findSubscriptionByRazorpayId error in DB:", err.message);
+    }
+  }
+
+  const mock = mockSubscriptions.find(
+    (s: any) =>
+      s.razorpay_subscription_id === identifier ||
+      s.razorpay_order_id === identifier ||
+      s.payment_id === identifier
+  );
+  return mock || null;
+}
+
+export async function updateSubscriptionStatusByRazorpayId(
+  identifier: string,
+  updates: Partial<VendorSubscription>
+): Promise<VendorSubscription | null> {
+  const existing = await findSubscriptionByRazorpayId(identifier);
+  if (!existing) return null;
+
+  const updatedRecord = {
+    ...updates,
+    updated_at: new Date().toISOString(),
+  };
+
+  if (isDbConfigured) {
+    try {
+      const { data, error } = await supabaseAdmin
+        .from("vendor_subscriptions")
+        .update(updatedRecord)
+        .eq("id", existing.id)
+        .select()
+        .single();
+
+      if (!error && data) return data as VendorSubscription;
+    } catch (err: any) {
+      console.warn("updateSubscriptionStatusByRazorpayId error in DB:", err.message);
+    }
+  }
+
+  const idx = mockSubscriptions.findIndex((s) => s.id === existing.id);
+  if (idx > -1) {
+    mockSubscriptions[idx] = { ...mockSubscriptions[idx], ...updatedRecord };
+    return mockSubscriptions[idx];
+  }
+
+  return null;
+}
+
 export async function createOrUpdateSubscription(data: {
   user_id: string;
   vendor_id?: string | null;
@@ -1015,11 +1087,31 @@ export async function createOrUpdateSubscription(data: {
   amount: number;
   payment_id?: string | null;
   payment_status?: "initiated" | "completed" | "failed" | "cancelled" | "pending";
+  status?: "active" | "expired" | "pending" | "cancelled" | "halted" | "completed" | "paused" | "authenticated";
   max_carts: number;
-  duration_days: number;
+  duration_days?: number;
+  starts_at?: string | null;
+  expires_at?: string | null;
+  razorpay_subscription_id?: string | null;
+  razorpay_order_id?: string | null;
+  razorpay_customer_id?: string | null;
+  razorpay_plan_id?: string | null;
+  total_count?: number;
+  paid_count?: number;
+  current_start?: string | null;
+  current_end?: string | null;
+  charge_at?: string | null;
+  ended_at?: string | null;
+  paused_at?: string | null;
+  resumed_at?: string | null;
+  payment_method?: string | null;
+  raw_event_reference?: any;
 }): Promise<VendorSubscription> {
-  const startsAt = new Date().toISOString();
-  const expiresAt = new Date(Date.now() + data.duration_days * 24 * 60 * 60 * 1000).toISOString();
+  const defaultDuration = data.duration_days || (data.billing_cycle === "3_months" ? 90 : 30);
+  const startsAt = data.starts_at || new Date().toISOString();
+  const expiresAt =
+    data.expires_at ||
+    new Date(Date.now() + defaultDuration * 24 * 60 * 60 * 1000).toISOString();
 
   const record: Omit<VendorSubscription, "id"> = {
     user_id: data.user_id,
@@ -1029,38 +1121,86 @@ export async function createOrUpdateSubscription(data: {
     amount: data.amount,
     payment_id: data.payment_id || `pay_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
     payment_status: data.payment_status || "completed",
-    status: "active",
+    status: data.status || "active",
     max_carts: data.max_carts,
     starts_at: startsAt,
     expires_at: expiresAt,
+    razorpay_subscription_id: data.razorpay_subscription_id || null,
+    razorpay_order_id: data.razorpay_order_id || null,
+    razorpay_customer_id: data.razorpay_customer_id || null,
+    razorpay_plan_id: data.razorpay_plan_id || null,
+    total_count: data.total_count ?? 0,
+    paid_count: data.paid_count ?? (data.payment_status === "completed" ? 1 : 0),
+    current_start: data.current_start || null,
+    current_end: data.current_end || null,
+    charge_at: data.charge_at || null,
+    ended_at: data.ended_at || null,
+    paused_at: data.paused_at || null,
+    resumed_at: data.resumed_at || null,
+    payment_method: data.payment_method || null,
+    raw_event_reference: data.raw_event_reference || null,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   };
 
-    if (isDbConfigured) {
+  if (isDbConfigured) {
     try {
-      const { data: inserted, error } = await supabase
-        .from("vendor_subscriptions")
-        .insert([record])
-        .select()
-        .single();
-
-      // Also ensure vendor profile and user account reflect the active plan
-      try {
-        await supabase
-          .from("vendor_profiles")
-          .update({
-            status: "approved",
-          })
-          .eq("id", data.user_id);
-      } catch {}
-
-      if (!error && inserted) {
-        return inserted;
+      // Check if an existing subscription matches this user or razorpay id
+      let existingSub: any = null;
+      if (data.razorpay_subscription_id) {
+        const { data: bySubId } = await supabaseAdmin
+          .from("vendor_subscriptions")
+          .select("id")
+          .eq("razorpay_subscription_id", data.razorpay_subscription_id)
+          .maybeSingle();
+        existingSub = bySubId;
       }
-      console.warn("Failed to insert subscription into Supabase table, saving in memory:", error?.message);
+
+      if (!existingSub && data.razorpay_order_id) {
+        const { data: byOrderId } = await supabaseAdmin
+          .from("vendor_subscriptions")
+          .select("id")
+          .eq("razorpay_order_id", data.razorpay_order_id)
+          .maybeSingle();
+        existingSub = byOrderId;
+      }
+
+      if (!existingSub && data.user_id) {
+        const { data: byUserId } = await supabaseAdmin
+          .from("vendor_subscriptions")
+          .select("id")
+          .eq("user_id", data.user_id)
+          .in("status", ["active", "pending", "authenticated"])
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        existingSub = byUserId;
+      }
+
+      if (existingSub) {
+        const { data: updated, error: updateError } = await supabaseAdmin
+          .from("vendor_subscriptions")
+          .update(record)
+          .eq("id", existingSub.id)
+          .select()
+          .single();
+
+        if (!updateError && updated) {
+          return updated as VendorSubscription;
+        }
+      } else {
+        const { data: inserted, error: insertError } = await supabaseAdmin
+          .from("vendor_subscriptions")
+          .insert([record])
+          .select()
+          .single();
+
+        if (!insertError && inserted) {
+          return inserted as VendorSubscription;
+        }
+      }
     } catch (err: any) {
-      console.warn("Error inserting subscription, saving to memory fallback:", err.message);
+      console.warn("Error upserting subscription in Supabase:", err.message);
     }
   }
 
@@ -1069,8 +1209,11 @@ export async function createOrUpdateSubscription(data: {
     ...record,
   };
 
-  // Replace any existing active sub for this user
-  mockSubscriptions = mockSubscriptions.filter((s) => s.user_id !== data.user_id);
+  mockSubscriptions = mockSubscriptions.filter(
+    (s) =>
+      s.user_id !== data.user_id &&
+      (!data.razorpay_subscription_id || s.razorpay_subscription_id !== data.razorpay_subscription_id)
+  );
   mockSubscriptions.push(created);
 
   return created;
@@ -1083,22 +1226,28 @@ export async function getUserEntitlement(userId: string): Promise<UserEntitlemen
   ]);
 
   const totalListings = carts.length;
-  if (!sub) {
+  if (!sub || sub.status !== "active") {
     return {
       plan: null,
       billingCycle: null,
-      status: null,
+      status: sub ? sub.status : null,
       listingLimit: 0,
-      startsAt: null,
-      expiresAt: null,
+      startsAt: sub ? sub.starts_at : null,
+      expiresAt: sub ? sub.expires_at : null,
       canPublish: false,
       totalListings,
       remainingListings: 0,
-      subscriptionId: null,
+      subscriptionId: sub ? sub.id : null,
     };
   }
 
-  const listingLimit = sub.max_carts || 2;
+  // Authoritative listing limits: Basic: 2, Growth: 5, Pro: 10
+  const PLAN_LIMITS: Record<string, number> = {
+    basic: 2,
+    growth: 5,
+    pro: 10,
+  };
+  const listingLimit = PLAN_LIMITS[sub.plan_id] || sub.max_carts || 2;
   const remainingListings = Math.max(0, listingLimit - totalListings);
   const canPublish = sub.status === "active" && remainingListings > 0;
 
@@ -1119,7 +1268,7 @@ export async function getUserEntitlement(userId: string): Promise<UserEntitlemen
 export async function isWebhookEventProcessed(eventId: string): Promise<boolean> {
   if (isDbConfigured) {
     try {
-      const { data } = await supabase
+      const { data } = await supabaseAdmin
         .from("webhook_events")
         .select("event_id")
         .eq("event_id", eventId)
@@ -1137,7 +1286,7 @@ export async function recordWebhookEvent(event: {
   event_type: string;
   razorpay_entity_id: string;
   payload?: any;
-  processing_status?: "processed" | "ignored" | "failed";
+  processing_status?: "processed" | "ignored" | "failed" | "processing";
 }): Promise<void> {
   const record: WebhookEventRecord = {
     event_id: event.event_id,
@@ -1150,7 +1299,7 @@ export async function recordWebhookEvent(event: {
 
   if (isDbConfigured) {
     try {
-      await supabase.from("webhook_events").upsert([record]);
+      await supabaseAdmin.from("webhook_events").upsert([record]);
       return;
     } catch (err: any) {
       console.warn("Failed to record webhook event in Supabase:", err.message);
@@ -1195,22 +1344,21 @@ export async function recordPaymentTransaction(payment: {
 
   if (isDbConfigured) {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await supabaseAdmin
         .from("subscription_payments")
         .upsert([record], { onConflict: "razorpay_payment_id" })
         .select()
         .single();
-      if (!error && data) return data;
+      if (!error && data) return data as SubscriptionPayment;
     } catch (err: any) {
-      console.warn("Error inserting payment transaction in DB:", err.message);
+      console.warn("Failed to record payment in Supabase:", err.message);
     }
   }
 
   const created: SubscriptionPayment = {
-    id: `pay_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+    id: `pay-${Math.random().toString(36).substring(2, 9)}`,
     ...record,
   };
-  mockPayments = mockPayments.filter((p) => p.razorpay_payment_id !== payment.razorpay_payment_id);
   mockPayments.push(created);
   return created;
 }

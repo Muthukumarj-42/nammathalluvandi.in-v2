@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import Razorpay from "razorpay";
 import { getPlan, getPlanPricing, PlanTier, BillingCycle } from "@/lib/plans";
+import { createOrUpdateSubscription } from "@/lib/db";
 
 export async function POST(request: Request) {
   try {
@@ -51,12 +52,34 @@ export async function POST(request: Request) {
       currency: "INR",
       receipt,
       notes: {
-        planId: planId || "custom",
+        planId: planId || "basic",
         billingCycle: billingCycle || "1_month",
         userId: userId || "",
         description,
       },
     });
+
+    // Record legitimate internal pending purchase in Supabase
+    if (userId && planId && billingCycle) {
+      try {
+        const plan = getPlan(planId as PlanTier);
+        const pricing = getPlanPricing(plan.id, billingCycle as BillingCycle);
+
+        await createOrUpdateSubscription({
+          user_id: userId,
+          plan_id: plan.id,
+          billing_cycle: billingCycle,
+          amount: pricing.price,
+          razorpay_order_id: order.id,
+          status: "pending",
+          payment_status: "initiated",
+          max_carts: plan.maxCarts,
+          duration_days: pricing.durationDays,
+        });
+      } catch (subErr) {
+        console.warn("Could not pre-record pending subscription:", subErr);
+      }
+    }
 
     return NextResponse.json({
       order_id: order.id,

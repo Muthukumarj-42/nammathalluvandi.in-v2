@@ -20,7 +20,6 @@ CREATE TABLE IF NOT EXISTS public.vendor_subscriptions (
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Add missing columns if table already existed
 ALTER TABLE public.vendor_subscriptions ADD COLUMN IF NOT EXISTS razorpay_subscription_id TEXT;
 ALTER TABLE public.vendor_subscriptions ADD COLUMN IF NOT EXISTS razorpay_order_id TEXT;
 ALTER TABLE public.vendor_subscriptions ADD COLUMN IF NOT EXISTS razorpay_customer_id TEXT;
@@ -29,6 +28,13 @@ ALTER TABLE public.vendor_subscriptions ADD COLUMN IF NOT EXISTS total_count INT
 ALTER TABLE public.vendor_subscriptions ADD COLUMN IF NOT EXISTS paid_count INTEGER DEFAULT 0;
 ALTER TABLE public.vendor_subscriptions ADD COLUMN IF NOT EXISTS payment_method TEXT;
 ALTER TABLE public.vendor_subscriptions ADD COLUMN IF NOT EXISTS raw_event_reference JSONB;
+ALTER TABLE public.vendor_subscriptions ADD COLUMN IF NOT EXISTS current_start TIMESTAMPTZ;
+ALTER TABLE public.vendor_subscriptions ADD COLUMN IF NOT EXISTS current_end TIMESTAMPTZ;
+ALTER TABLE public.vendor_subscriptions ADD COLUMN IF NOT EXISTS charge_at TIMESTAMPTZ;
+ALTER TABLE public.vendor_subscriptions ADD COLUMN IF NOT EXISTS ended_at TIMESTAMPTZ;
+ALTER TABLE public.vendor_subscriptions ADD COLUMN IF NOT EXISTS paused_at TIMESTAMPTZ;
+ALTER TABLE public.vendor_subscriptions ADD COLUMN IF NOT EXISTS resumed_at TIMESTAMPTZ;
+ALTER TABLE public.vendor_subscriptions ADD COLUMN IF NOT EXISTS invoice_id TEXT;
 
 -- 2. Create subscription_payments table for storing each payment transaction
 CREATE TABLE IF NOT EXISTS public.subscription_payments (
