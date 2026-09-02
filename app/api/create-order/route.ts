@@ -90,9 +90,14 @@ export async function POST(request: Request) {
     });
   } catch (err: any) {
     console.error("Error creating Razorpay order:", err);
+    const errorMsg =
+      err.error?.description ||
+      err.description ||
+      err.message ||
+      "Failed to create Razorpay order";
     return NextResponse.json(
-      { error: err.message || "Failed to create Razorpay order" },
-      { status: 500 }
+      { error: errorMsg },
+      { status: err.statusCode || 500 }
     );
   }
 }
